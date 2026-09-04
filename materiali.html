@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>I miei casi — Simulatore Casi Clinici</title>
+  <title>Materiali — Simulatore Casi Clinici</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,24 +16,30 @@
         <span class="marchio-icona">🩺</span>
         <div>
           <h1>Simulatore Casi Clinici</h1>
-          <p class="sottotitolo">I miei casi</p>
+          <p class="sottotitolo">Materiali</p>
         </div>
       </div>
       <nav class="top-nav">
         <a href="index.html">Home</a>
         <a href="ripassa.html">Ripassa</a>
-        <a href="casi.html" class="attivo">I miei casi</a>
-        <a href="materiali.html">Materiali</a>
+        <a href="casi.html">I miei casi</a>
+        <a href="materiali.html" class="attivo">Materiali</a>
         <a href="aggiungi.html">+ Aggiungi</a>
       </nav>
     </div>
   </header>
 
   <main>
-    <h2 class="page-title">I tuoi casi salvati</h2>
-    <p class="page-sub">Raggruppati per materia, con lo stato di ripasso di ciascuno.</p>
-    <p id="stato-caricamento" class="muted">Caricamento casi dal database...</p>
-    <div id="casi"></div>
+    <div class="pagina-materiali-header">
+      <div>
+        <h2 class="page-title">Materiali di studio</h2>
+        <p class="page-sub">Dispense e documenti divisi per materia.</p>
+      </div>
+      <a href="carica-materiale.html" class="link-cambia">+ Carica materiale</a>
+    </div>
+
+    <p id="stato-caricamento" class="muted">Caricamento materiali...</p>
+    <div id="materiali"></div>
   </main>
 
   <script>
@@ -42,6 +48,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="casi.js?v=4"></script>
+  <script type="module" src="materiali.js?v=1"></script>
 </body>
 </html>

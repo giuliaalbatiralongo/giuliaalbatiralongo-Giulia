@@ -1,4 +1,4 @@
-import { getCasiClinici, aggiornaStatoCaso } from './db.js?v=5';
+import { getCasiClinici, aggiornaStatoCaso } from './db.js?v=6';
 import { iconaPerMateria } from './materie.js?v=1';
 
 const parametri = new URLSearchParams(window.location.search);

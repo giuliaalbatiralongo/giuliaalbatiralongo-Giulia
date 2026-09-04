@@ -47,3 +47,42 @@ export async function inserisciCaso(caso) {
   }
   return true;
 }
+
+export async function getMateriali(materia) {
+  let query = supabase.from('materiali').select('*').order('created_at', { ascending: false });
+
+  if (materia) {
+    query = query.eq('materia', materia);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Errore nel caricamento dei materiali:', error);
+    return [];
+  }
+  return data;
+}
+
+export async function caricaMateriale(file, metadati) {
+  const percorsoFile = `${Date.now()}-${file.name}`;
+
+  const { error: erroreUpload } = await supabase.storage.from('dispense').upload(percorsoFile, file);
+
+  if (erroreUpload) {
+    console.error('Errore nel caricamento del file:', erroreUpload);
+    return false;
+  }
+
+  const { data: datiUrl } = supabase.storage.from('dispense').getPublicUrl(percorsoFile);
+
+  const { error: erroreInserimento } = await supabase
+    .from('materiali')
+    .insert([{ ...metadati, url: datiUrl.publicUrl }]);
+
+  if (erroreInserimento) {
+    console.error('Errore nel salvataggio del materiale:', erroreInserimento);
+    return false;
+  }
+  return true;
+}

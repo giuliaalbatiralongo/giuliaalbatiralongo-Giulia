@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carica materiale — Simulatore Casi Clinici</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=8">
+</head>
+<body>
+  <header class="top-bar">
+    <div class="top-bar-inner">
+      <div class="marchio">
+        <span class="marchio-icona">🩺</span>
+        <div>
+          <h1>Simulatore Casi Clinici</h1>
+          <p class="sottotitolo">Carica materiale</p>
+        </div>
+      </div>
+      <nav class="top-nav">
+        <a href="index.html">Home</a>
+        <a href="ripassa.html">Ripassa</a>
+        <a href="casi.html">I miei casi</a>
+        <a href="materiali.html" class="attivo">Materiali</a>
+        <a href="aggiungi.html">+ Aggiungi</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="contenuto-stretto">
+      <h2 class="page-title">Carica un materiale</h2>
+      <p class="page-sub">Carica un PDF (dispensa, articolo, riassunto) collegato a una materia.</p>
+
+      <form id="form-materiale">
+        <label for="materia">Materia</label>
+        <input type="text" id="materia" name="materia" list="materie-suggerite" required>
+        <datalist id="materie-suggerite">
+          <option value="Farmacologia 2">
+          <option value="Gastroenterologia">
+          <option value="Malattie Infettive">
+          <option value="Anatomia Patologica">
+          <option value="Organi di Senso">
+        </datalist>
+
+        <label for="argomento">Argomento <span class="opzionale">(facoltativo)</span></label>
+        <input type="text" id="argomento" name="argomento" placeholder="Es. Anticoagulanti...">
+
+        <label for="titolo">Titolo del documento</label>
+        <input type="text" id="titolo" name="titolo" placeholder="Es. Dispensa anticoagulanti orali" required>
+
+        <label for="file">File PDF</label>
+        <input type="file" id="file" name="file" accept="application/pdf" required>
+
+        <button type="submit">Carica materiale</button>
+      </form>
+
+      <p id="esito-caricamento"></p>
+    </div>
+  </main>
+
+  <script>
+    window.addEventListener('error', (e) => {
+      const el = document.getElementById('esito-caricamento');
+      if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
+    });
+  </script>
+  <script type="module" src="carica-materiale.js?v=1"></script>
+</body>
+</html>
