@@ -9,16 +9,28 @@
 <body>
   <header>
     <h1>Simulatore Casi Clinici</h1>
+    <nav>
+      <a href="index.html" class="nav-link attivo">Ripassa</a>
+      <a href="casi.html" class="nav-link">I miei casi</a>
+    </nav>
   </header>
 
   <main>
-    <section id="lista-casi">
-      <h2>I miei casi</h2>
-      <p id="stato-caricamento">Caricamento casi dal database...</p>
-      <ul id="casi"></ul>
+    <p id="caricamento">Caricamento caso dal database...</p>
+
+    <section id="caso" hidden>
+      <p class="materia-label" id="materia-label"></p>
+      <p id="vignetta-text"></p>
+      <p id="domanda-text" class="domanda"></p>
+
+      <div id="opzioni"></div>
+
+      <div id="risultato" hidden></div>
+
+      <button id="prossimo" hidden>Prossimo caso →</button>
     </section>
   </main>
 
-  <script type="module" src="app.js"></script>
+  <script type="module" src="quiz.js"></script>
 </body>
 </html>

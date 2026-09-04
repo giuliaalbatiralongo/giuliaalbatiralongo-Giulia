@@ -19,3 +19,14 @@ export async function getCasiClinici() {
   }
   return data;
 }
+
+export async function aggiornaStatoCaso(id, nuovoStato) {
+  const { error } = await supabase
+    .from('casi_clinici')
+    .update({ stato: nuovoStato })
+    .eq('id', id);
+
+  if (error) {
+    console.error("Errore nell'aggiornamento dello stato:", error);
+  }
+}
