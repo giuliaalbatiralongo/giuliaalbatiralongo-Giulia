@@ -23,6 +23,21 @@ function creaVoceCaso(caso) {
   return li;
 }
 
+function creaGruppoArgomento(nome, casiArgomento) {
+  const div = document.createElement('div');
+  div.className = 'gruppo-argomento';
+
+  const h4 = document.createElement('h4');
+  h4.textContent = nome;
+  div.appendChild(h4);
+
+  const ul = document.createElement('ul');
+  casiArgomento.forEach((caso) => ul.appendChild(creaVoceCaso(caso)));
+  div.appendChild(ul);
+
+  return div;
+}
+
 function creaGruppoMateria(nome, casiMateria) {
   const div = document.createElement('div');
   div.className = 'gruppo-materia';
@@ -42,9 +57,11 @@ function creaGruppoMateria(nome, casiMateria) {
 
   div.appendChild(header);
 
-  const ul = document.createElement('ul');
-  casiMateria.forEach((caso) => ul.appendChild(creaVoceCaso(caso)));
-  div.appendChild(ul);
+  const argomentiUnici = [...new Set(casiMateria.map((c) => c.argomento || 'Generale'))].sort();
+  argomentiUnici.forEach((argomento) => {
+    const casiArgomento = casiMateria.filter((c) => (c.argomento || 'Generale') === argomento);
+    div.appendChild(creaGruppoArgomento(argomento, casiArgomento));
+  });
 
   return div;
 }

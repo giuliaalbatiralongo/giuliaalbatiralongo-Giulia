@@ -7,8 +7,10 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const datiForm = new FormData(form);
+  const argomento = datiForm.get('argomento');
   const nuovoCaso = {
     materia: datiForm.get('materia'),
+    argomento: argomento ? argomento.trim() || null : null,
     vignetta: datiForm.get('vignetta'),
     domanda: datiForm.get('domanda'),
     opzione_a: datiForm.get('opzione_a'),

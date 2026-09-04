@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <header class="top-bar">
@@ -43,6 +43,9 @@
           <option value="Anatomia Patologica">
           <option value="Organi di Senso">
         </datalist>
+
+        <label for="argomento">Argomento <span class="opzionale">(facoltativo)</span></label>
+        <input type="text" id="argomento" name="argomento" placeholder="Es. Anticoagulanti, Interazioni farmacologiche...">
 
         <label for="vignetta">Vignetta clinica</label>
         <textarea id="vignetta" name="vignetta" rows="4" required></textarea>
@@ -85,6 +88,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="aggiungi.js?v=3"></script>
+  <script type="module" src="aggiungi.js?v=4"></script>
 </body>
 </html>

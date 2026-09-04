@@ -274,6 +274,24 @@ main {
   font-size: 0.93rem;
 }
 
+.gruppo-argomento {
+  margin-left: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.gruppo-argomento h4 {
+  font-size: 0.8rem;
+  color: var(--colore-testo-tenue);
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.opzionale {
+  color: var(--colore-testo-tenue);
+  font-weight: 400;
+  font-size: 0.82rem;
+}
+
 .contenuto-stretto {
   max-width: 660px;
 }
