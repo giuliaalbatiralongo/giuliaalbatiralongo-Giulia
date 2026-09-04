@@ -83,16 +83,21 @@ elProssimo.addEventListener('click', () => {
 });
 
 async function avvia() {
-  casi = await getCasiClinici();
+  try {
+    casi = await getCasiClinici();
 
-  if (casi.length === 0) {
-    elCaricamento.textContent = 'Nessun caso trovato. Aggiungine uno dal database per iniziare.';
-    return;
+    if (casi.length === 0) {
+      elCaricamento.textContent = 'Nessun caso trovato. Aggiungine uno dal database per iniziare.';
+      return;
+    }
+
+    elCaricamento.hidden = true;
+    elCaso.hidden = false;
+    mostraCaso(scegliCaso());
+  } catch (errore) {
+    elCaricamento.textContent = 'Errore nel caricamento: ' + errore.message;
+    console.error(errore);
   }
-
-  elCaricamento.hidden = true;
-  elCaso.hidden = false;
-  mostraCaso(scegliCaso());
 }
 
 avvia();
