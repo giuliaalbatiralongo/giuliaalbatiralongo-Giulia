@@ -4,14 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulatore Casi Clinici</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <header class="top-bar">
     <div class="top-bar-inner">
-      <div>
-        <h1>Simulatore Casi Clinici</h1>
-        <p class="sottotitolo">Scegli una materia per iniziare</p>
+      <div class="marchio">
+        <span class="marchio-icona">🩺</span>
+        <div>
+          <h1>Simulatore Casi Clinici</h1>
+          <p class="sottotitolo">Scegli una materia per iniziare</p>
+        </div>
       </div>
       <nav class="top-nav">
         <a href="index.html" class="attivo">Home</a>
@@ -23,6 +29,8 @@
   </header>
 
   <main>
+    <h2 class="page-title">Le tue materie</h2>
+    <p class="page-sub">Scegli una materia da ripassare, o esercitati su tutte insieme.</p>
     <p id="stato-home" class="muted">Caricamento materie...</p>
     <div id="materie" class="materie-grid" hidden></div>
   </main>
