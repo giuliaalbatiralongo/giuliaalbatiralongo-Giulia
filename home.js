@@ -1,4 +1,5 @@
 import { getCasiClinici } from './db.js?v=5';
+import { iconaPerMateria } from './materie.js?v=1';
 
 const STATI = ['nuovo', 'da_ripassare', 'consolidato'];
 const ETICHETTE_STATO = {
@@ -27,9 +28,20 @@ function creaCardMateria(nome, casiMateria, isTutte = false) {
   a.className = 'materia-card' + (isTutte ? ' tutte' : '');
   a.href = isTutte ? 'ripassa.html' : `ripassa.html?materia=${encodeURIComponent(nome)}`;
 
+  const top = document.createElement('div');
+  top.className = 'materia-card-top';
+
+  const icona = iconaPerMateria(isTutte ? null : nome);
+  const spanIcona = document.createElement('span');
+  spanIcona.className = `materia-icona ${icona.classe}`;
+  spanIcona.textContent = icona.emoji;
+  top.appendChild(spanIcona);
+
   const h3 = document.createElement('h3');
   h3.textContent = isTutte ? 'Tutte le materie' : nome;
-  a.appendChild(h3);
+  top.appendChild(h3);
+
+  a.appendChild(top);
 
   const stats = document.createElement('div');
   stats.className = 'materia-stats';

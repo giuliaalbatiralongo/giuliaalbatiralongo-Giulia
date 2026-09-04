@@ -1,4 +1,5 @@
 import { getCasiClinici, aggiornaStatoCaso } from './db.js?v=5';
+import { iconaPerMateria } from './materie.js?v=1';
 
 const parametri = new URLSearchParams(window.location.search);
 const materiaFiltro = parametri.get('materia');
@@ -41,7 +42,8 @@ function scegliCaso() {
 
 function mostraCaso(caso) {
   casoCorrente = caso;
-  elMateria.textContent = caso.materia;
+  const icona = iconaPerMateria(caso.materia);
+  elMateria.textContent = `${icona.emoji} ${caso.materia}`;
   elVignetta.textContent = caso.vignetta;
   elDomanda.textContent = caso.domanda;
   elRisultato.hidden = true;

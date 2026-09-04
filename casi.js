@@ -1,4 +1,5 @@
 import { getCasiClinici } from './db.js?v=5';
+import { iconaPerMateria } from './materie.js?v=1';
 
 const ETICHETTE_STATO = {
   nuovo: 'nuovo',
@@ -26,9 +27,20 @@ function creaGruppoMateria(nome, casiMateria) {
   const div = document.createElement('div');
   div.className = 'gruppo-materia';
 
+  const header = document.createElement('div');
+  header.className = 'gruppo-materia-header';
+
+  const icona = iconaPerMateria(nome);
+  const spanIcona = document.createElement('span');
+  spanIcona.className = `materia-icona piccola ${icona.classe}`;
+  spanIcona.textContent = icona.emoji;
+  header.appendChild(spanIcona);
+
   const h3 = document.createElement('h3');
   h3.textContent = nome;
-  div.appendChild(h3);
+  header.appendChild(h3);
+
+  div.appendChild(header);
 
   const ul = document.createElement('ul');
   casiMateria.forEach((caso) => ul.appendChild(creaVoceCaso(caso)));
