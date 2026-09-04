@@ -1,5 +1,5 @@
 import { getCasiClinici } from './db.js?v=6';
-import { iconaPerMateria } from './materie.js?v=1';
+import { creaIconaMateria } from './materie.js?v=2';
 
 const ETICHETTE_STATO = {
   nuovo: 'nuovo',
@@ -44,12 +44,7 @@ function creaGruppoMateria(nome, casiMateria) {
 
   const header = document.createElement('div');
   header.className = 'gruppo-materia-header';
-
-  const icona = iconaPerMateria(nome);
-  const spanIcona = document.createElement('span');
-  spanIcona.className = `materia-icona piccola ${icona.classe}`;
-  spanIcona.textContent = icona.emoji;
-  header.appendChild(spanIcona);
+  header.appendChild(creaIconaMateria(nome, true));
 
   const h3 = document.createElement('h3');
   h3.textContent = nome;
@@ -67,18 +62,26 @@ function creaGruppoMateria(nome, casiMateria) {
 }
 
 async function mostraCasi() {
-  const statoEl = document.getElementById('stato-caricamento');
+  const elScheletro = document.getElementById('scheletro-casi');
   const contenitoreEl = document.getElementById('casi');
 
   try {
     const casi = await getCasiClinici();
 
     if (casi.length === 0) {
-      statoEl.textContent = 'Nessun caso trovato nel database. Aggiungine uno da "+ Aggiungi" per iniziare.';
+      elScheletro.innerHTML = `
+        <div class="stato-vuoto">
+          <i class="ph ph-folder-open stato-vuoto-icona" aria-hidden="true"></i>
+          <p>Non hai ancora nessun caso salvato.</p>
+          <a class="btn-primario" href="aggiungi.html">
+            <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi il primo caso
+          </a>
+        </div>
+      `;
       return;
     }
 
-    statoEl.remove();
+    elScheletro.remove();
 
     const materieUniche = [...new Set(casi.map((c) => c.materia))].sort();
     materieUniche.forEach((nome) => {
@@ -86,7 +89,7 @@ async function mostraCasi() {
       contenitoreEl.appendChild(creaGruppoMateria(nome, casiMateria));
     });
   } catch (errore) {
-    statoEl.textContent = 'Errore nel caricamento: ' + errore.message;
+    elScheletro.innerHTML = `<p class="errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);
   }
 }

@@ -22,11 +22,13 @@ form.addEventListener('submit', async (e) => {
   const salvato = await caricaMateriale(file, metadati);
 
   if (salvato) {
-    elEsito.textContent = '✅ Materiale caricato! Lo trovi nella pagina "Materiali".';
+    elEsito.innerHTML =
+      '<i class="ph ph-check-circle" aria-hidden="true"></i> Materiale caricato. Lo trovi nella pagina "Materiali".';
     elEsito.className = 'successo';
     form.reset();
   } else {
-    elEsito.textContent = '❌ Non sono riuscita a caricare il materiale. Riprova.';
+    elEsito.innerHTML =
+      '<i class="ph ph-x-circle" aria-hidden="true"></i> Non sono riuscita a caricare il materiale. Riprova.';
     elEsito.className = 'errore';
   }
 });

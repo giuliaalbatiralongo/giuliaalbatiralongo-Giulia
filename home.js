@@ -1,5 +1,5 @@
 import { getCasiClinici } from './db.js?v=6';
-import { iconaPerMateria } from './materie.js?v=1';
+import { creaIconaMateria } from './materie.js?v=2';
 
 const STATI = ['nuovo', 'da_ripassare', 'consolidato'];
 const ETICHETTE_STATO = {
@@ -30,12 +30,7 @@ function creaCardMateria(nome, casiMateria, isTutte = false) {
 
   const top = document.createElement('div');
   top.className = 'materia-card-top';
-
-  const icona = iconaPerMateria(isTutte ? null : nome);
-  const spanIcona = document.createElement('span');
-  spanIcona.className = `materia-icona ${icona.classe}`;
-  spanIcona.textContent = icona.emoji;
-  top.appendChild(spanIcona);
+  top.appendChild(creaIconaMateria(isTutte ? null : nome));
 
   const h3 = document.createElement('h3');
   h3.textContent = isTutte ? 'Tutte le materie' : nome;
@@ -56,15 +51,29 @@ function creaCardMateria(nome, casiMateria, isTutte = false) {
   return a;
 }
 
+function mostraStatoVuoto(contenitore) {
+  contenitore.innerHTML = `
+    <div class="stato-vuoto">
+      <i class="ph ph-folder-open stato-vuoto-icona" aria-hidden="true"></i>
+      <p>Non hai ancora nessun caso clinico.</p>
+      <a class="btn-primario" href="aggiungi.html">
+        <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi il primo caso
+      </a>
+    </div>
+  `;
+  contenitore.hidden = false;
+}
+
 async function avvia() {
-  const elStato = document.getElementById('stato-home');
+  const elScheletro = document.getElementById('scheletro-home');
   const elMaterie = document.getElementById('materie');
 
   try {
     const casi = await getCasiClinici();
+    elScheletro.remove();
 
     if (casi.length === 0) {
-      elStato.textContent = 'Nessun caso ancora. Vai su "+ Aggiungi" per crearne uno.';
+      mostraStatoVuoto(elMaterie);
       return;
     }
 
@@ -76,10 +85,9 @@ async function avvia() {
       elMaterie.appendChild(creaCardMateria(nome, casiMateria));
     });
 
-    elStato.hidden = true;
     elMaterie.hidden = false;
   } catch (errore) {
-    elStato.textContent = 'Errore nel caricamento: ' + errore.message;
+    elScheletro.innerHTML = `<p class="errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);
   }
 }

@@ -25,11 +25,13 @@ form.addEventListener('submit', async (e) => {
   const salvato = await inserisciCaso(nuovoCaso);
 
   if (salvato) {
-    elEsito.textContent = '✅ Caso salvato! Lo trovi nella vista "Ripassa" e in "I miei casi".';
+    elEsito.innerHTML =
+      '<i class="ph ph-check-circle" aria-hidden="true"></i> Caso salvato. Lo trovi in "Ripassa" e in "I miei casi".';
     elEsito.className = 'successo';
     form.reset();
   } else {
-    elEsito.textContent = '❌ Non sono riuscita a salvare il caso. Riprova.';
+    elEsito.innerHTML =
+      '<i class="ph ph-x-circle" aria-hidden="true"></i> Non sono riuscita a salvare il caso. Riprova.';
     elEsito.className = 'errore';
   }
 });

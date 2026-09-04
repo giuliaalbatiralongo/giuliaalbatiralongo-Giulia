@@ -1,5 +1,5 @@
 import { getMateriali } from './db.js?v=6';
-import { iconaPerMateria } from './materie.js?v=1';
+import { creaIconaMateria } from './materie.js?v=2';
 
 function creaVoceMateriale(materiale) {
   const li = document.createElement('li');
@@ -14,7 +14,13 @@ function creaVoceMateriale(materiale) {
   link.target = '_blank';
   link.rel = 'noopener noreferrer';
   link.className = 'link-cambia';
-  link.textContent = 'Apri PDF ↗';
+
+  const icona = document.createElement('i');
+  icona.className = 'ph ph-arrow-square-out';
+  icona.setAttribute('aria-hidden', 'true');
+  link.appendChild(document.createTextNode('Apri PDF'));
+  link.appendChild(icona);
+
   li.appendChild(link);
 
   return li;
@@ -26,12 +32,7 @@ function creaGruppoMateria(nome, materialiMateria) {
 
   const header = document.createElement('div');
   header.className = 'gruppo-materia-header';
-
-  const icona = iconaPerMateria(nome);
-  const spanIcona = document.createElement('span');
-  spanIcona.className = `materia-icona piccola ${icona.classe}`;
-  spanIcona.textContent = icona.emoji;
-  header.appendChild(spanIcona);
+  header.appendChild(creaIconaMateria(nome, true));
 
   const h3 = document.createElement('h3');
   h3.textContent = nome;
@@ -47,18 +48,26 @@ function creaGruppoMateria(nome, materialiMateria) {
 }
 
 async function mostraMateriali() {
-  const statoEl = document.getElementById('stato-caricamento');
+  const elScheletro = document.getElementById('scheletro-materiali');
   const contenitoreEl = document.getElementById('materiali');
 
   try {
     const materiali = await getMateriali();
 
     if (materiali.length === 0) {
-      statoEl.textContent = 'Nessun materiale ancora caricato. Usa "+ Carica materiale" per aggiungerne uno.';
+      elScheletro.innerHTML = `
+        <div class="stato-vuoto">
+          <i class="ph ph-file-dashed stato-vuoto-icona" aria-hidden="true"></i>
+          <p>Nessun materiale caricato finora.</p>
+          <a class="btn-primario" href="carica-materiale.html">
+            <i class="ph ph-upload-simple" aria-hidden="true"></i> Carica il primo PDF
+          </a>
+        </div>
+      `;
       return;
     }
 
-    statoEl.remove();
+    elScheletro.remove();
 
     const materieUniche = [...new Set(materiali.map((m) => m.materia))].sort();
     materieUniche.forEach((nome) => {
@@ -66,7 +75,7 @@ async function mostraMateriali() {
       contenitoreEl.appendChild(creaGruppoMateria(nome, materialiMateria));
     });
   } catch (errore) {
-    statoEl.textContent = 'Errore nel caricamento: ' + errore.message;
+    elScheletro.innerHTML = `<p class="errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);
   }
 }
