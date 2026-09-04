@@ -1,4 +1,4 @@
-import { getCasiClinici, aggiornaStatoCaso } from './db.js?v=6';
+import { getCasiClinici, aggiornaStatoCaso, getMateriali } from './db.js?v=6';
 import { iconaPerMateria } from './materie.js?v=1';
 
 const parametri = new URLSearchParams(window.location.search);
@@ -6,6 +6,7 @@ const materiaFiltro = parametri.get('materia');
 
 let casi = [];
 let casoCorrente = null;
+const materialiPerMateria = {};
 
 const elCaricamento = document.getElementById('caricamento');
 const elCaso = document.getElementById('caso');
@@ -16,6 +17,8 @@ const elDomanda = document.getElementById('domanda-text');
 const elOpzioni = document.getElementById('opzioni');
 const elRisultato = document.getElementById('risultato');
 const elProssimo = document.getElementById('prossimo');
+const elMaterialiLaterali = document.getElementById('materiali-laterali');
+const elMaterialiLaterialiLista = document.getElementById('materiali-laterali-lista');
 
 elTitoloMateria.textContent = materiaFiltro ? `Ripassa — ${materiaFiltro}` : 'Ripassa — Tutte le materie';
 
@@ -40,6 +43,31 @@ function scegliCaso() {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
+async function mostraMaterialiCorrelati(materia) {
+  if (!materialiPerMateria[materia]) {
+    materialiPerMateria[materia] = await getMateriali(materia);
+  }
+  const materiali = materialiPerMateria[materia];
+
+  if (materiali.length === 0) {
+    elMaterialiLaterali.hidden = true;
+    return;
+  }
+
+  elMaterialiLaterialiLista.innerHTML = '';
+  materiali.forEach((m) => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = m.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = m.titolo;
+    li.appendChild(a);
+    elMaterialiLaterialiLista.appendChild(li);
+  });
+  elMaterialiLaterali.hidden = false;
+}
+
 function mostraCaso(caso) {
   casoCorrente = caso;
   const icona = iconaPerMateria(caso.materia);
@@ -48,6 +76,7 @@ function mostraCaso(caso) {
   elDomanda.textContent = caso.domanda;
   elRisultato.hidden = true;
   elProssimo.hidden = true;
+  mostraMaterialiCorrelati(caso.materia);
 
   const opzioni = [
     { lettera: 'a', testo: caso.opzione_a },

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
   <header class="top-bar">
@@ -30,27 +30,34 @@
   </header>
 
   <main>
-    <div class="contenuto-stretto">
-      <div class="ripassa-header">
-        <span id="titolo-materia" class="page-title">Ripassa</span>
-        <a href="index.html" class="link-cambia">← Cambia materia</a>
-      </div>
-
-      <p id="caricamento">Caricamento caso dal database...</p>
-
-      <section id="caso" hidden>
-        <div class="card-caso">
-          <p class="materia-label" id="materia-label"></p>
-          <p id="vignetta-text"></p>
-          <p id="domanda-text" class="domanda"></p>
-
-          <div id="opzioni"></div>
+    <div class="ripassa-layout">
+      <div class="ripassa-principale">
+        <div class="ripassa-header">
+          <span id="titolo-materia" class="page-title">Ripassa</span>
+          <a href="index.html" class="link-cambia">← Cambia materia</a>
         </div>
 
-        <div id="risultato" hidden></div>
+        <p id="caricamento">Caricamento caso dal database...</p>
 
-        <button id="prossimo" hidden>Prossimo caso →</button>
-      </section>
+        <section id="caso" hidden>
+          <div class="card-caso">
+            <p class="materia-label" id="materia-label"></p>
+            <p id="vignetta-text"></p>
+            <p id="domanda-text" class="domanda"></p>
+
+            <div id="opzioni"></div>
+          </div>
+
+          <div id="risultato" hidden></div>
+
+          <button id="prossimo" hidden>Prossimo caso →</button>
+        </section>
+      </div>
+
+      <aside class="materiali-laterali" id="materiali-laterali" hidden>
+        <h3>Materiali correlati</h3>
+        <ul id="materiali-laterali-lista"></ul>
+      </aside>
     </div>
   </main>
 
@@ -60,6 +67,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="ripassa.js?v=3"></script>
+  <script type="module" src="ripassa.js?v=4"></script>
 </body>
 </html>

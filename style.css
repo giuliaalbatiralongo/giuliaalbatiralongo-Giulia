@@ -294,6 +294,61 @@ main {
   max-width: 660px;
 }
 
+/* Layout Ripassa a due colonne (quiz + materiali correlati) */
+.ripassa-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 660px) 260px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.materiali-laterali {
+  background: var(--colore-superficie);
+  border: 1px solid var(--colore-bordo);
+  border-radius: var(--raggio-sm);
+  padding: 1.2rem;
+  position: sticky;
+  top: 1.5rem;
+}
+
+.materiali-laterali h3 {
+  font-size: 0.85rem;
+  color: var(--colore-testo-tenue);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.8rem;
+}
+
+.materiali-laterali ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.materiali-laterali a {
+  color: var(--colore-primario);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.materiali-laterali a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 860px) {
+  .ripassa-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .materiali-laterali {
+    position: static;
+  }
+}
+
 /* Vista Ripassa */
 .ripassa-header {
   display: flex;
