@@ -23,6 +23,12 @@
     </section>
   </main>
 
-  <script type="module" src="app.js"></script>
+  <script>
+    window.addEventListener('error', (e) => {
+      const el = document.getElementById('stato-caricamento');
+      if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
+    });
+  </script>
+  <script type="module" src="app.js?v=3"></script>
 </body>
 </html>
