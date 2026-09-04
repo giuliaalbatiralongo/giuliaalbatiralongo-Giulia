@@ -1,16 +1,22 @@
-import { getCasiClinici, aggiornaStatoCaso } from './db.js?v=4';
+import { getCasiClinici, aggiornaStatoCaso } from './db.js?v=5';
+
+const parametri = new URLSearchParams(window.location.search);
+const materiaFiltro = parametri.get('materia');
 
 let casi = [];
 let casoCorrente = null;
 
 const elCaricamento = document.getElementById('caricamento');
 const elCaso = document.getElementById('caso');
+const elTitoloMateria = document.getElementById('titolo-materia');
 const elMateria = document.getElementById('materia-label');
 const elVignetta = document.getElementById('vignetta-text');
 const elDomanda = document.getElementById('domanda-text');
 const elOpzioni = document.getElementById('opzioni');
 const elRisultato = document.getElementById('risultato');
 const elProssimo = document.getElementById('prossimo');
+
+elTitoloMateria.textContent = materiaFiltro ? `Ripassa — ${materiaFiltro}` : 'Ripassa — Tutte le materie';
 
 // Logica di avanzamento: nuovo -> da_ripassare -> consolidato.
 // Una risposta sbagliata riporta sempre il caso a "da_ripassare",
@@ -87,10 +93,12 @@ elProssimo.addEventListener('click', () => {
 
 async function avvia() {
   try {
-    casi = await getCasiClinici();
+    casi = await getCasiClinici(materiaFiltro || undefined);
 
     if (casi.length === 0) {
-      elCaricamento.textContent = 'Nessun caso trovato. Aggiungine uno dal database per iniziare.';
+      elCaricamento.textContent = materiaFiltro
+        ? `Nessun caso trovato per "${materiaFiltro}".`
+        : 'Nessun caso trovato. Aggiungine uno per iniziare.';
       return;
     }
 

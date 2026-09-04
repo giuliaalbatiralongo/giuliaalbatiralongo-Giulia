@@ -7,22 +7,22 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
+  <header class="top-bar">
     <h1>Simulatore Casi Clinici</h1>
-    <nav>
-      <a href="index.html" class="nav-link">Ripassa</a>
-      <a href="casi.html" class="nav-link attivo">I miei casi</a>
-      <a href="aggiungi.html" class="nav-link">+ Aggiungi</a>
-    </nav>
+    <p class="sottotitolo">I miei casi</p>
   </header>
 
   <main>
-    <section id="lista-casi">
-      <h2>I miei casi</h2>
-      <p id="stato-caricamento">Caricamento casi dal database...</p>
-      <ul id="casi"></ul>
-    </section>
+    <p id="stato-caricamento" class="muted">Caricamento casi dal database...</p>
+    <div id="casi"></div>
   </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="ripassa.html" class="nav-item"><span class="nav-icon">📖</span><span>Ripassa</span></a>
+    <a href="casi.html" class="nav-item attivo"><span class="nav-icon">📋</span><span>I miei casi</span></a>
+    <a href="aggiungi.html" class="nav-item"><span class="nav-icon">➕</span><span>Aggiungi</span></a>
+  </nav>
 
   <script>
     window.addEventListener('error', (e) => {
@@ -30,6 +30,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="app.js?v=3"></script>
+  <script type="module" src="casi.js?v=1"></script>
 </body>
 </html>

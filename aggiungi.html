@@ -7,18 +7,12 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
+  <header class="top-bar">
     <h1>Simulatore Casi Clinici</h1>
-    <nav>
-      <a href="index.html" class="nav-link">Ripassa</a>
-      <a href="casi.html" class="nav-link">I miei casi</a>
-      <a href="aggiungi.html" class="nav-link attivo">+ Aggiungi</a>
-    </nav>
+    <p class="sottotitolo">Aggiungi un nuovo caso</p>
   </header>
 
   <main>
-    <h2>Aggiungi un nuovo caso</h2>
-
     <form id="form-caso">
       <label for="materia">Materia</label>
       <input type="text" id="materia" name="materia" list="materie-suggerite" required>
@@ -64,12 +58,19 @@
     <p id="esito-salvataggio"></p>
   </main>
 
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="ripassa.html" class="nav-item"><span class="nav-icon">📖</span><span>Ripassa</span></a>
+    <a href="casi.html" class="nav-item"><span class="nav-icon">📋</span><span>I miei casi</span></a>
+    <a href="aggiungi.html" class="nav-item attivo"><span class="nav-icon">➕</span><span>Aggiungi</span></a>
+  </nav>
+
   <script>
     window.addEventListener('error', (e) => {
       const el = document.getElementById('esito-salvataggio');
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="aggiungi.js?v=1"></script>
+  <script type="module" src="aggiungi.js?v=2"></script>
 </body>
 </html>

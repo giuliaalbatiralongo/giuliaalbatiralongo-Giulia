@@ -7,37 +7,29 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
+  <header class="top-bar">
     <h1>Simulatore Casi Clinici</h1>
-    <nav>
-      <a href="index.html" class="nav-link attivo">Ripassa</a>
-      <a href="casi.html" class="nav-link">I miei casi</a>
-      <a href="aggiungi.html" class="nav-link">+ Aggiungi</a>
-    </nav>
+    <p class="sottotitolo">Scegli una materia per iniziare</p>
   </header>
 
   <main>
-    <p id="caricamento">Caricamento caso dal database...</p>
-
-    <section id="caso" hidden>
-      <p class="materia-label" id="materia-label"></p>
-      <p id="vignetta-text"></p>
-      <p id="domanda-text" class="domanda"></p>
-
-      <div id="opzioni"></div>
-
-      <div id="risultato" hidden></div>
-
-      <button id="prossimo" hidden>Prossimo caso →</button>
-    </section>
+    <p id="stato-home" class="muted">Caricamento materie...</p>
+    <div id="materie" class="materie-grid" hidden></div>
   </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item attivo"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="ripassa.html" class="nav-item"><span class="nav-icon">📖</span><span>Ripassa</span></a>
+    <a href="casi.html" class="nav-item"><span class="nav-icon">📋</span><span>I miei casi</span></a>
+    <a href="aggiungi.html" class="nav-item"><span class="nav-icon">➕</span><span>Aggiungi</span></a>
+  </nav>
 
   <script>
     window.addEventListener('error', (e) => {
-      const el = document.getElementById('caricamento');
+      const el = document.getElementById('stato-home');
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="quiz.js?v=3"></script>
+  <script type="module" src="home.js?v=1"></script>
 </body>
 </html>

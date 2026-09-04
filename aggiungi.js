@@ -1,4 +1,4 @@
-import { inserisciCaso } from './db.js?v=4';
+import { inserisciCaso } from './db.js?v=5';
 
 const form = document.getElementById('form-caso');
 const elEsito = document.getElementById('esito-salvataggio');
