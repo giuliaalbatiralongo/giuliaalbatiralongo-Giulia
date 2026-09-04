@@ -13,11 +13,11 @@
   --colore-da-ripassare-sfondo: #fdefdc;
   --colore-consolidato: #15803d;
   --colore-consolidato-sfondo: #e6f6ec;
-  --raggio-sm: 10px;
-  --raggio: 16px;
-  --raggio-lg: 22px;
-  --ombra: 0 4px 14px rgba(90, 75, 196, 0.08), 0 1px 3px rgba(42, 36, 64, 0.05);
-  --ombra-hover: 0 12px 28px rgba(124, 111, 232, 0.18), 0 2px 6px rgba(42, 36, 64, 0.06);
+  --raggio-sm: 8px;
+  --raggio: 12px;
+  --raggio-lg: 14px;
+  --ombra: 0 1px 2px rgba(42, 36, 64, 0.06);
+  --ombra-hover: 0 2px 6px rgba(42, 36, 64, 0.09);
 }
 
 * {
@@ -38,10 +38,10 @@ h1, h2, h3 {
 }
 
 header.top-bar {
-  background: linear-gradient(135deg, var(--colore-primario) 0%, var(--colore-primario-scuro) 100%);
+  background: var(--colore-primario-scuro);
   color: white;
-  padding: 1.3rem 2rem;
-  box-shadow: 0 2px 16px rgba(90, 75, 196, 0.2);
+  padding: 1.1rem 2rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .top-bar-inner {
@@ -138,13 +138,12 @@ main {
   padding: 1.4rem 1.5rem;
   text-decoration: none;
   color: var(--colore-testo);
-  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .materia-card:hover {
   border-color: var(--colore-primario);
   box-shadow: var(--ombra-hover);
-  transform: translateY(-3px);
 }
 
 .materia-card-top {
@@ -160,7 +159,7 @@ main {
 }
 
 .materia-card.tutte {
-  background: linear-gradient(135deg, var(--colore-primario-chiaro) 0%, var(--colore-superficie) 100%);
+  background: var(--colore-primario-chiaro);
   border-color: #d9d3f9;
 }
 
@@ -175,16 +174,15 @@ main {
   justify-content: center;
   width: 46px;
   height: 46px;
-  border-radius: 14px;
-  font-size: 1.5rem;
+  border-radius: 50%;
+  font-size: 1.4rem;
   flex-shrink: 0;
 }
 
 .materia-icona.piccola {
   width: 26px;
   height: 26px;
-  font-size: 1rem;
-  border-radius: 9px;
+  font-size: 0.95rem;
 }
 
 .icona-rosa { background: #fbe8f0; }
@@ -193,7 +191,7 @@ main {
 .icona-blu { background: #e4edfc; }
 .icona-lilla { background: #efeaff; }
 .icona-neutra { background: #ece9f5; }
-.icona-primario { background: linear-gradient(135deg, #e4defc, #d9d0fb); }
+.icona-primario { background: var(--colore-primario-chiaro); }
 
 .materia-stats {
   display: flex;
