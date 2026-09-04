@@ -1,4 +1,4 @@
-import { getCasiClinici, aggiornaStatoCaso } from './db.js?v=3';
+import { getCasiClinici, aggiornaStatoCaso } from './db.js?v=4';
 
 let casi = [];
 let casoCorrente = null;

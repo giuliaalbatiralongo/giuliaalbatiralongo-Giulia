@@ -1,4 +1,4 @@
-import { getCasiClinici } from './db.js?v=3';
+import { getCasiClinici } from './db.js?v=4';
 
 async function mostraCasi() {
   const statoEl = document.getElementById('stato-caricamento');
