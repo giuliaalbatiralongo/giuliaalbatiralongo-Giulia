@@ -32,3 +32,15 @@ export async function aggiornaStatoCaso(id, nuovoStato) {
   }
   return true;
 }
+
+export async function inserisciCaso(caso) {
+  const { error } = await supabase
+    .from('casi_clinici')
+    .insert([caso]);
+
+  if (error) {
+    console.error('Errore nel salvataggio del caso:', error);
+    return false;
+  }
+  return true;
+}
