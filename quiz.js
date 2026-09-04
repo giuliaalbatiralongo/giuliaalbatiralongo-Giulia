@@ -75,7 +75,10 @@ async function rispondi(letteraScelta, bottoneCliccato) {
 
   const nuovoStato = calcolaProssimoStato(casoCorrente.stato, corretto);
   casoCorrente.stato = nuovoStato;
-  await aggiornaStatoCaso(casoCorrente.id, nuovoStato);
+  const salvato = await aggiornaStatoCaso(casoCorrente.id, nuovoStato);
+  if (!salvato) {
+    elRisultato.innerHTML += '<p class="avviso">⚠️ Non sono riuscita a salvare il nuovo stato nel database.</p>';
+  }
 }
 
 elProssimo.addEventListener('click', () => {

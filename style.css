@@ -124,6 +124,11 @@ main {
   margin-top: 0;
 }
 
+.avviso {
+  color: #b45309;
+  font-size: 0.9rem;
+}
+
 #prossimo {
   background: #2b3a67;
   color: white;

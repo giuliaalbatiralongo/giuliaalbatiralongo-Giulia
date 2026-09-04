@@ -28,5 +28,7 @@ export async function aggiornaStatoCaso(id, nuovoStato) {
 
   if (error) {
     console.error("Errore nell'aggiornamento dello stato:", error);
+    return false;
   }
+  return true;
 }
