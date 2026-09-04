@@ -4,43 +4,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ripassa — Simulatore Casi Clinici</title>
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <header class="top-bar">
-    <h1>Simulatore Casi Clinici</h1>
-    <p class="sottotitolo">Ripassa</p>
+    <div class="top-bar-inner">
+      <div>
+        <h1>Simulatore Casi Clinici</h1>
+        <p class="sottotitolo">Ripassa</p>
+      </div>
+      <nav class="top-nav">
+        <a href="index.html">Home</a>
+        <a href="ripassa.html" class="attivo">Ripassa</a>
+        <a href="casi.html">I miei casi</a>
+        <a href="aggiungi.html">+ Aggiungi</a>
+      </nav>
+    </div>
   </header>
 
   <main>
-    <div class="ripassa-header">
-      <span id="titolo-materia" class="page-title">Ripassa</span>
-      <a href="index.html" class="link-cambia">← Cambia materia</a>
-    </div>
-
-    <p id="caricamento">Caricamento caso dal database...</p>
-
-    <section id="caso" hidden>
-      <div class="card-caso">
-        <p class="materia-label" id="materia-label"></p>
-        <p id="vignetta-text"></p>
-        <p id="domanda-text" class="domanda"></p>
-
-        <div id="opzioni"></div>
+    <div class="contenuto-stretto">
+      <div class="ripassa-header">
+        <span id="titolo-materia" class="page-title">Ripassa</span>
+        <a href="index.html" class="link-cambia">← Cambia materia</a>
       </div>
 
-      <div id="risultato" hidden></div>
+      <p id="caricamento">Caricamento caso dal database...</p>
 
-      <button id="prossimo" hidden>Prossimo caso →</button>
-    </section>
+      <section id="caso" hidden>
+        <div class="card-caso">
+          <p class="materia-label" id="materia-label"></p>
+          <p id="vignetta-text"></p>
+          <p id="domanda-text" class="domanda"></p>
+
+          <div id="opzioni"></div>
+        </div>
+
+        <div id="risultato" hidden></div>
+
+        <button id="prossimo" hidden>Prossimo caso →</button>
+      </section>
+    </div>
   </main>
-
-  <nav class="bottom-nav">
-    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span><span>Home</span></a>
-    <a href="ripassa.html" class="nav-item attivo"><span class="nav-icon">📖</span><span>Ripassa</span></a>
-    <a href="casi.html" class="nav-item"><span class="nav-icon">📋</span><span>I miei casi</span></a>
-    <a href="aggiungi.html" class="nav-item"><span class="nav-icon">➕</span><span>Aggiungi</span></a>
-  </nav>
 
   <script>
     window.addEventListener('error', (e) => {
@@ -48,6 +53,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="ripassa.js?v=1"></script>
+  <script type="module" src="ripassa.js?v=2"></script>
 </body>
 </html>

@@ -4,66 +4,71 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aggiungi caso — Simulatore Casi Clinici</title>
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <header class="top-bar">
-    <h1>Simulatore Casi Clinici</h1>
-    <p class="sottotitolo">Aggiungi un nuovo caso</p>
+    <div class="top-bar-inner">
+      <div>
+        <h1>Simulatore Casi Clinici</h1>
+        <p class="sottotitolo">Aggiungi un nuovo caso</p>
+      </div>
+      <nav class="top-nav">
+        <a href="index.html">Home</a>
+        <a href="ripassa.html">Ripassa</a>
+        <a href="casi.html">I miei casi</a>
+        <a href="aggiungi.html" class="attivo">+ Aggiungi</a>
+      </nav>
+    </div>
   </header>
 
   <main>
-    <form id="form-caso">
-      <label for="materia">Materia</label>
-      <input type="text" id="materia" name="materia" list="materie-suggerite" required>
-      <datalist id="materie-suggerite">
-        <option value="Farmacologia 2">
-        <option value="Gastroenterologia">
-        <option value="Malattie Infettive">
-        <option value="Anatomia Patologica">
-        <option value="Organi di Senso">
-      </datalist>
+    <div class="contenuto-stretto">
+      <form id="form-caso">
+        <label for="materia">Materia</label>
+        <input type="text" id="materia" name="materia" list="materie-suggerite" required>
+        <datalist id="materie-suggerite">
+          <option value="Farmacologia 2">
+          <option value="Gastroenterologia">
+          <option value="Malattie Infettive">
+          <option value="Anatomia Patologica">
+          <option value="Organi di Senso">
+        </datalist>
 
-      <label for="vignetta">Vignetta clinica</label>
-      <textarea id="vignetta" name="vignetta" rows="4" required></textarea>
+        <label for="vignetta">Vignetta clinica</label>
+        <textarea id="vignetta" name="vignetta" rows="4" required></textarea>
 
-      <label for="domanda">Domanda</label>
-      <textarea id="domanda" name="domanda" rows="2" required></textarea>
+        <label for="domanda">Domanda</label>
+        <textarea id="domanda" name="domanda" rows="2" required></textarea>
 
-      <p class="hint">Scrivi le 4 opzioni e segna con il pallino quale è quella corretta.</p>
+        <p class="hint">Scrivi le 4 opzioni e segna con il pallino quale è quella corretta.</p>
 
-      <div class="opzione-form">
-        <label><input type="radio" name="corretta" value="a" required> Corretta</label>
-        <input type="text" name="opzione_a" placeholder="Opzione A" required>
-      </div>
-      <div class="opzione-form">
-        <label><input type="radio" name="corretta" value="b"> Corretta</label>
-        <input type="text" name="opzione_b" placeholder="Opzione B" required>
-      </div>
-      <div class="opzione-form">
-        <label><input type="radio" name="corretta" value="c"> Corretta</label>
-        <input type="text" name="opzione_c" placeholder="Opzione C" required>
-      </div>
-      <div class="opzione-form">
-        <label><input type="radio" name="corretta" value="d"> Corretta</label>
-        <input type="text" name="opzione_d" placeholder="Opzione D" required>
-      </div>
+        <div class="opzione-form">
+          <label><input type="radio" name="corretta" value="a" required> Corretta</label>
+          <input type="text" name="opzione_a" placeholder="Opzione A" required>
+        </div>
+        <div class="opzione-form">
+          <label><input type="radio" name="corretta" value="b"> Corretta</label>
+          <input type="text" name="opzione_b" placeholder="Opzione B" required>
+        </div>
+        <div class="opzione-form">
+          <label><input type="radio" name="corretta" value="c"> Corretta</label>
+          <input type="text" name="opzione_c" placeholder="Opzione C" required>
+        </div>
+        <div class="opzione-form">
+          <label><input type="radio" name="corretta" value="d"> Corretta</label>
+          <input type="text" name="opzione_d" placeholder="Opzione D" required>
+        </div>
 
-      <label for="spiegazione">Spiegazione</label>
-      <textarea id="spiegazione" name="spiegazione" rows="3" required></textarea>
+        <label for="spiegazione">Spiegazione</label>
+        <textarea id="spiegazione" name="spiegazione" rows="3" required></textarea>
 
-      <button type="submit">Salva caso</button>
-    </form>
+        <button type="submit">Salva caso</button>
+      </form>
 
-    <p id="esito-salvataggio"></p>
+      <p id="esito-salvataggio"></p>
+    </div>
   </main>
-
-  <nav class="bottom-nav">
-    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span><span>Home</span></a>
-    <a href="ripassa.html" class="nav-item"><span class="nav-icon">📖</span><span>Ripassa</span></a>
-    <a href="casi.html" class="nav-item"><span class="nav-icon">📋</span><span>I miei casi</span></a>
-    <a href="aggiungi.html" class="nav-item attivo"><span class="nav-icon">➕</span><span>Aggiungi</span></a>
-  </nav>
 
   <script>
     window.addEventListener('error', (e) => {
@@ -71,6 +76,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="aggiungi.js?v=2"></script>
+  <script type="module" src="aggiungi.js?v=3"></script>
 </body>
 </html>

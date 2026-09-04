@@ -30,7 +30,17 @@ body {
 header.top-bar {
   background: var(--colore-primario);
   color: white;
-  padding: 1rem 1.5rem;
+  padding: 1rem 2rem;
+}
+
+.top-bar-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
 }
 
 header.top-bar h1 {
@@ -44,10 +54,32 @@ header.top-bar .sottotitolo {
   color: #cbd2e8;
 }
 
+.top-nav {
+  display: flex;
+  gap: 1.6rem;
+}
+
+.top-nav a {
+  color: #cbd2e8;
+  text-decoration: none;
+  font-size: 0.92rem;
+  padding-bottom: 0.2rem;
+}
+
+.top-nav a:hover {
+  color: white;
+}
+
+.top-nav a.attivo {
+  color: white;
+  font-weight: 600;
+  border-bottom: 2px solid white;
+}
+
 main {
-  max-width: 640px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 1.5rem 1.2rem calc(5.5rem);
+  padding: 2rem;
 }
 
 .muted {
@@ -65,46 +97,11 @@ main {
   font-size: 0.92rem;
 }
 
-/* Barra di navigazione fissa in basso */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  background: var(--colore-superficie);
-  border-top: 1px solid var(--colore-bordo);
-  padding: 0.35rem 0 calc(0.35rem + env(safe-area-inset-bottom));
-  z-index: 10;
-}
-
-.nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
-  color: var(--colore-testo-tenue);
-  text-decoration: none;
-  font-size: 0.72rem;
-  padding: 0.3rem 0;
-}
-
-.nav-icon {
-  font-size: 1.3rem;
-  line-height: 1;
-}
-
-.nav-item.attivo {
-  color: var(--colore-primario);
-  font-weight: 600;
-}
-
 /* Schede materie (Home) */
 .materie-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
 }
 
 .materia-card {
@@ -113,9 +110,15 @@ main {
   border: 1px solid var(--colore-bordo);
   border-radius: var(--raggio);
   box-shadow: var(--ombra);
-  padding: 1rem 1.1rem;
+  padding: 1.2rem 1.3rem;
   text-decoration: none;
   color: var(--colore-testo);
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.materia-card:hover {
+  border-color: var(--colore-primario);
+  box-shadow: 0 4px 10px rgba(16, 24, 40, 0.1);
 }
 
 .materia-card h3 {
@@ -191,6 +194,10 @@ main {
 #casi li .vignetta-breve {
   flex: 1;
   font-size: 0.92rem;
+}
+
+.contenuto-stretto {
+  max-width: 640px;
 }
 
 /* Vista Ripassa */
