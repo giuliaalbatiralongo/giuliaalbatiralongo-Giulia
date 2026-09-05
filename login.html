@@ -33,9 +33,12 @@
           <button type="submit" class="btn btn-largo">Accedi</button>
         </form>
 
-        <div class="separatore"><span>oppure</span></div>
+        <!-- Accesso con Google: codice pronto, in attesa che le credenziali
+             vengano create nella Google Cloud Console. Per riattivarlo basta
+             togliere l'attributo hidden dai due elementi qui sotto. -->
+        <div class="separatore" hidden><span>oppure</span></div>
 
-        <button type="button" class="btn btn-neutro btn-largo btn-google" data-google>
+        <button type="button" class="btn btn-neutro btn-largo btn-google" data-google hidden>
           <i class="ph ph-google-logo" aria-hidden="true"></i> Continua con Google
         </button>
 
@@ -63,9 +66,12 @@
           <button type="submit" class="btn btn-largo">Registrati</button>
         </form>
 
-        <div class="separatore"><span>oppure</span></div>
+        <!-- Accesso con Google: codice pronto, in attesa che le credenziali
+             vengano create nella Google Cloud Console. Per riattivarlo basta
+             togliere l'attributo hidden dai due elementi qui sotto. -->
+        <div class="separatore" hidden><span>oppure</span></div>
 
-        <button type="button" class="btn btn-neutro btn-largo btn-google" data-google>
+        <button type="button" class="btn btn-neutro btn-largo btn-google" data-google hidden>
           <i class="ph ph-google-logo" aria-hidden="true"></i> Continua con Google
         </button>
 
@@ -136,6 +142,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="login.js?v=4"></script>
+  <script type="module" src="login.js?v=5"></script>
 </body>
 </html>
