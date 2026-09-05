@@ -1591,3 +1591,12 @@ a.profilo-btn {
 .azioni-revisione .esito-form {
   margin: 0;
 }
+
+/* Il codice di invito si scrive in maiuscolo a schermo, cosi' com'e'
+   stampato sull'invito. Il confronto lato database ignora comunque
+   maiuscole, spazi e trattini di forma diversa. */
+#attiva-codice {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
