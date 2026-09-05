@@ -3,7 +3,7 @@ import {
   aggiornaStatoCaso,
   getMateriali,
   registraRisposta,
-} from './db.js?v=7';
+} from './db.js?v=8';
 import { iconaPerMateria } from './materie.js?v=3';
 
 const parametri = new URLSearchParams(window.location.search);

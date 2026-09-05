@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz - Akesis</title>
+  <title>I miei casi - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -36,59 +36,30 @@
 
     <main class="contenuto">
       <div class="contenuto-interno">
-        <h1 class="page-titolo">Quiz</h1>
-        <p class="page-sub">Scegli una materia da esercitare, oppure mettile tutte insieme.</p>
+        <div class="testata">
+          <div>
+            <h1 class="page-titolo">I miei casi</h1>
+            <p class="page-sub">Apri un caso per rileggerlo e vedere la soluzione. I casi che non hai ancora affrontato restano coperti.</p>
+          </div>
+          <a href="quiz.html" class="link-testo"><i class="ph ph-arrow-left" aria-hidden="true"></i> Torna al quiz</a>
+        </div>
 
-        <div id="scheletro-materie" class="materie-grid">
-          <div class="scheletro scheletro-card"></div>
-          <div class="scheletro scheletro-card"></div>
+        <div id="scheletro">
+          <div class="scheletro scheletro-riga" style="width: 180px"></div>
           <div class="scheletro scheletro-card"></div>
         </div>
-        <div id="materie" class="materie-grid" hidden></div>
 
-        <section class="sezione">
-          <h2 class="sezione-titolo">Andamento</h2>
-          <p class="sezione-sub">Calcolato sulle risposte che dai nelle sessioni di quiz.</p>
-          <div id="tracker"></div>
-        </section>
-
-        <section class="sezione">
-          <h2 class="sezione-titolo">Archivio e inserimento</h2>
-          <p class="sezione-sub">Rileggere i casi salvati o aggiungerne di nuovi.</p>
-          <div class="materie-grid">
-            <a href="casi.html" class="materia-card">
-              <div class="materia-testata">
-                <span class="materia-icona"><i class="ph ph-list-checks" aria-hidden="true"></i></span>
-                <div>
-                  <div class="materia-nome">I miei casi</div>
-                  <div class="materia-conteggio" id="conteggio-casi">archivio completo</div>
-                </div>
-              </div>
-              <p class="materia-descrizione">Rileggi i casi e scopri la soluzione. Quelli mai affrontati restano coperti.</p>
-            </a>
-
-            <a href="aggiungi.html" class="materia-card">
-              <div class="materia-testata">
-                <span class="materia-icona"><i class="ph ph-plus-circle" aria-hidden="true"></i></span>
-                <div>
-                  <div class="materia-nome">Aggiungi caso</div>
-                  <div class="materia-conteggio">nuovo caso clinico</div>
-                </div>
-              </div>
-              <p class="materia-descrizione">Inserisci una vignetta con domanda, quattro opzioni e spiegazione.</p>
-            </a>
-          </div>
-        </section>
+        <div id="casi"></div>
       </div>
     </main>
   </div>
 
   <script>
     window.addEventListener('error', (e) => {
-      const el = document.getElementById('scheletro-materie');
+      const el = document.getElementById('scheletro');
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="quiz.js?v=2"></script>
+  <script type="module" src="casi.js?v=1"></script>
 </body>
 </html>

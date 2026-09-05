@@ -1,4 +1,4 @@
-import { getCasiClinici, getRisposte, calcolaStatistiche } from './db.js?v=7';
+import { getCasiClinici, getRisposte, calcolaStatistiche } from './db.js?v=8';
 import { iconaPerMateria } from './materie.js?v=3';
 
 const STATI = ['nuovo', 'da_ripassare', 'consolidato'];
@@ -6,11 +6,6 @@ const ETICHETTE_PLURALE = {
   nuovo: 'nuovi',
   da_ripassare: 'da ripassare',
   consolidato: 'consolidati',
-};
-const ETICHETTE_SINGOLARE = {
-  nuovo: 'nuovo',
-  da_ripassare: 'da ripassare',
-  consolidato: 'consolidato',
 };
 
 /* ---------- Schede materia ---------- */
@@ -123,11 +118,7 @@ function creaStatAndamento(andamento) {
   div.appendChild(val);
 
   const verso = andamento.delta > 0 ? 'su' : andamento.delta < 0 ? 'giu' : 'pari';
-  const iconaVerso = {
-    su: 'ph-trend-up',
-    giu: 'ph-trend-down',
-    pari: 'ph-minus',
-  }[verso];
+  const iconaVerso = { su: 'ph-trend-up', giu: 'ph-trend-down', pari: 'ph-minus' }[verso];
 
   const delta = document.createElement('div');
   delta.className = `stat-delta ${verso}`;
@@ -187,87 +178,28 @@ function mostraTracker(statistiche) {
   contenitore.appendChild(griglia);
 }
 
-/* ---------- Elenco casi ---------- */
-
-function creaVoceCaso(caso) {
-  const li = document.createElement('li');
-
-  const testo = document.createElement('span');
-  testo.className = 'elenco-testo';
-  testo.textContent = caso.vignetta;
-  li.appendChild(testo);
-
-  const stato = document.createElement('span');
-  stato.className = `stato stato-${caso.stato}`;
-  stato.textContent = ETICHETTE_SINGOLARE[caso.stato] || caso.stato;
-  li.appendChild(stato);
-
-  return li;
-}
-
-function creaGruppoMateria(nome, casiMateria) {
-  const div = document.createElement('div');
-  div.className = 'gruppo-materia';
-
-  const testata = document.createElement('div');
-  testata.className = 'gruppo-materia-testata';
-
-  const icona = document.createElement('i');
-  icona.className = `ph ${iconaPerMateria(nome)}`;
-  icona.setAttribute('aria-hidden', 'true');
-  testata.appendChild(icona);
-
-  const h3 = document.createElement('h3');
-  h3.textContent = nome;
-  testata.appendChild(h3);
-
-  div.appendChild(testata);
-
-  const argomenti = [...new Set(casiMateria.map((c) => c.argomento || 'Generale'))].sort();
-  argomenti.forEach((argomento) => {
-    const blocco = document.createElement('div');
-    blocco.className = 'gruppo-argomento';
-
-    const h4 = document.createElement('h4');
-    h4.textContent = argomento;
-    blocco.appendChild(h4);
-
-    const ul = document.createElement('ul');
-    ul.className = 'elenco';
-    casiMateria
-      .filter((c) => (c.argomento || 'Generale') === argomento)
-      .forEach((caso) => ul.appendChild(creaVoceCaso(caso)));
-    blocco.appendChild(ul);
-
-    div.appendChild(blocco);
-  });
-
-  return div;
-}
-
 /* ---------- Avvio ---------- */
 
 async function avvia() {
-  const elScheletroMaterie = document.getElementById('scheletro-materie');
+  const elScheletro = document.getElementById('scheletro-materie');
   const elMaterie = document.getElementById('materie');
-  const elScheletroCasi = document.getElementById('scheletro-casi');
-  const elCasi = document.getElementById('casi');
+  const elConteggioCasi = document.getElementById('conteggio-casi');
 
   try {
     const [casi, risposte] = await Promise.all([getCasiClinici(), getRisposte()]);
 
     mostraTracker(calcolaStatistiche(risposte));
+    elConteggioCasi.textContent = `${casi.length} ${casi.length === 1 ? 'caso' : 'casi'} in archivio`;
 
     if (casi.length === 0) {
-      elScheletroMaterie.className = '';
-      elScheletroMaterie.innerHTML = `
+      elScheletro.className = '';
+      elScheletro.innerHTML = `
         <div class="stato-vuoto">
           <i class="ph ph-folder-open" aria-hidden="true"></i>
           <p>Non hai ancora nessun caso clinico.</p>
           <a class="btn" href="aggiungi.html"><i class="ph ph-plus" aria-hidden="true"></i> Aggiungi il primo caso</a>
         </div>
       `;
-      elScheletroCasi.remove();
       return;
     }
 
@@ -277,16 +209,12 @@ async function avvia() {
     materie.forEach((nome) => {
       elMaterie.appendChild(creaCardMateria(nome, casi.filter((c) => c.materia === nome)));
     });
-    elScheletroMaterie.remove();
-    elMaterie.hidden = false;
 
-    materie.forEach((nome) => {
-      elCasi.appendChild(creaGruppoMateria(nome, casi.filter((c) => c.materia === nome)));
-    });
-    elScheletroCasi.remove();
+    elScheletro.remove();
+    elMaterie.hidden = false;
   } catch (errore) {
-    elScheletroMaterie.className = '';
-    elScheletroMaterie.innerHTML = `<p class="messaggio-errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
+    elScheletro.className = '';
+    elScheletro.innerHTML = `<p class="messaggio-errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);
   }
 }

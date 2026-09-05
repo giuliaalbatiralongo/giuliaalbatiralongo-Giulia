@@ -1,4 +1,4 @@
-import { getCasiClinici } from './db.js?v=7';
+import { getCasiClinici } from './db.js?v=8';
 import { iconaPerMateria } from './materie.js?v=3';
 
 const STATI = ['nuovo', 'da_ripassare', 'consolidato'];

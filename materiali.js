@@ -1,4 +1,4 @@
-import { getMateriali } from './db.js?v=7';
+import { getMateriali } from './db.js?v=8';
 import { iconaPerMateria } from './materie.js?v=3';
 import { TIPI_MATERIALE, tipoPerChiave } from './tipi.js?v=1';
 

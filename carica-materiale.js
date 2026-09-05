@@ -1,4 +1,4 @@
-import { caricaMateriale } from './db.js?v=7';
+import { caricaMateriale } from './db.js?v=8';
 
 const form = document.getElementById('form-materiale');
 const elEsito = document.getElementById('esito');

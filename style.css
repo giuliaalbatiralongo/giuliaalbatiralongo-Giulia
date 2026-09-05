@@ -534,6 +534,243 @@ i[class*="ph-"] {
 }
 
 /* ============================================================
+   Casi espandibili, con velo sui casi mai affrontati
+   ============================================================ */
+
+.caso-riga {
+  background: var(--superficie);
+  border-top: 1px solid var(--linea);
+}
+
+.caso-riga:first-child { border-top: none; }
+
+.caso-riga > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 18px;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 160ms var(--curva);
+}
+
+.caso-riga > summary::-webkit-details-marker { display: none; }
+
+@media (hover: hover) and (pointer: fine) {
+  .caso-riga > summary:hover { background: var(--superficie-alt); }
+}
+
+.caso-riga-testo {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.caso-riga-lato {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.caso-riga-freccia {
+  font-size: 15px;
+  color: var(--testo-3);
+  transition: transform 160ms var(--curva);
+}
+
+.caso-riga[open] .caso-riga-freccia { transform: rotate(180deg); }
+
+.caso-dettaglio {
+  position: relative;
+  padding: 4px 18px 20px;
+}
+
+.caso-dettaglio-testo {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--testo);
+  max-width: 62ch;
+  margin-bottom: 12px;
+}
+
+.caso-dettaglio-domanda {
+  font-weight: 600;
+  margin-bottom: 12px;
+  max-width: 62ch;
+}
+
+.caso-opzioni {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 62ch;
+}
+
+.caso-opzioni li {
+  display: flex;
+  gap: 9px;
+  padding: 9px 12px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--testo-2);
+}
+
+.caso-opzioni li.giusta {
+  border-color: var(--st-consolidato);
+  background: var(--consolidato-tenue);
+  color: var(--testo);
+  font-weight: 500;
+}
+
+.caso-opzioni .opzione-lettera { padding-top: 0; }
+
+.caso-spiegazione {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--testo-2);
+  max-width: 62ch;
+  padding-top: 12px;
+  border-top: 1px solid var(--linea);
+}
+
+/* Velo: il caso mai affrontato resta illeggibile finche' non lo scopri,
+   cosi' non ti rovini il quiz leggendolo per sbaglio. */
+.velato .caso-dettaglio-contenuto {
+  filter: blur(7px);
+  user-select: none;
+  pointer-events: none;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 16px;
+}
+
+.velo-nota {
+  font-size: 12.5px;
+  color: var(--testo-2);
+  max-width: 34ch;
+}
+
+/* ============================================================
+   Domande d'esame
+   ============================================================ */
+
+.domanda-card {
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  box-shadow: var(--ombra-1);
+  padding: 18px;
+  margin-bottom: 10px;
+}
+
+.domanda-testata {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.domanda-testo {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+  max-width: 62ch;
+}
+
+.domanda-argomento {
+  font-size: 11.5px;
+  color: var(--testo-3);
+  margin-top: 4px;
+}
+
+.domanda-conteggio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.conteggio-valore {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--testo-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.btn-piu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--linea-forte);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+  color: var(--testo-2);
+  cursor: pointer;
+  font-size: 15px;
+  transition: border-color 160ms var(--curva), color 160ms var(--curva),
+    transform 160ms var(--curva);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-piu:hover {
+    border-color: var(--accento);
+    color: var(--accento);
+  }
+}
+
+.btn-piu:active { transform: scale(0.94); }
+
+.domanda-note textarea {
+  font-size: 13px;
+  min-height: 62px;
+}
+
+.domanda-note-etichetta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--testo-3);
+  margin-bottom: 6px;
+}
+
+.nota-salvata {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--st-consolidato);
+  opacity: 0;
+  transition: opacity 160ms var(--curva);
+}
+
+.nota-salvata.visibile { opacity: 1; }
+
+/* ============================================================
    Elenchi (I miei casi, Materiali)
    ============================================================ */
 

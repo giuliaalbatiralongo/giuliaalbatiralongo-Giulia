@@ -87,6 +87,61 @@ export async function caricaMateriale(file, metadati) {
   return true;
 }
 
+/* ---------- Domande d'esame ---------- */
+
+export async function getDomandeEsame() {
+  const { data, error } = await supabase
+    .from('domande_esame')
+    .select('*')
+    .order('volte', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Errore nel caricamento delle domande:', error);
+    return [];
+  }
+  return data;
+}
+
+export async function inserisciDomandaEsame(domanda) {
+  const { error } = await supabase.from('domande_esame').insert([domanda]);
+
+  if (error) {
+    console.error('Errore nel salvataggio della domanda:', error);
+    return false;
+  }
+  return true;
+}
+
+// Incrementa il contatore leggendo il valore corrente e riscrivendolo.
+// Con una sola persona che scrive va bene; se in futuro l'app diventa
+// multiutente conviene spostare l'incremento in una funzione lato database.
+export async function incrementaVolte(id, volteAttuali) {
+  const { error } = await supabase
+    .from('domande_esame')
+    .update({ volte: volteAttuali + 1 })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Errore nell aggiornamento del conteggio:', error);
+    return false;
+  }
+  return true;
+}
+
+export async function aggiornaNoteDomanda(id, note) {
+  const { error } = await supabase
+    .from('domande_esame')
+    .update({ note })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Errore nel salvataggio delle note:', error);
+    return false;
+  }
+  return true;
+}
+
 /* ---------- Tracker delle risposte ----------
    Ogni risposta data nel quiz viene registrata come riga singola.
    Da queste righe ricaviamo accuratezza, numero di sessioni e
