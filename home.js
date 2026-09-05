@@ -7,20 +7,23 @@ import {
   getDateEsame,
   getPiani,
   studioDiOggi,
+  casiDaRipassareOggi,
+  calcolaPiano,
   nomeUnita,
   giorniMancanti,
   nomeTipoData,
+  titoloData,
 } from './db.js?v=25';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
-const elSezioni = document.getElementById('sezioni');
+const elGriglia = document.getElementById('griglia');
+const elData = document.getElementById('oggi-data');
 const elSaluto = document.getElementById('saluto');
-const elRaccolta = document.getElementById('raccolta');
-const elStudioOggi = document.getElementById('studio-oggi');
-const elStudioOggiElenco = document.getElementById('studio-oggi-elenco');
-const elProssimeDate = document.getElementById('prossime-date');
-const elProssimeElenco = document.getElementById('prossime-elenco');
+const elOggiCorpo = document.getElementById('oggi-corpo');
+const elRighe = document.getElementById('righe-sezioni');
+const elScadenzeElenco = document.getElementById('scadenze-elenco');
+const elMaterieElenco = document.getElementById('materie-elenco');
 const elAttesa = document.getElementById('attesa');
 const elAttesaElenco = document.getElementById('attesa-elenco');
 
@@ -32,6 +35,13 @@ function arrotonda(n) {
   return Math.ceil(n - 1e-9);
 }
 
+function oggiIso() {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const g = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${g}`;
+}
+
 /* Il saluto cambia con l'ora. Non e' decorazione: aprire l'app alle
    sette di sera e leggere "buongiorno" fa sembrare che nessuno stia
    guardando. */
@@ -41,145 +51,364 @@ function saluto(nome) {
   return nome ? `${parte}, ${nome}` : parte;
 }
 
-/* ---------- Cosa c'e' dentro ----------
-   Una riga che conta quello che hai messo insieme, non quello che ti
-   manca. Aprire l'app non deve essere un rimprovero. */
-
-function scriviRaccolta(casi, domande, materiali, date) {
-  const pezzi = [];
-  if (materiali.length) pezzi.push(plurale(materiali.length, 'documento', 'documenti'));
-  if (domande.length) pezzi.push(plurale(domande.length, "domanda d'esame", "domande d'esame"));
-  if (casi.length) pezzi.push(plurale(casi.length, 'caso clinico', 'casi clinici'));
-  if (date.length) pezzi.push(plurale(date.length, 'data segnata', 'date segnate'));
-
-  if (pezzi.length === 0) {
-    elRaccolta.textContent =
-      'Non c e ancora niente dentro. Comincia da dove ti fa piu comodo: un documento, una data, una domanda.';
-    return;
-  }
-
-  const ultimo = pezzi.pop();
-  const elenco = pezzi.length ? `${pezzi.join(', ')} e ${ultimo}` : ultimo;
-  elRaccolta.textContent = `Qui dentro ci sono ${elenco}. Tutto roba che ti sei costruita.`;
+function dataDiOggi() {
+  const d = new Date().toLocaleDateString('it-IT', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+  return d.charAt(0).toUpperCase() + d.slice(1);
 }
 
-/* ---------- Le sezioni ---------- */
+/* ---------- Cosa studi oggi ----------
+   E' la domanda che si fa aprendo l'app, quindi sta in cima e in
+   grande. Ogni riga e' una cosa da fare oggi, con il numero davanti:
+   quaranta pagine, otto casi. Il numero e' l'informazione, il resto e'
+   contorno. */
 
-function creaCardSezione(sezione) {
+function rigaOggi({ numero, unita, titolo, sotto, indirizzo, azione }) {
+  const riga = document.createElement('a');
+  riga.className = 'oggi-voce';
+  riga.href = indirizzo;
+
+  const cifra = document.createElement('span');
+  cifra.className = 'oggi-voce-cifra';
+
+  const n = document.createElement('strong');
+  n.textContent = numero;
+  cifra.appendChild(n);
+
+  if (unita) {
+    const u = document.createElement('span');
+    u.textContent = unita;
+    cifra.appendChild(u);
+  }
+  riga.appendChild(cifra);
+
+  const testo = document.createElement('span');
+  testo.className = 'oggi-voce-testo';
+
+  const t = document.createElement('span');
+  t.className = 'oggi-voce-titolo';
+  t.textContent = titolo;
+  testo.appendChild(t);
+
+  const s = document.createElement('span');
+  s.className = 'oggi-voce-sotto';
+  s.textContent = sotto;
+  testo.appendChild(s);
+
+  riga.appendChild(testo);
+
+  const fine = document.createElement('span');
+  fine.className = 'oggi-voce-azione';
+  fine.textContent = azione;
+  riga.appendChild(fine);
+
+  return riga;
+}
+
+function mostraOggi(piani, casi, date) {
+  const oggi = oggiIso();
+  elOggiCorpo.innerHTML = '';
+  let quante = 0;
+
+  /* Prima le date di oggi: se l'esame e' stamattina, viene prima di
+     qualunque programma di studio. */
+  date
+    .filter((d) => d.giorno === oggi)
+    .forEach((d) => {
+      elOggiCorpo.appendChild(
+        rigaOggi({
+          numero: 'Oggi',
+          unita: null,
+          titolo: titoloData(d),
+          sotto: nomeTipoData(d.tipo),
+          indirizzo: 'calendario.html',
+          azione: 'Calendario',
+        })
+      );
+      quante += 1;
+    });
+
+  studioDiOggi(piani, oggi).forEach((voce) => {
+    const q = voce.quantita === null ? null : arrotonda(voce.quantita);
+    elOggiCorpo.appendChild(
+      rigaOggi({
+        numero: q === null ? '·' : q,
+        unita: q === null ? null : nomeUnita(voce.unita, q),
+        titolo: voce.materia,
+        sotto: voce.fase,
+        indirizzo: 'piano.html',
+        azione: 'Segna',
+      })
+    );
+    quante += 1;
+  });
+
+  const daRipassare = casiDaRipassareOggi(casi);
+  if (daRipassare.length > 0) {
+    elOggiCorpo.appendChild(
+      rigaOggi({
+        numero: daRipassare.length,
+        unita: daRipassare.length === 1 ? 'caso' : 'casi',
+        titolo: 'Da ripassare',
+        sotto: 'Tornano oggi secondo la scala dei ripassi',
+        indirizzo: 'quiz.html',
+        azione: 'Ripassa',
+      })
+    );
+    quante += 1;
+  }
+
+  if (quante > 0) return;
+
+  /* Vuoto non vuol dire in colpa: si dice cosa manca per riempirlo. */
+  const vuoto = document.createElement('div');
+  vuoto.className = 'oggi-vuoto';
+
+  const t = document.createElement('p');
+  t.className = 'oggi-vuoto-titolo';
+  const p = document.createElement('p');
+  p.className = 'oggi-vuoto-testo';
   const a = document.createElement('a');
-  a.className = 'materia-card';
-  a.href = sezione.indirizzo;
+  a.className = 'btn';
 
-  const testata = document.createElement('div');
-  testata.className = 'materia-testata';
+  if (piani.length === 0) {
+    t.textContent = 'Non hai ancora organizzato niente.';
+    p.textContent =
+      'Dimmi una materia, quanto materiale c\'è e quanto tempo hai: da domani trovi qui quante pagine fare, già divise.';
+    a.href = 'piano.html';
+    a.innerHTML = '<i class="ph ph-path" aria-hidden="true"></i> Organizza una materia';
+  } else {
+    t.textContent = 'Oggi sei libera.';
+    p.textContent =
+      'Nessuna delle tue materie cade oggi: o è un giorno che ti sei tenuta, o le finestre non sono ancora cominciate.';
+    a.href = 'quiz.html';
+    a.innerHTML = '<i class="ph ph-cards" aria-hidden="true"></i> Fai due quiz';
+  }
 
-  const badge = document.createElement('span');
-  badge.className = 'materia-icona';
-  const icona = document.createElement('i');
-  icona.className = `ph ${sezione.icona}`;
-  icona.setAttribute('aria-hidden', 'true');
-  badge.appendChild(icona);
-  testata.appendChild(badge);
+  vuoto.append(t, p, a);
+  elOggiCorpo.appendChild(vuoto);
+}
 
-  const testo = document.createElement('div');
+/* ---------- Tutto quello che ti serve ----------
+   Non sei schede uguali: righe strette, sotto a quello che conta. Ogni
+   riga risponde a una domanda vera ("dov'e' il materiale?", "ho dieci
+   minuti, cosa faccio?"). */
 
-  const titolo = document.createElement('div');
-  titolo.className = 'materia-nome';
-  titolo.textContent = sezione.nome;
-  testo.appendChild(titolo);
+function rigaSezione(voce) {
+  const a = document.createElement('a');
+  a.className = 'riga-sezione';
+  a.href = voce.indirizzo;
+  if (voce.spenta) a.classList.add('spenta');
 
-  const conteggio = document.createElement('div');
-  conteggio.className = 'materia-conteggio';
-  conteggio.textContent = sezione.conteggio;
-  testo.appendChild(conteggio);
+  const icona = document.createElement('span');
+  icona.className = 'riga-sezione-icona';
+  icona.innerHTML = `<i class="ph ${voce.icona}" aria-hidden="true"></i>`;
+  a.appendChild(icona);
 
-  testata.appendChild(testo);
-  a.appendChild(testata);
+  const testo = document.createElement('span');
+  testo.className = 'riga-sezione-testo';
 
-  const descrizione = document.createElement('p');
-  descrizione.className = 'materia-descrizione';
-  descrizione.textContent = sezione.descrizione;
-  a.appendChild(descrizione);
+  const testa = document.createElement('span');
+  testa.className = 'riga-sezione-testa';
+
+  const nome = document.createElement('span');
+  nome.className = 'riga-sezione-nome';
+  nome.textContent = voce.nome;
+  testa.appendChild(nome);
+
+  const conto = document.createElement('span');
+  conto.className = 'riga-sezione-conto';
+  conto.textContent = voce.conto;
+  testa.appendChild(conto);
+
+  testo.appendChild(testa);
+
+  const sotto = document.createElement('span');
+  sotto.className = 'riga-sezione-sotto';
+  sotto.textContent = voce.sotto;
+  testo.appendChild(sotto);
+
+  a.appendChild(testo);
+
+  const freccia = document.createElement('i');
+  freccia.className = 'ph ph-caret-right riga-sezione-freccia';
+  freccia.setAttribute('aria-hidden', 'true');
+  a.appendChild(freccia);
 
   return a;
 }
 
-/* ---------- Colonna destra ---------- */
-
-function mostraStudioDiOggi(piani) {
-  const voci = studioDiOggi(piani);
-  if (voci.length === 0) return;
-
-  voci.forEach((voce) => {
-    const riga = document.createElement('a');
-    riga.className = 'oggi-riga';
-    riga.href = 'piano.html';
-
-    const quanto = document.createElement('span');
-    quanto.className = 'oggi-quanto';
-    quanto.textContent = voce.quantita === null ? '-' : arrotonda(voce.quantita);
-    riga.appendChild(quanto);
-
-    const testo = document.createElement('span');
-    testo.className = 'oggi-testo';
-
-    const materia = document.createElement('span');
-    materia.className = 'oggi-materia';
-    materia.textContent = voce.materia;
-    testo.appendChild(materia);
-
-    const dettaglio = document.createElement('span');
-    dettaglio.className = 'oggi-dettaglio';
-    const q = voce.quantita === null ? null : arrotonda(voce.quantita);
-    dettaglio.textContent = q === null ? voce.fase : `${nomeUnita(voce.unita, q)} · ${voce.fase}`;
-    testo.appendChild(dettaglio);
-
-    riga.appendChild(testo);
-    elStudioOggiElenco.appendChild(riga);
-  });
-
-  elStudioOggi.hidden = false;
+function mostraRighe(materiali, casi, domande) {
+  [
+    {
+      nome: 'Materiali',
+      indirizzo: 'materiali.html',
+      icona: 'ph-folder',
+      conto: materiali.length ? plurale(materiali.length, 'documento', 'documenti') : '',
+      sotto: 'Sbobine, dispense e appunti, divisi per materia.',
+    },
+    {
+      nome: 'Quiz',
+      indirizzo: 'quiz.html',
+      icona: 'ph-cards',
+      conto: casi.length ? plurale(casi.length, 'caso', 'casi') : '',
+      sotto: 'Hai un ritaglio di tempo? Casi clinici per tenere la mente allenata.',
+    },
+    {
+      nome: 'Domande esami',
+      indirizzo: 'domande.html',
+      icona: 'ph-exam',
+      conto: domande.length ? plurale(domande.length, 'domanda', 'domande') : '',
+      sotto: 'Quello che i professori hanno chiesto davvero, e chi l\'ha chiesto.',
+    },
+    {
+      nome: 'Test SSM',
+      indirizzo: 'ssm.html',
+      icona: 'ph-target',
+      conto: 'in preparazione',
+      sotto: 'Le domande dei concorsi di specializzazione.',
+      spenta: true,
+    },
+  ].forEach((v) => elRighe.appendChild(rigaSezione(v)));
 }
 
-function mostraProssimeDate(date) {
-  const future = date.filter((d) => giorniMancanti(d.giorno) >= 0).slice(0, 3);
-  if (future.length === 0) return;
+/* ---------- Le tue scadenze ---------- */
+
+function mostraScadenze(date) {
+  const future = date.filter((d) => giorniMancanti(d.giorno) >= 0).slice(0, 4);
+  elScadenzeElenco.innerHTML = '';
+
+  if (future.length === 0) {
+    const vuoto = document.createElement('p');
+    vuoto.className = 'blocco-vuoto';
+    vuoto.textContent =
+      'Nessuna data segnata. Appelli, tirocini e consegne stanno nel calendario.';
+    elScadenzeElenco.appendChild(vuoto);
+    return;
+  }
 
   future.forEach((voce) => {
     const riga = document.createElement('a');
-    riga.className = 'prossima';
+    riga.className = 'scadenza';
     riga.href = 'calendario.html';
 
-    const quando = document.createElement('span');
-    quando.className = 'prossima-quando';
     const g = giorniMancanti(voce.giorno);
-    quando.textContent = g === 0 ? 'oggi' : g;
-    if (g > 0) quando.classList.add('numero');
+
+    const quando = document.createElement('span');
+    quando.className = 'scadenza-quando';
+    if (g === 0) {
+      quando.textContent = 'oggi';
+      quando.classList.add('adesso');
+    } else if (g === 1) {
+      quando.textContent = 'domani';
+    } else {
+      const n = document.createElement('strong');
+      n.textContent = g;
+      quando.appendChild(n);
+      quando.append('giorni');
+    }
     riga.appendChild(quando);
 
     const testo = document.createElement('span');
-    testo.className = 'prossima-testo';
+    testo.className = 'scadenza-testo';
 
-    const materia = document.createElement('span');
-    materia.className = 'prossima-materia';
-    materia.textContent = voce.materia || nomeTipoData(voce.tipo);
-    testo.appendChild(materia);
+    const nome = document.createElement('span');
+    nome.className = 'scadenza-nome';
+    nome.textContent = titoloData(voce);
+    testo.appendChild(nome);
 
     const meta = document.createElement('span');
-    meta.className = 'prossima-meta';
+    meta.className = 'scadenza-meta';
     const data = new Date(voce.giorno + 'T00:00:00');
     meta.textContent = `${nomeTipoData(voce.tipo)} · ${data.toLocaleDateString('it-IT', {
+      weekday: 'short',
       day: 'numeric',
-      month: 'long',
+      month: 'short',
     })}`;
     testo.appendChild(meta);
 
     riga.appendChild(testo);
-    elProssimeElenco.appendChild(riga);
-  });
 
-  elProssimeDate.hidden = false;
+    const filo = document.createElement('span');
+    filo.className = 'scadenza-filo';
+    filo.style.background = `var(--tipo-${voce.tipo})`;
+    riga.appendChild(filo);
+
+    elScadenzeElenco.appendChild(riga);
+  });
 }
+
+/* ---------- Come ti sei organizzata ----------
+   Non un voto: solo dove sta ogni materia dentro la sua finestra. */
+
+function mostraMaterie(piani) {
+  elMaterieElenco.innerHTML = '';
+
+  if (piani.length === 0) {
+    const vuoto = document.createElement('p');
+    vuoto.className = 'blocco-vuoto';
+    vuoto.textContent =
+      'Nessuna materia organizzata. Si parte da quanto materiale c\'è e quanto tempo hai.';
+    elMaterieElenco.appendChild(vuoto);
+    return;
+  }
+
+  piani.slice(0, 4).forEach((piano) => {
+    const calcolo = calcolaPiano(piano, oggiIso());
+
+    const riga = document.createElement('a');
+    riga.className = 'materia-riga';
+    riga.href = 'piano.html';
+
+    const testa = document.createElement('span');
+    testa.className = 'materia-riga-testa';
+
+    const nome = document.createElement('span');
+    nome.className = 'materia-riga-nome';
+    nome.textContent = piano.materia;
+    testa.appendChild(nome);
+
+    const quando = document.createElement('span');
+    quando.className = 'materia-riga-quando';
+    const restano = giorniMancanti(piano.fine);
+    quando.textContent =
+      restano < 0 ? 'finita' : restano === 0 ? 'ultimo giorno' : `${restano} g`;
+    testa.appendChild(quando);
+
+    riga.appendChild(testa);
+
+    const barra = document.createElement('span');
+    barra.className = 'materia-riga-barra';
+    const fatte = (piano.fasi || []).reduce((s, f) => s + (f.fatte || 0), 0);
+    const totale = (piano.fasi || []).reduce(
+      (s, f) => s + (piano.unita === 'giorni' ? f.giorni : piano.quantita),
+      0
+    );
+    const pieno = document.createElement('span');
+    pieno.style.width = totale > 0 ? `${Math.min((fatte / totale) * 100, 100)}%` : '0%';
+    barra.appendChild(pieno);
+    riga.appendChild(barra);
+
+    const meta = document.createElement('span');
+    meta.className = 'materia-riga-meta';
+    meta.textContent = calcolo.fattibile
+      ? `${piano.quantita} ${nomeUnita(piano.unita, piano.quantita)} · ${plurale(
+          (piano.fasi || []).length,
+          'passata',
+          'passate'
+        )}`
+      : 'Le passate non stanno nella finestra';
+    if (!calcolo.fattibile) meta.classList.add('stretta');
+    riga.appendChild(meta);
+
+    elMaterieElenco.appendChild(riga);
+  });
+}
+
+/* ---------- Coda di revisione, solo per l'admin ---------- */
 
 function mostraAttesa(casiAttesa, materialiAttesa) {
   const voci = [
@@ -218,6 +447,7 @@ function mostraAttesa(casiAttesa, materialiAttesa) {
 /* ---------- Avvio ---------- */
 
 async function avvia(profilo) {
+  elData.textContent = dataDiOggi();
   elSaluto.textContent = saluto(profilo.nome);
 
   try {
@@ -229,65 +459,13 @@ async function avvia(profilo) {
       getPiani(),
     ]);
 
-    scriviRaccolta(casi, domande, materiali, date);
-
-    const sezioni = [
-      {
-        nome: 'Calendario',
-        indirizzo: 'calendario.html',
-        icona: 'ph-calendar-dots',
-        conteggio: date.length ? plurale(date.length, 'data', 'date') : 'ancora vuoto',
-        descrizione:
-          'Appelli, esami, tirocini, lezioni e scadenze. Con quanti giorni mancano, e i colori per capirlo a colpo d occhio.',
-      },
-      {
-        nome: 'Organizzazione studio',
-        indirizzo: 'piano.html',
-        icona: 'ph-path',
-        conteggio: piani.length ? plurale(piani.length, 'materia', 'materie') : 'ancora vuoto',
-        descrizione:
-          'Quanto materiale c e, in quanto tempo, e in quante passate. Lui calcola quanto fare al giorno, e rifa il conto se cambi ritmo.',
-      },
-      {
-        nome: 'Materiali',
-        indirizzo: 'materiali.html',
-        icona: 'ph-folder',
-        conteggio: materiali.length ? plurale(materiali.length, 'documento', 'documenti') : 'ancora vuoto',
-        descrizione:
-          'Sbobine, dispense, letteratura e appunti, divisi per materia. Alcuni documenti si aprono solo con una chiave.',
-      },
-      {
-        nome: 'Domande esami',
-        indirizzo: 'domande.html',
-        icona: 'ph-exam',
-        conteggio: domande.length ? plurale(domande.length, 'domanda', 'domande') : 'ancora vuoto',
-        descrizione:
-          'Cosa hanno chiesto davvero i professori, con chi l ha chiesto e le note di chi c e passato. Ci si puo anche farsi interrogare.',
-      },
-      {
-        nome: 'Quiz',
-        indirizzo: 'quiz.html',
-        icona: 'ph-cards',
-        conteggio: casi.length ? plurale(casi.length, 'caso', 'casi') : 'ancora vuoto',
-        descrizione:
-          'Casi clinici per tenere la mente allenata quando hai un ritaglio di tempo, e capire se una cosa la sai davvero.',
-      },
-      {
-        nome: 'Test SSM',
-        indirizzo: 'ssm.html',
-        icona: 'ph-target',
-        conteggio: 'in preparazione',
-        descrizione:
-          'Le domande dei concorsi di specializzazione. La sezione resta chiusa finche non ci sono le domande.',
-      },
-    ];
+    mostraOggi(piani, casi, date);
+    mostraRighe(materiali, casi, domande);
+    mostraScadenze(date);
+    mostraMaterie(piani);
 
     elScheletro.remove();
-    sezioni.forEach((s) => elSezioni.appendChild(creaCardSezione(s)));
-    elSezioni.hidden = false;
-
-    mostraStudioDiOggi(piani);
-    mostraProssimeDate(date);
+    elGriglia.hidden = false;
 
     if (profilo.ruolo === 'admin') {
       const [casiAttesa, materialiAttesa] = await Promise.all([

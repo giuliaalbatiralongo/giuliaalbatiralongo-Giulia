@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=39">
+  <link rel="stylesheet" href="style.css?v=42">
 </head>
 <body>
   <div class="app">
@@ -59,51 +59,51 @@
     <main class="contenuto">
       <div class="contenuto-interno largo">
 
-        <section class="banner">
-          <div class="banner-testo">
-            <p class="banner-saluto" id="saluto"></p>
-            <h1 class="banner-titolo">Akesis</h1>
-            <p class="banner-riga">
-              L'universita' si misura in pagine, in notti corte e in nomi da
-              ricordare. Akesis tiene insieme tutto questo: il materiale che
-              raccogli, le date che ti aspettano, lo studio da mettere in ordine
-              e le domande che agli esami escono davvero.
-            </p>
-          </div>
-          <i class="ph ph-sparkle banner-segno" aria-hidden="true"></i>
-        </section>
+        <header class="apertura">
+          <p class="apertura-data" id="oggi-data"></p>
+          <h1 class="apertura-saluto" id="saluto"></h1>
+          <p class="apertura-frase">Tutta la tua università in un posto solo.</p>
+        </header>
 
-        <p class="riga-raccolta" id="raccolta"></p>
+        <div id="scheletro">
+          <div class="scheletro scheletro-card"></div>
+        </div>
 
-        <div class="home-colonne">
-          <div class="home-principale">
-            <div class="sezione-testa">
-              <h2 class="sezione-titolo">Cosa trovi qui</h2>
-            </div>
+        <div class="home-griglia" id="griglia" hidden>
 
-            <div id="scheletro" class="materie-grid">
-              <div class="scheletro scheletro-card"></div>
-              <div class="scheletro scheletro-card"></div>
-            </div>
+          <div class="home-centro">
 
-            <div id="sezioni" class="materie-grid" hidden></div>
+            <section class="oggi-blocco">
+              <div class="oggi-blocco-testa">
+                <h2 class="oggi-blocco-titolo">Cosa studi oggi</h2>
+                <a href="piano.html" class="link-testo">Organizzazione</a>
+              </div>
+              <div class="oggi-blocco-corpo" id="oggi-corpo"></div>
+            </section>
+
+            <section class="blocco-righe">
+              <h2 class="blocco-righe-titolo">Tutto quello che ti serve</h2>
+              <div id="righe-sezioni"></div>
+            </section>
+
           </div>
 
           <aside class="home-lato">
-            <section class="pannello" id="studio-oggi" hidden>
-              <div class="sezione-testa">
-                <h2 class="sezione-titolo">Studio di oggi</h2>
-                <a href="piano.html" class="link-testo">Organizza</a>
-              </div>
-              <div id="studio-oggi-elenco"></div>
-            </section>
 
-            <section class="pannello" id="prossime-date" hidden>
+            <section class="pannello" id="scadenze">
               <div class="sezione-testa">
-                <h2 class="sezione-titolo">In arrivo</h2>
+                <h2 class="sezione-titolo">Le tue scadenze</h2>
                 <a href="calendario.html" class="link-testo">Calendario</a>
               </div>
-              <div id="prossime-elenco"></div>
+              <div id="scadenze-elenco"></div>
+            </section>
+
+            <section class="pannello" id="materie">
+              <div class="sezione-testa">
+                <h2 class="sezione-titolo">Come ti sei organizzata</h2>
+                <a href="piano.html" class="link-testo">Apri</a>
+              </div>
+              <div id="materie-elenco"></div>
             </section>
 
             <section class="pannello" id="attesa" hidden>
@@ -113,6 +113,7 @@
               </div>
               <ul class="elenco-secco" id="attesa-elenco"></ul>
             </section>
+
           </aside>
         </div>
 
@@ -120,7 +121,7 @@
           Akesis, dal greco <i lang="grc">akesis</i>, cura. Nella mitologia greca
           Aceso era la figlia di Asclepio e presiedeva al processo del guarire:
           non all'istante in cui si guarisce, ma al tempo lento che ci porta.
-          Anche imparare e' cosi'. Non e' il giorno dell'esame: sono tutti i
+          Anche imparare è così. Non è il giorno dell'esame: sono tutti i
           giorni prima.
         </p>
 
@@ -134,6 +135,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="home.js?v=20"></script>
+  <script type="module" src="home.js?v=22"></script>
 </body>
 </html>

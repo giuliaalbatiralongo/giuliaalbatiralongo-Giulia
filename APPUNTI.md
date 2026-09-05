@@ -17,7 +17,29 @@ all'universita': ci carichi il materiale, ci progetti lo studio, ci
 organizzi la sessione, ci vedi le date e gli impegni. L'amico
 universitario, non il registro dei voti.
 
-Da questa decisione discende come e' fatta la home:
+**Rifatta una seconda volta il 5 settembre.** La prima versione diceva
+le cose giuste ma sembrava un menu: sei schede uguali sotto il titolo
+"Cosa trovi qui", cioe' la barra laterale disegnata due volte. Giulia
+l'ha giudicata acerba.
+
+La seconda versione parte dalle domande che si fa lei aprendo l'app:
+*cosa devo studiare oggi, dov'e' il materiale, ho del tempo libero,
+come avevo organizzato gli esami, ho delle scadenze.* Ogni pezzo della
+pagina risponde a una di quelle, in quell'ordine di urgenza:
+
+- **In cima**, la data e il saluto. Niente piu' lastra viola: mangiava
+  mezzo schermo per una frase, e sopra non ci stava niente di utile
+- **"Cosa studi oggi"** e' l'unico blocco con il fondo d'accento e i
+  numeri grandi. Ci finiscono dentro, in quest'ordine: le date di oggi,
+  quanto studiare per ogni materia, i casi da ripassare. Se e' vuoto,
+  invita invece di rimproverare
+- **Quattro righe strette** (Materiali, Quiz, Domande esami, Test SSM)
+  con il conteggio vero accanto. Righe, non schede: sono subordinate
+- **A destra**, le scadenze con quanti giorni mancano (non la data: "fra
+  12 giorni" si capisce a colpo d'occhio, "17 settembre" no) e le materie
+  organizzate con la loro barra
+
+Dalla prima versione discende comunque:
 
 - Niente pulsante "Inizia una sessione" in evidenza: la sessione di quiz
   e' una delle sei cose che si possono fare, non *la* cosa
@@ -33,6 +55,21 @@ Da questa decisione discende come e' fatta la home:
 
 I numeri non sono spariti: stanno nelle Statistiche, dove uno ci va
 quando li vuole vedere, invece di trovarseli in faccia all'apertura.
+
+### Due trappole trovate rifacendo la home
+
+**`.pannello a { display: flex }`** e' piu' specifica di una classe
+sola, quindi mangiava il `display: block` delle righe nuove dentro i
+pannelli. E' la terza volta che una regola larga ne batte una mirata
+(le altre due: `[hidden]` e il doppio `.pannello`). Le regole della
+colonna destra ora partono tutte da `.pannello`, ed e' scritto perche'.
+
+**Il grigio chiaro `--testo-3` non arrivava al minimo di leggibilita'**
+(AA, 4.5:1) su nessuno dei tre fondi: 3.03:1 sul piu' chiaro. E' il
+colore dei conteggi, delle date e dei sottotitoli, cioe' di mezza app.
+Scurito a `#6b6f7d` (chiaro) e schiarito a `#8c909c` (scuro). Aggiunto
+anche `--accento-su-tenue`, perche' al buio il viola sul suo stesso
+fondo tenue si fermava a 4.38:1.
 
 ### I quiz, a che servono
 

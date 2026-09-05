@@ -40,7 +40,7 @@
   /* Testo */
   --testo: #14151a;
   --testo-2: #5c5f6b;
-  --testo-3: #8a8d99;
+  --testo-3: #6b6f7d;
 
   /* Linee */
   --linea: #e8e9ed;
@@ -50,6 +50,7 @@
   --accento: #5b4bd6;
   --accento-hover: #4a3cbd;
   --accento-tenue: #efedfd;
+  --accento-su-tenue: #5b4bd6;
   /* Il banner porta sempre testo bianco: il suo fondo non segue
      l'accento, che al buio schiarisce e perderebbe leggibilita'. */
   --banner-fondo: #5b4bd6;
@@ -67,10 +68,10 @@
   --tipo-tirocinio: #c0396b;
   --tipo-lezione: #2563b0;
   --tipo-scadenza: #4d7c0f;
-  --tipo-altro: #8a8d99;
+  --tipo-altro: #6b6f7d;
 
   /* Stati di ripasso */
-  --st-nuovo: #8a8d99;
+  --st-nuovo: #6b6f7d;
   --st-ripassare: #b4700f;
   --st-consolidato: #1a7f48;
   --pericolo: #c0392b;
@@ -102,12 +103,13 @@
     --superficie-alt: #1b1e24;
     --testo: #f0f1f3;
     --testo-2: #9ca0ab;
-    --testo-3: #7a7e8a;
+    --testo-3: #8c909c;
     --linea: #24262d;
     --linea-forte: #2e313a;
     --accento: #8b7cf0;
     --accento-hover: #a294f5;
     --accento-tenue: rgba(139, 124, 240, 0.14);
+    --accento-su-tenue: #a294f5;
     --banner-fondo: #4334a8;
 
     /* Al buio i colori non si ribaltano: sono valori loro, verificati
@@ -118,8 +120,8 @@
     --tipo-tirocinio: #cf4a72;
     --tipo-lezione: #4785cc;
     --tipo-scadenza: #6f9128;
-    --tipo-altro: #7a7e8a;
-    --st-nuovo: #7a7e8a;
+    --tipo-altro: #8c909c;
+    --st-nuovo: #8c909c;
     --st-ripassare: #d99938;
     --st-consolidato: #4bbd80;
     --pericolo: #e8695b;
@@ -1998,67 +2000,39 @@ a.profilo-btn {
 
 .nav-gruppo:not(:first-child) { margin-top: 22px; }
 
-/* ---------- Apertura ---------- */
+/* ---------- Apertura ----------
+   Niente lastra colorata: tre righe di testo e via. Lo spazio in alto
+   serve a quello che devi fare oggi, non a una dichiarazione
+   d'intenti. */
 
-.banner {
-  position: relative;
-  overflow: hidden;
-  padding: 34px 36px 36px;
-  margin-bottom: 20px;
-  border-radius: var(--r-card);
-  background: var(--banner-fondo);
-  color: #ffffff;
+.apertura {
+  margin-bottom: 26px;
 }
 
-.banner-testo { position: relative; z-index: 1; max-width: 58ch; }
-
-.banner-occhiello {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.82);
-  margin-bottom: 12px;
+.apertura-data {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--testo-3);
+  margin-bottom: 6px;
 }
 
-.banner-titolo {
-  font-family: "Montserrat", "Plus Jakarta Sans", system-ui, sans-serif;
+.apertura-saluto {
+  font-size: 33px;
   font-weight: 700;
-  font-size: 34px;
-  letter-spacing: 0.04em;
+  letter-spacing: -0.028em;
   line-height: 1.1;
-  margin-bottom: 12px;
+  color: var(--testo);
+  margin: 0 0 8px;
 }
 
 /* Una frase sola: puo' portare piu' peso di un paragrafo. */
-.banner-riga {
-  font-size: 17px;
-  line-height: 1.45;
-  letter-spacing: -0.008em;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 24px;
-}
-
-/* Un solo segno decorativo, tagliato dal bordo: da' profondita' senza
-   diventare un motivo di sfondo. */
-.banner-segno {
-  position: absolute;
-  right: -26px;
-  top: -18px;
-  font-size: 210px;
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.1);
-  pointer-events: none;
-}
-
-/* Pulsante chiaro: sul fondo d'accento quello viola sparirebbe. */
-.btn-chiaro {
-  background: #ffffff;
-  color: var(--banner-fondo);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn-chiaro:hover { background: rgba(255, 255, 255, 0.9); }
+.apertura-frase {
+  font-size: 15.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--accento);
+  margin: 0;
 }
 
 /* ---------- Tessere ---------- */
@@ -2139,14 +2113,19 @@ a.tessera:active { transform: scale(0.99); }
 
 /* ---------- Due colonne ---------- */
 
-.home-colonne {
+.home-griglia {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 316px;
+  grid-template-columns: minmax(0, 1fr) 320px;
   gap: 24px;
   align-items: start;
 }
 
-.home-principale .materie-grid { grid-template-columns: 1fr; gap: 12px; }
+.home-centro {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  min-width: 0;
+}
 
 .home-lato {
   display: flex;
@@ -2258,14 +2237,12 @@ a.tessera:active { transform: scale(0.99); }
 /* ---------- Schermi stretti ---------- */
 
 @media (max-width: 1080px) {
-  .home-colonne { grid-template-columns: 1fr; }
+  .home-griglia { grid-template-columns: 1fr; }
   .tessere { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 640px) {
   .banner { padding: 26px 22px 28px; }
-  .banner-titolo { font-size: 27px; }
-  .banner-segno { font-size: 150px; right: -34px; }
   .tessere { grid-template-columns: 1fr; }
   .stato-riga { grid-template-columns: 96px 1fr 28px; }
 }
@@ -3606,24 +3583,6 @@ a.oggi-riga {
   a.oggi-riga:hover { background: var(--superficie-alt); }
 }
 
-/* ---------- Home: saluto e riga di quello che c'e' dentro ---------- */
-
-.banner-saluto {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.82);
-  margin-bottom: 10px;
-}
-
-/* Conta quello che hai messo insieme, non quello che ti manca:
-   aprire l'app non deve essere un rimprovero. */
-.riga-raccolta {
-  max-width: 68ch;
-  margin: 18px 0 28px;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--testo-2);
-}
 
 /* ---------- Professori che hanno fatto una domanda ---------- */
 
@@ -3783,4 +3742,385 @@ a.oggi-riga {
   background-position: right 9px center;
   border-color: var(--linea);
   border-radius: 8px;
+}
+
+/* ---------- Home: cosa studi oggi ----------
+   E' la prima domanda che ci si fa aprendo l'app, quindi e' il blocco
+   piu' grande e l'unico con il fondo d'accento. Tutto il resto della
+   pagina e' piu' quieto di proposito: se tre cose gridano, non ne
+   grida nessuna. */
+
+.oggi-blocco {
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+  box-shadow: var(--ombra-2);
+  overflow: hidden;
+}
+
+.oggi-blocco-testa {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--accento-tenue);
+  border-bottom: 1px solid var(--linea);
+}
+
+.oggi-blocco-titolo {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+  color: var(--accento-su-tenue);
+}
+
+.oggi-blocco-testa .link-testo { color: var(--accento-su-tenue); }
+
+.oggi-blocco-corpo { display: flex; flex-direction: column; }
+
+.oggi-voce {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--linea);
+  text-decoration: none;
+  color: inherit;
+  transition: background 160ms var(--curva), transform 120ms var(--curva);
+}
+
+.oggi-voce:last-child { border-bottom: none; }
+
+/* Il numero e' l'informazione: quaranta pagine, otto casi. Il resto
+   e' contorno, e sta scritto piu' piccolo. */
+.oggi-voce-cifra {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 62px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: var(--accento-tenue);
+  color: var(--accento-su-tenue);
+  line-height: 1.05;
+}
+
+.oggi-voce-cifra strong {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+/* Niente opacity qui: abbassa il contrasto di un testo gia' piccolo. */
+.oggi-voce-cifra span {
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.oggi-voce-testo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.oggi-voce-titolo {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.oggi-voce-sotto {
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+.oggi-voce-azione {
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accento);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .oggi-voce:hover { background: var(--superficie-alt); }
+}
+
+.oggi-voce:active { transform: scale(0.995); }
+
+.oggi-voce:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: -2px;
+}
+
+/* Vuoto non vuol dire in colpa: si dice cosa manca e come riempirlo. */
+.oggi-vuoto {
+  padding: 28px 20px 26px;
+  text-align: center;
+}
+
+.oggi-vuoto-titolo {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.014em;
+  margin: 0 0 6px;
+}
+
+.oggi-vuoto-testo {
+  max-width: 48ch;
+  margin: 0 auto 18px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--testo-2);
+}
+
+/* ---------- Home: le altre sezioni, come righe ----------
+   Non schede uguali in griglia: righe, sotto a quello che conta. */
+
+.blocco-righe-titolo {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--testo-3);
+  margin: 0 0 12px;
+}
+
+.riga-sezione {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 8px;
+  transition: border-color 160ms var(--curva), transform 120ms var(--curva),
+    box-shadow 160ms var(--curva);
+}
+
+.riga-sezione:last-child { margin-bottom: 0; }
+
+.riga-sezione-icona {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-controllo);
+  background: var(--superficie-alt);
+  border: 1px solid var(--linea);
+  color: var(--testo-2);
+  font-size: 19px;
+}
+
+.riga-sezione-testo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.riga-sezione-testa {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.riga-sezione-nome {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.riga-sezione-conto {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--testo-3);
+}
+
+.riga-sezione-sotto {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--testo-2);
+}
+
+.riga-sezione-freccia {
+  flex: 0 0 auto;
+  font-size: 15px;
+  color: var(--testo-3);
+}
+
+/* Il Test SSM non e' ancora aperto: si vede, ma non invita. */
+.riga-sezione.spenta { opacity: 0.58; }
+
+@media (hover: hover) and (pointer: fine) {
+  .riga-sezione:hover {
+    border-color: var(--linea-forte);
+    box-shadow: var(--ombra-1);
+  }
+  .riga-sezione:hover .riga-sezione-icona {
+    background: var(--accento-tenue);
+    border-color: transparent;
+    color: var(--accento);
+  }
+}
+
+.riga-sezione:active { transform: translateY(1px); }
+
+.riga-sezione:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 2px;
+}
+
+/* ---------- Home: le tue scadenze ----------
+   Ogni selettore qui parte da `.pannello` perche' il foglio ha gia' una
+   regola `.pannello a { display: flex }`, piu' specifica di una classe
+   sola: senza il prefisso queste righe si sfasciano.
+
+   Quanti giorni mancano, non la data: "fra 12 giorni" si capisce a
+   colpo d'occhio, "18 settembre" richiede di fare il conto. */
+
+.pannello .scadenza {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0 11px 12px;
+  border-bottom: 1px solid var(--linea);
+  text-decoration: none;
+  color: inherit;
+}
+
+.pannello .scadenza:last-child { border-bottom: none; }
+
+.pannello .scadenza-filo {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 2px;
+}
+
+.pannello .scadenza-quando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+  min-width: 46px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--testo-3);
+  line-height: 1.15;
+}
+
+.pannello .scadenza-quando strong {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--testo);
+}
+
+.pannello .scadenza-quando.adesso {
+  font-size: 13px;
+  color: var(--accento);
+}
+
+.pannello .scadenza-testo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.pannello .scadenza-nome {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pannello .scadenza-meta { font-size: 11.5px; color: var(--testo-3); }
+
+@media (hover: hover) and (pointer: fine) {
+  .pannello .scadenza:hover .scadenza-nome { color: var(--accento); }
+}
+
+/* ---------- Home: come ti sei organizzata ----------
+   Non un voto. Solo dove sta ogni materia dentro la sua finestra. */
+
+.pannello .materia-riga {
+  display: block;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--linea);
+  text-decoration: none;
+  color: inherit;
+}
+
+.pannello .materia-riga:last-child { border-bottom: none; }
+
+.pannello .materia-riga-testa {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+
+.pannello .materia-riga-nome {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pannello .materia-riga-quando {
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--testo-3);
+}
+
+.pannello .materia-riga-barra {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--linea);
+  overflow: hidden;
+}
+
+.pannello .materia-riga-barra span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accento);
+  transition: width 260ms var(--curva);
+}
+
+.pannello .materia-riga-meta {
+  display: block;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+.pannello .materia-riga-meta.stretta { color: var(--pericolo); }
+
+@media (hover: hover) and (pointer: fine) {
+  .pannello .materia-riga:hover .materia-riga-nome { color: var(--accento); }
 }
