@@ -34,6 +34,17 @@ cerchera' la prossima cosa da costruire.
 
 ---
 
+### Tempo di studio: cosa manca
+
+Il conteggio c'e' (quiz e domande d'esame, separati, giorno per giorno) e
+in home si vede il tempo di oggi piu' il totale dei sette giorni. Restano
+aperte:
+
+- Una pagina con lo storico giorno per giorno, invece del solo riepilogo
+- Il conteggio sui Materiali: la sezione e' gia' prevista dal database,
+  ma nessuna pagina la usa ancora
+- Un obiettivo giornaliero, se Giulia lo vuole
+
 ## Aperte, in attesa di una decisione di Giulia
 
 ### Frase di apertura in home

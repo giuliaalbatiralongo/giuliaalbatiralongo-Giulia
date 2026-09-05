@@ -6,8 +6,11 @@ import {
   getMaterialiInAttesa,
   getRisposte,
   calcolaStatistiche,
-} from './db.js?v=13';
-import { proteggiPagina } from './auth.js?v=8';
+  getTempoStudio,
+  sommaPerSezione,
+  formattaDurata,
+} from './db.js?v=15';
+import { proteggiPagina } from './auth.js?v=9';
 
 const elScheletro = document.getElementById('scheletro');
 const elSezioni = document.getElementById('sezioni');
@@ -15,6 +18,9 @@ const elTessere = document.getElementById('tessere');
 const elStato = document.getElementById('stato');
 const elStatoRighe = document.getElementById('stato-righe');
 const elStatoNota = document.getElementById('stato-nota');
+const elTempo = document.getElementById('tempo');
+const elTempoRighe = document.getElementById('tempo-righe');
+const elTempoNota = document.getElementById('tempo-nota');
 const elAttesa = document.getElementById('attesa');
 const elAttesaElenco = document.getElementById('attesa-elenco');
 
@@ -147,6 +153,65 @@ function mostraStato(casi, statistiche) {
   elStato.hidden = false;
 }
 
+/* ---------- Colonna destra: tempo di studio ---------- */
+
+const NOMI_SEZIONE = {
+  quiz: 'Quiz',
+  domande: "Domande d'esame",
+  materiali: 'Materiali',
+};
+
+function creaRigaTempo(sezione, secondi) {
+  const riga = document.createElement('div');
+  riga.className = 'tempo-riga';
+
+  const nome = document.createElement('span');
+  nome.className = 'tempo-riga-nome';
+  nome.textContent = NOMI_SEZIONE[sezione] || sezione;
+  riga.appendChild(nome);
+
+  const valore = document.createElement('span');
+  valore.className = 'tempo-riga-valore';
+  valore.textContent = formattaDurata(secondi);
+  riga.appendChild(valore);
+
+  return riga;
+}
+
+function mostraTempo(righe) {
+  const oggi = new Date().toISOString().slice(0, 10);
+  const diOggi = righe.filter((r) => r.giorno === oggi);
+
+  const totaliOggi = sommaPerSezione(diOggi);
+  const sezioni = Object.keys(totaliOggi).filter((s) => totaliOggi[s] > 0);
+
+  if (sezioni.length === 0) {
+    elTempoRighe.innerHTML =
+      '<p class="tempo-vuoto">Oggi non hai ancora studiato qui dentro.</p>';
+  } else {
+    sezioni
+      .sort((a, b) => totaliOggi[b] - totaliOggi[a])
+      .forEach((s) => elTempoRighe.appendChild(creaRigaTempo(s, totaliOggi[s])));
+  }
+
+  // Il totale della settimana da' la misura vera: una giornata storta
+  // da sola non dice niente.
+  const settimana = new Date();
+  settimana.setDate(settimana.getDate() - 6);
+  const limite = settimana.toISOString().slice(0, 10);
+
+  const secondiSettimana = righe
+    .filter((r) => r.giorno >= limite)
+    .reduce((somma, r) => somma + r.secondi, 0);
+
+  elTempoNota.textContent =
+    secondiSettimana > 0
+      ? `Negli ultimi sette giorni: ${formattaDurata(secondiSettimana)}.`
+      : 'Il conteggio si ferma da solo quando lasci la pagina.';
+
+  elTempo.hidden = false;
+}
+
 /* ---------- Colonna destra: coda di revisione ---------- */
 
 function mostraAttesa(casiAttesa, materialiAttesa) {
@@ -187,11 +252,12 @@ function mostraAttesa(casiAttesa, materialiAttesa) {
 
 async function avvia(profilo) {
   try {
-    const [casi, domande, materiali, risposte] = await Promise.all([
+    const [casi, domande, materiali, risposte, tempo] = await Promise.all([
       getCasiClinici(),
       getDomandeEsame(),
       getMateriali(),
       getRisposte(),
+      getTempoStudio(),
     ]);
 
     const statistiche = calcolaStatistiche(risposte);
@@ -257,6 +323,7 @@ async function avvia(profilo) {
     elSezioni.hidden = false;
 
     mostraStato(casi, statistiche);
+    mostraTempo(tempo);
 
     if (profilo.ruolo === 'admin') {
       const [casiAttesa, materialiAttesa] = await Promise.all([

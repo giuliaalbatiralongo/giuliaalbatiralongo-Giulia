@@ -18,6 +18,16 @@
      hover dietro @media (hover: hover).
    ============================================================ */
 
+/* L'attributo hidden deve vincere sempre.
+   Senza questa riga, qualunque classe che imposti un display (una voce
+   di menu in flex, un pulsante in inline-flex, una griglia) batte
+   [hidden] e l'elemento resta a schermo: e' cosi' che la voce Revisione
+   restava visibile agli studenti e il pulsante di Google compariva
+   pur non essendo configurato. */
+[hidden] {
+  display: none !important;
+}
+
 :root {
   color-scheme: light dark;
 
@@ -2258,9 +2268,11 @@ body.barra-chiusa .sidebar {
   transform: translateX(-100%);
 }
 
+/* A barra chiusa il contenuto prende tutto: resta solo il rientro che
+   serve a non finire sotto il pulsante di riapertura. */
 body.barra-chiusa .contenuto {
   margin-left: 0;
-  padding-left: 70px;
+  padding-left: 60px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2361,4 +2373,40 @@ body.barra-chiusa .contenuto {
   width: 5px;
   height: 1px;
   background: var(--testo-3);
+}
+
+/* ============================================================
+   Tempo di studio
+   ============================================================ */
+
+.tempo-righe {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tempo-riga {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tempo-riga-nome {
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+/* La durata e' il dato, quindi porta il peso. Cifre a larghezza fissa,
+   cosi' le righe restano incolonnate. */
+.tempo-riga-valore {
+  font-size: 13.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tempo-vuoto {
+  font-size: 12.5px;
+  color: var(--testo-3);
 }

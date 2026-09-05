@@ -4,9 +4,10 @@ import {
   getMateriali,
   linkMateriali,
   registraRisposta,
-} from './db.js?v=13';
+} from './db.js?v=15';
 import { iconaPerMateria } from './materie.js?v=3';
-import { proteggiPagina } from './auth.js?v=8';
+import { proteggiPagina } from './auth.js?v=9';
+import { misuraTempo } from './tempo.js?v=1';
 
 const parametri = new URLSearchParams(window.location.search);
 const materiaFiltro = parametri.get('materia');
@@ -227,6 +228,9 @@ async function avvia() {
   }
 }
 
+// Il conteggio parte solo a pagina protetta: senza profilo non
+// c'e' nessuno a cui attribuire il tempo.
 proteggiPagina().then((profilo) => {
+  if (profilo) misuraTempo('quiz');
   if (profilo) avvia();
 });

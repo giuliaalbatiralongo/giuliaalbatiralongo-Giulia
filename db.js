@@ -2,8 +2,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // La "publishable key" e' pensata per stare nel codice pubblico: la sicurezza
 // vera e' data dalle policy di Row Level Security impostate su Supabase.
-const SUPABASE_URL = 'https://sxeqniswoybjftkscwyp.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Z63kjtRjfEV5SC15wK4hNA_z69Pg1z0';
+export const SUPABASE_URL = 'https://sxeqniswoybjftkscwyp.supabase.co';
+export const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Z63kjtRjfEV5SC15wK4hNA_z69Pg1z0';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
@@ -392,6 +392,49 @@ export async function eliminaNota(id) {
     return false;
   }
   return true;
+}
+
+/* ---------- Tempo di studio ---------- */
+
+/* Quanto tempo per sezione, dal giorno indicato a oggi. Le regole del
+   database restituiscono soltanto le righe di chi sta chiedendo. */
+export async function getTempoStudio(daGiorni = 30) {
+  const da = new Date();
+  da.setDate(da.getDate() - daGiorni);
+
+  const { data, error } = await supabase
+    .from('tempo_studio')
+    .select('sezione, giorno, secondi')
+    .gte('giorno', da.toISOString().slice(0, 10))
+    .order('giorno', { ascending: false });
+
+  if (error) {
+    console.error('Errore nel caricamento del tempo:', error);
+    return [];
+  }
+  return data;
+}
+
+/* Somma i secondi per sezione in un insieme di righe. */
+export function sommaPerSezione(righe) {
+  const totali = {};
+  righe.forEach((r) => {
+    totali[r.sezione] = (totali[r.sezione] || 0) + r.secondi;
+  });
+  return totali;
+}
+
+/* "1 h 20 min", "45 min", "meno di un minuto". Niente secondi: su un
+   tempo di studio non aggiungono nulla. */
+export function formattaDurata(secondi) {
+  if (!secondi || secondi < 60) return 'meno di un minuto';
+
+  const minuti = Math.round(secondi / 60);
+  if (minuti < 60) return `${minuti} min`;
+
+  const ore = Math.floor(minuti / 60);
+  const resto = minuti % 60;
+  return resto === 0 ? `${ore} h` : `${ore} h ${resto} min`;
 }
 
 /* ---------- Tracker delle risposte ----------

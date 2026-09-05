@@ -4,9 +4,10 @@ import {
   getNoteDomanda,
   aggiungiNota,
   eliminaNota,
-} from './db.js?v=13';
+} from './db.js?v=15';
 import { iconaPerMateria } from './materie.js?v=3';
-import { proteggiPagina } from './auth.js?v=8';
+import { proteggiPagina } from './auth.js?v=9';
+import { misuraTempo } from './tempo.js?v=1';
 
 const parametri = new URLSearchParams(window.location.search);
 const materiaScelta = parametri.get('materia');
@@ -267,14 +268,6 @@ function creaCardMateria(nome, domande) {
   testata.appendChild(testo);
   a.appendChild(testata);
 
-  // La domanda piu' ricorrente dice a colpo d'occhio su cosa insiste
-  // quell'esame.
-  const piuChiesta = domande.reduce((a1, b) => (b.volte > a1.volte ? b : a1));
-  const anteprima = document.createElement('p');
-  anteprima.className = 'materia-descrizione';
-  anteprima.textContent = `La piu ricorrente: ${piuChiesta.domanda}`;
-  a.appendChild(anteprima);
-
   return a;
 }
 
@@ -458,6 +451,9 @@ async function avvia() {
   }
 }
 
+// Il conteggio parte solo a pagina protetta: senza profilo non
+// c'e' nessuno a cui attribuire il tempo.
 proteggiPagina().then((profilo) => {
+  if (profilo) misuraTempo('domande');
   if (profilo) avvia();
 });
