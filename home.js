@@ -8,13 +8,16 @@ import {
   calcolaStatistiche,
   casiDaRipassareOggi,
   casiMaiVisti,
+  getPiani,
+  studioDiOggi,
+  nomeUnita,
   getDateEsame,
   giorniMancanti,
   nomeTipoData,
   getTempoStudio,
   sommaPerSezione,
   formattaDurata,
-} from './db.js?v=22';
+} from './db.js?v=23';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -26,6 +29,8 @@ const elStatoNota = document.getElementById('stato-nota');
 const elTempo = document.getElementById('tempo');
 const elTempoRighe = document.getElementById('tempo-righe');
 const elTempoNota = document.getElementById('tempo-nota');
+const elStudioOggi = document.getElementById('studio-oggi');
+const elStudioOggiElenco = document.getElementById('studio-oggi-elenco');
 const elProssimeDate = document.getElementById('prossime-date');
 const elProssimeElenco = document.getElementById('prossime-elenco');
 const elAttesa = document.getElementById('attesa');
@@ -163,6 +168,46 @@ function mostraStato(casi, statistiche) {
   }
 
   elStato.hidden = false;
+}
+
+/* ---------- Colonna destra: studio di oggi ---------- */
+
+function mostraStudioDiOggi(piani) {
+  const voci = studioDiOggi(piani);
+  if (voci.length === 0) return;
+
+  voci.forEach((voce) => {
+    const riga = document.createElement('a');
+    riga.className = 'oggi-riga';
+    riga.href = 'piano.html';
+
+    const quanto = document.createElement('span');
+    quanto.className = 'oggi-quanto';
+    // Mezza pagina non esiste: si arrotonda per eccesso, altrimenti
+    // seguendo il piano alla lettera si resta sempre un po' indietro.
+    quanto.textContent = voce.quantita === null ? '-' : Math.ceil(voce.quantita - 1e-9);
+    riga.appendChild(quanto);
+
+    const testo = document.createElement('span');
+    testo.className = 'oggi-testo';
+
+    const materia = document.createElement('span');
+    materia.className = 'oggi-materia';
+    materia.textContent = voce.materia;
+    testo.appendChild(materia);
+
+    const dettaglio = document.createElement('span');
+    dettaglio.className = 'oggi-dettaglio';
+    const arrotondata = voce.quantita === null ? null : Math.ceil(voce.quantita - 1e-9);
+    dettaglio.textContent =
+      arrotondata === null ? voce.fase : `${nomeUnita(voce.unita, arrotondata)} · ${voce.fase}`;
+    testo.appendChild(dettaglio);
+
+    riga.appendChild(testo);
+    elStudioOggiElenco.appendChild(riga);
+  });
+
+  elStudioOggi.hidden = false;
 }
 
 /* ---------- Colonna destra: prossime date ---------- */
@@ -306,13 +351,14 @@ function mostraAttesa(casiAttesa, materialiAttesa) {
 
 async function avvia(profilo) {
   try {
-    const [casi, domande, materiali, risposte, tempo, date] = await Promise.all([
+    const [casi, domande, materiali, risposte, tempo, date, piani] = await Promise.all([
       getCasiClinici(),
       getDomandeEsame(),
       getMateriali(),
       getRisposte(),
       getTempoStudio(),
       getDateEsame(),
+      getPiani(),
     ]);
 
     const statistiche = calcolaStatistiche(risposte);
@@ -384,6 +430,7 @@ async function avvia(profilo) {
     elSezioni.hidden = false;
 
     mostraStato(casi, statistiche);
+    mostraStudioDiOggi(piani);
     mostraProssimeDate(date);
     mostraTempo(tempo);
 

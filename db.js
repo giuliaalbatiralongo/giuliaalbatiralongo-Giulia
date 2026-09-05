@@ -613,78 +613,92 @@ export function creaIcs(date) {
   return righe.join('\r\n');
 }
 
-/* ---------- Sessioni di esami ---------- */
+/* ---------- Organizzazione dello studio ---------- */
 
-export async function getSessioni() {
+export const UNITA = [
+  { chiave: 'pagine', nome: 'Pagine', singolare: 'pagina', plurale: 'pagine' },
+  { chiave: 'lezioni', nome: 'Lezioni', singolare: 'lezione', plurale: 'lezioni' },
+  { chiave: 'giorni', nome: 'Giorni', singolare: 'giorno', plurale: 'giorni' },
+];
+
+export function nomeUnita(chiave, quante) {
+  const u = UNITA.find((x) => x.chiave === chiave) || UNITA[0];
+  return quante === 1 ? u.singolare : u.plurale;
+}
+
+/* Le fasi che si propongono di partenza: sono quelle che Giulia ha
+   descritto, una lettura e due ripassi sempre piu' rapidi. */
+export const FASI_PROPOSTE = [
+  { nome: 'Prima lettura', giorni: 10 },
+  { nome: 'Prima ripetizione', giorni: 7 },
+  { nome: 'Seconda ripetizione', giorni: 7 },
+];
+
+export async function getPiani() {
   const { data, error } = await supabase
-    .from('sessioni')
-    .select('*, esami:sessione_esami(*)')
-    .order('inizio', { ascending: false });
+    .from('piani')
+    .select('*, fasi:piano_fasi(*)')
+    .order('fine', { ascending: true });
 
   if (error) {
-    console.error('Errore nel caricamento delle sessioni:', error);
+    console.error('Errore nel caricamento dei piani:', error);
     return [];
   }
 
-  return data.map((s) => ({
-    ...s,
-    esami: (s.esami || []).sort((a, b) => a.giorno.localeCompare(b.giorno)),
-  }));
+  return data.map((p) => ({ ...p, fasi: (p.fasi || []).sort((a, b) => a.ordine - b.ordine) }));
 }
 
-export async function inserisciSessione(sessione, esami) {
-  const { data, error } = await supabase.from('sessioni').insert([sessione]).select('*').single();
+export async function inserisciPiano(piano, fasi) {
+  const { data, error } = await supabase.from('piani').insert([piano]).select('*').single();
 
   if (error) {
-    console.error('Errore nel salvataggio della sessione:', error);
+    console.error('Errore nel salvataggio del piano:', error);
     return null;
   }
 
-  const righe = esami.map((e) => ({ ...e, sessione_id: data.id }));
-  const { data: salvati, error: erroreEsami } = await supabase
-    .from('sessione_esami')
+  const righe = fasi.map((f, i) => ({ ...f, piano_id: data.id, ordine: i + 1 }));
+  const { data: salvate, error: erroreFasi } = await supabase
+    .from('piano_fasi')
     .insert(righe)
     .select('*');
 
-  // Una sessione senza esami non serve a niente: se gli esami non
-  // entrano, si toglie anche lei invece di lasciarla monca.
-  if (erroreEsami) {
-    console.error('Errore nel salvataggio degli esami:', erroreEsami);
-    await supabase.from('sessioni').delete().eq('id', data.id);
+  // Un piano senza fasi non dice niente: se le fasi non entrano, si
+  // toglie anche lui invece di restare monco.
+  if (erroreFasi) {
+    console.error('Errore nel salvataggio delle fasi:', erroreFasi);
+    await supabase.from('piani').delete().eq('id', data.id);
     return null;
   }
 
-  return { ...data, esami: salvati.sort((a, b) => a.giorno.localeCompare(b.giorno)) };
+  return { ...data, fasi: salvate.sort((a, b) => a.ordine - b.ordine) };
 }
 
-export async function aggiornaFatteEsame(id, fatte) {
-  const { error } = await supabase.from('sessione_esami').update({ fatte }).eq('id', id);
+export async function aggiornaFatteFase(id, fatte) {
+  const { error } = await supabase.from('piano_fasi').update({ fatte }).eq('id', id);
 
   if (error) {
-    console.error('Errore nell aggiornamento:', error);
+    console.error('Errore nell aggiornamento della fase:', error);
     return false;
   }
   return true;
 }
 
-export async function eliminaSessione(id) {
-  const { error } = await supabase.from('sessioni').delete().eq('id', id);
+export async function eliminaPiano(id) {
+  const { error } = await supabase.from('piani').delete().eq('id', id);
 
   if (error) {
-    console.error('Errore nell eliminazione della sessione:', error);
+    console.error('Errore nell eliminazione del piano:', error);
     return false;
   }
   return true;
 }
 
-/* I giorni su cui si puo' studiare, da oggi (o dall'inizio) all'ultimo
-   esame, saltando quelli che ci si e' lasciati liberi. */
-function giorniDiStudio(inizio, ultimoGiorno, giorniLiberi) {
+function giorniDiStudio(dal, al, giorniLiberi) {
   const liberi = new Set((giorniLiberi || []).map(Number));
   const giorni = [];
 
-  const cursore = new Date(inizio + 'T00:00:00');
-  const fine = new Date(ultimoGiorno + 'T00:00:00');
+  const cursore = new Date(dal + 'T00:00:00');
+  const fine = new Date(al + 'T00:00:00');
 
   while (cursore < fine) {
     const settimana = cursore.getDay() === 0 ? 7 : cursore.getDay();
@@ -699,111 +713,72 @@ function giorniDiStudio(inizio, ultimoGiorno, giorniLiberi) {
   return giorni;
 }
 
-/* Il piano di una sessione intera.
+/* Il piano di una materia.
 
-   Il ritmo non si sceglie: si calcola. Ogni esame impone un vincolo,
-   cioe' che tutte le lezioni sue e di quelli prima di lui stiano nei
-   giorni disponibili entro la sua data. Il ritmo necessario e' il piu'
-   alto fra questi vincoli: basta un esame stretto all'inizio per
-   costringere tutto il resto.
+   Le fasi occupano i giorni utili in fila, nell'ordine in cui sono
+   scritte. Ogni fase rifa' tutto il materiale nei giorni che le
+   spettano: e' per questo che le ripetizioni sono piu' fitte della
+   prima lettura, non perche' si legga piu' in fretta.
 
-   Poi i giorni si riempiono in ordine, dando la precedenza all'esame che
-   scade prima. Un giorno puo' chiudere un esame e cominciare il
-   successivo, come succede davvero. */
-export function calcolaSessione(sessione, oggiIso) {
+   Con l'unita' "giorni" non si calcola nessuna quantita' giornaliera:
+   quel modo di contare serve proprio a chi non conta. */
+export function calcolaPiano(piano, oggiIso) {
   const oggi = oggiIso || new Date().toISOString().slice(0, 10);
-  const partenza = sessione.inizio > oggi ? sessione.inizio : oggi;
+  const tutti = giorniDiStudio(piano.inizio, piano.fine, piano.giorni_liberi);
+  const aQuantita = piano.unita !== 'giorni';
 
-  const esami = [...(sessione.esami || [])]
-    .map((e) => ({ ...e, restano: Math.max(e.totale_lezioni - e.fatte, 0) }))
-    .sort((a, b) => a.giorno.localeCompare(b.giorno));
+  let posizione = 0;
+  const fasi = (piano.fasi || []).map((fase) => {
+    const suoi = tutti.slice(posizione, posizione + fase.giorni);
+    posizione += fase.giorni;
 
-  const daFare = esami.filter((e) => e.restano > 0 && e.giorno > oggi);
-
-  if (daFare.length === 0) {
-    return { ritmo: 0, giorni: [], vincoli: [], fattibile: true, esami };
-  }
-
-  const ultimo = daFare[daFare.length - 1].giorno;
-  const tuttiIGiorni = giorniDiStudio(partenza, ultimo, sessione.giorni_liberi);
-
-  // Un vincolo per esame: le lezioni cumulate devono stare nei giorni
-  // che restano prima della sua data.
-  let cumulate = 0;
-  const vincoli = daFare.map((e) => {
-    cumulate += e.restano;
-    const disponibili = tuttiIGiorni.filter((g) => g < e.giorno).length;
     return {
-      titolo: e.titolo,
-      giorno: e.giorno,
-      cumulate,
-      disponibili,
-      richiesto: disponibili > 0 ? cumulate / disponibili : Infinity,
+      ...fase,
+      giorniVeri: suoi,
+      dal: suoi[0] || null,
+      al: suoi[suoi.length - 1] || null,
+      // La quantita' per giorno e' quella della fase: ogni fase rifa'
+      // tutto il materiale nei giorni che ha.
+      alGiorno: aQuantita && suoi.length > 0 ? piano.quantita / suoi.length : null,
+      completa: suoi.length === fase.giorni,
     };
   });
 
-  const ritmo = Math.max(...vincoli.map((v) => v.richiesto));
-  const stretto = vincoli.find((v) => v.richiesto === ritmo);
+  const richiesti = fasi.reduce((s, f) => s + f.giorni, 0);
+  const avanzano = tutti.length - richiesti;
 
-  if (!Number.isFinite(ritmo)) {
-    return { ritmo: Infinity, giorni: [], vincoli, stretto, fattibile: false, esami };
-  }
-
-  /* Riempimento dei giorni. Il resto frazionario si porta avanti invece
-     di arrotondare ogni giorno, altrimenti la somma non torna. */
-  const rimaste = new Map(daFare.map((e) => [e.id, e.restano]));
-  const fatteFinora = new Map(daFare.map((e) => [e.id, e.fatte]));
-  let indice = 0;
-  let avanzo = 0;
-  const giorni = [];
-
-  tuttiIGiorni.forEach((giorno) => {
-    avanzo += ritmo;
-    let quante = Math.floor(avanzo + 1e-9);
-    if (quante <= 0) return;
-    avanzo -= quante;
-
-    const voci = [];
-
-    while (quante > 0 && indice < daFare.length) {
-      const esame = daFare[indice];
-
-      // Un esame gia' passato quel giorno non si studia piu'.
-      if (esame.giorno <= giorno) {
-        indice += 1;
-        continue;
-      }
-
-      const restano = rimaste.get(esame.id);
-      if (restano <= 0) {
-        indice += 1;
-        continue;
-      }
-
-      const prese = Math.min(restano, quante);
-      const da = fatteFinora.get(esame.id) + 1;
-      fatteFinora.set(esame.id, fatteFinora.get(esame.id) + prese);
-      rimaste.set(esame.id, restano - prese);
-      quante -= prese;
-
-      voci.push({ esameId: esame.id, titolo: esame.titolo, quante: prese, da, a: da + prese - 1 });
-    }
-
-    if (voci.length > 0) giorni.push({ giorno, voci });
-  });
-
-  const nonAssegnate = [...rimaste.values()].reduce((s, v) => s + v, 0);
+  const faseOggi = fasi.find((f) => f.giorniVeri.includes(oggi)) || null;
+  const oggiELibero = !tutti.includes(oggi) && oggi >= piano.inizio && oggi < piano.fine;
 
   return {
-    ritmo,
-    giorni,
-    vincoli,
-    stretto,
-    // Oltre le otto lezioni al giorno non e' un piano, e' una speranza.
-    fattibile: nonAssegnate === 0 && ritmo <= 8,
-    nonAssegnate,
-    esami,
+    fasi,
+    giorniDisponibili: tutti.length,
+    giorniRichiesti: richiesti,
+    avanzano,
+    // Non ci sta se le fasi chiedono piu' giorni di quelli disponibili.
+    fattibile: avanzano >= 0,
+    faseOggi,
+    oggiELibero,
+    quantitaOggi: faseOggi && faseOggi.alGiorno !== null ? faseOggi.alGiorno : null,
+    finito: oggi >= piano.fine,
   };
+}
+
+/* Cosa tocca oggi, su tutte le materie insieme. Non si sommano
+   quantita' di unita' diverse: quaranta pagine e tre lezioni non fanno
+   quarantatre di niente. */
+export function studioDiOggi(piani, oggiIso) {
+  const oggi = oggiIso || new Date().toISOString().slice(0, 10);
+
+  return piani
+    .map((piano) => ({ piano, calcolo: calcolaPiano(piano, oggi) }))
+    .filter((v) => v.calcolo.faseOggi)
+    .map((v) => ({
+      materia: v.piano.materia,
+      unita: v.piano.unita,
+      fase: v.calcolo.faseOggi.nome,
+      quantita: v.calcolo.quantitaOggi,
+    }));
 }
 
 /* ---------- Interesse per i servizi non ancora attivi ---------- */

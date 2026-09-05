@@ -1,25 +1,29 @@
 import {
-  getSessioni,
-  inserisciSessione,
-  aggiornaFatteEsame,
-  eliminaSessione,
-  calcolaSessione,
+  getPiani,
+  inserisciPiano,
+  aggiornaFatteFase,
+  eliminaPiano,
+  calcolaPiano,
+  studioDiOggi,
+  nomeUnita,
+  FASI_PROPOSTE,
   getDateEsame,
   titoloData,
-  giorniMancanti,
-} from './db.js?v=22';
+} from './db.js?v=23';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
-const elSessioni = document.getElementById('sessioni');
-const finestra = document.getElementById('finestra-sessione');
-const form = document.getElementById('form-sessione');
-const esito = document.getElementById('sessione-esito');
-const elRighe = document.getElementById('righe-esami');
+const elPiani = document.getElementById('piani');
+const elOggi = document.getElementById('oggi');
+const elOggiElenco = document.getElementById('oggi-elenco');
+const finestra = document.getElementById('finestra-piano');
+const form = document.getElementById('form-piano');
+const esito = document.getElementById('piano-esito');
+const elRighe = document.getElementById('righe-fasi');
 
 const NOMI_GIORNI = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 
-let sessioni = [];
+let piani = [];
 let date = [];
 
 function oggiIso() {
@@ -30,43 +34,90 @@ function oggiIso() {
 }
 
 function dataBreve(iso) {
+  if (!iso) return '';
   return new Date(iso + 'T00:00:00').toLocaleDateString('it-IT', {
-    weekday: 'short',
     day: 'numeric',
     month: 'short',
   });
 }
 
-function plurale(n, uno, molti) {
-  return `${n} ${n === 1 ? uno : molti}`;
+function arrotonda(n) {
+  // Mezza pagina non esiste: si arrotonda per eccesso, altrimenti
+  // seguendo il piano alla lettera si resta sempre un po' indietro.
+  return Math.ceil(n - 1e-9);
 }
 
-/* ---------- Scheda di una sessione ---------- */
+/* ---------- Cosa tocca oggi ---------- */
 
-function creaScheda(sessione) {
-  const calcolo = calcolaSessione(sessione, oggiIso());
+function mostraOggi() {
+  const voci = studioDiOggi(piani, oggiIso());
+  elOggiElenco.innerHTML = '';
+
+  if (voci.length === 0) {
+    elOggi.hidden = piani.length === 0;
+    if (piani.length > 0) {
+      elOggiElenco.innerHTML =
+        '<p class="blocco-vuoto">Oggi non e in programma niente. Puo essere un giorno libero, o una finestra non ancora cominciata.</p>';
+    }
+    return;
+  }
+
+  voci.forEach((voce) => {
+    const riga = document.createElement('div');
+    riga.className = 'oggi-riga';
+
+    const quanto = document.createElement('span');
+    quanto.className = 'oggi-quanto';
+    quanto.textContent =
+      voce.quantita === null ? '-' : arrotonda(voce.quantita);
+    riga.appendChild(quanto);
+
+    const testo = document.createElement('span');
+    testo.className = 'oggi-testo';
+
+    const materia = document.createElement('span');
+    materia.className = 'oggi-materia';
+    materia.textContent = voce.materia;
+    testo.appendChild(materia);
+
+    const dettaglio = document.createElement('span');
+    dettaglio.className = 'oggi-dettaglio';
+    dettaglio.textContent =
+      voce.quantita === null
+        ? voce.fase
+        : `${nomeUnita(voce.unita, arrotonda(voce.quantita))} · ${voce.fase}`;
+    testo.appendChild(dettaglio);
+
+    riga.appendChild(testo);
+    elOggiElenco.appendChild(riga);
+  });
+
+  elOggi.hidden = false;
+}
+
+/* ---------- Scheda di una materia ---------- */
+
+function creaScheda(piano) {
+  const calcolo = calcolaPiano(piano, oggiIso());
 
   const card = document.createElement('article');
   card.className = 'piano-card';
 
-  /* Testata */
   const testa = document.createElement('div');
   testa.className = 'piano-testa';
 
   const titolo = document.createElement('div');
   const nome = document.createElement('h2');
   nome.className = 'piano-nome';
-  nome.textContent = sessione.nome;
+  nome.textContent = piano.materia;
   titolo.appendChild(nome);
 
   const sotto = document.createElement('p');
   sotto.className = 'piano-quando';
-  const liberi = (sessione.giorni_liberi || [])
-    .map((n) => NOMI_GIORNI[n - 1])
-    .join(', ');
   sotto.textContent =
-    `${plurale(sessione.esami.length, 'esame', 'esami')}` +
-    (liberi ? ` · liberi: ${liberi}` : ' · nessun giorno libero');
+    `${piano.quantita} ${nomeUnita(piano.unita, piano.quantita)} · ` +
+    `${dataBreve(piano.inizio)} - ${dataBreve(piano.fine)} · ` +
+    `${calcolo.giorniDisponibili} giorni utili`;
   titolo.appendChild(sotto);
   testa.appendChild(titolo);
 
@@ -75,10 +126,10 @@ function creaScheda(sessione) {
   togli.className = 'link-bottone';
   togli.textContent = 'Elimina';
   togli.addEventListener('click', async () => {
-    if (!window.confirm(`Eliminare la sessione "${sessione.nome}"?`)) return;
+    if (!window.confirm(`Eliminare il piano di ${piano.materia}?`)) return;
     togli.disabled = true;
-    if (await eliminaSessione(sessione.id)) {
-      sessioni = sessioni.filter((s) => s.id !== sessione.id);
+    if (await eliminaPiano(piano.id)) {
+      piani = piani.filter((p) => p.id !== piano.id);
       disegna();
     } else {
       togli.disabled = false;
@@ -87,107 +138,115 @@ function creaScheda(sessione) {
   testa.appendChild(togli);
   card.appendChild(testa);
 
-  /* Il ritmo: la risposta alla domanda per cui si apre questa pagina */
+  /* Il riquadro di oggi per questa materia */
   const riquadro = document.createElement('div');
   riquadro.className = 'piano-oggi';
 
-  if (calcolo.ritmo === 0) {
-    riquadro.classList.add('spento');
-    riquadro.textContent = 'Non resta niente da studiare in questa sessione.';
-  } else if (!Number.isFinite(calcolo.ritmo)) {
+  if (!calcolo.fattibile) {
     riquadro.classList.add('allarme');
     riquadro.textContent =
-      `Non restano giorni utili prima di ${calcolo.stretto.titolo}. ` +
-      'Togli qualche giorno libero, o sposta la data.';
+      `Le passate chiedono ${calcolo.giorniRichiesti} giorni, ma nella finestra ce ne sono ` +
+      `${calcolo.giorniDisponibili}. Accorcia una passata, allunga la finestra, o togli un giorno libero.`;
+  } else if (calcolo.finito) {
+    riquadro.classList.add('spento');
+    riquadro.textContent = 'La finestra di questa materia e passata.';
+  } else if (calcolo.faseOggi) {
+    const t = document.createElement('p');
+    t.className = 'piano-oggi-titolo';
+    t.textContent =
+      calcolo.quantitaOggi === null
+        ? calcolo.faseOggi.nome
+        : `${arrotonda(calcolo.quantitaOggi)} ${nomeUnita(piano.unita, arrotonda(calcolo.quantitaOggi))} oggi`;
+    riquadro.appendChild(t);
+
+    const q = document.createElement('p');
+    q.className = 'piano-oggi-quali';
+    q.textContent = calcolo.quantitaOggi === null ? 'Studia e basta.' : calcolo.faseOggi.nome;
+    riquadro.appendChild(q);
+  } else if (calcolo.oggiELibero) {
+    riquadro.classList.add('spento');
+    riquadro.textContent = 'Oggi e uno dei giorni che ti sei lasciata libera.';
   } else {
-    const numero = document.createElement('p');
-    numero.className = 'piano-oggi-titolo';
-    numero.textContent = `${calcolo.ritmo.toFixed(1)} lezioni al giorno`;
-    riquadro.appendChild(numero);
-
-    const spiega = document.createElement('p');
-    spiega.className = 'piano-oggi-quali';
-    spiega.textContent = calcolo.stretto
-      ? `Lo impone ${calcolo.stretto.titolo}: ${calcolo.stretto.cumulate} lezioni in ${plurale(calcolo.stretto.disponibili, 'giorno', 'giorni')}.`
-      : '';
-    riquadro.appendChild(spiega);
-
-    if (!calcolo.fattibile) {
-      riquadro.classList.add('allarme');
-      const avviso = document.createElement('p');
-      avviso.className = 'piano-oggi-quali';
-      avviso.textContent =
-        'E un ritmo che non si tiene. Valuta se togliere un giorno libero, spostare un esame, o darne uno in meno.';
-      riquadro.appendChild(avviso);
-    }
+    riquadro.classList.add('spento');
+    riquadro.textContent = 'Oggi e fuori dalla finestra di questa materia.';
   }
 
   card.appendChild(riquadro);
 
-  /* Gli esami, uno per riga */
+  /* Le passate */
   const elenco = document.createElement('div');
-  elenco.className = 'esami-elenco';
+  elenco.className = 'fasi-elenco';
 
-  calcolo.esami.forEach((esame) => {
+  calcolo.fasi.forEach((fase) => {
     const riga = document.createElement('div');
-    riga.className = 'esame-riga';
+    riga.className = 'fase-riga' + (fase === calcolo.faseOggi ? ' corrente' : '');
 
     const info = document.createElement('div');
-    const nomeEsame = document.createElement('p');
-    nomeEsame.className = 'esame-nome';
-    nomeEsame.textContent = esame.titolo;
-    info.appendChild(nomeEsame);
+    const nomeFase = document.createElement('p');
+    nomeFase.className = 'fase-nome';
+    nomeFase.textContent = fase.nome;
+    info.appendChild(nomeFase);
 
-    const mancano = giorniMancanti(esame.giorno);
     const meta = document.createElement('p');
-    meta.className = 'esame-meta';
-    meta.textContent =
-      mancano < 0
-        ? `passato il ${dataBreve(esame.giorno)}`
-        : mancano === 0
-          ? 'oggi'
-          : `${plurale(mancano, 'giorno', 'giorni')} · ${dataBreve(esame.giorno)}`;
+    meta.className = 'fase-meta';
+    meta.textContent = fase.dal
+      ? `${fase.giorni} giorni · ${dataBreve(fase.dal)} - ${dataBreve(fase.al)}`
+      : `${fase.giorni} giorni · fuori dalla finestra`;
     info.appendChild(meta);
     riga.appendChild(info);
 
+    const ritmo = document.createElement('span');
+    ritmo.className = 'fase-ritmo';
+    ritmo.textContent =
+      fase.alGiorno === null
+        ? '-'
+        : `${arrotonda(fase.alGiorno)} ${nomeUnita(piano.unita, arrotonda(fase.alGiorno))}/giorno`;
+    riga.appendChild(ritmo);
+
+    /* Avanzamento della passata */
     const barra = document.createElement('span');
     barra.className = 'stato-barra';
     const pieno = document.createElement('span');
     pieno.className = 'stato-barra-pieno';
-    pieno.style.width = `${(esame.fatte / esame.totale_lezioni) * 100}%`;
+    const totale = piano.unita === 'giorni' ? fase.giorni : piano.quantita;
+    pieno.style.width = `${Math.min((fase.fatte / totale) * 100, 100)}%`;
     barra.appendChild(pieno);
     riga.appendChild(barra);
 
     const conto = document.createElement('span');
-    conto.className = 'esame-conto';
-    conto.textContent = `${esame.fatte}/${esame.totale_lezioni}`;
+    conto.className = 'fase-conto';
+    conto.textContent = `${fase.fatte}/${totale}`;
     riga.appendChild(conto);
 
     const azioni = document.createElement('div');
     azioni.className = 'esame-azioni';
 
+    const passo = fase.alGiorno === null ? 1 : Math.max(arrotonda(fase.alGiorno), 1);
+
     const meno = document.createElement('button');
     meno.type = 'button';
     meno.className = 'btn-piu';
     meno.innerHTML = '<i class="ph ph-minus" aria-hidden="true"></i>';
-    meno.setAttribute('aria-label', `Togli una lezione da ${esame.titolo}`);
-    meno.disabled = esame.fatte === 0;
+    meno.setAttribute('aria-label', `Togli da ${fase.nome}`);
+    meno.disabled = fase.fatte === 0;
 
     const piu = document.createElement('button');
     piu.type = 'button';
     piu.className = 'btn-piu';
     piu.innerHTML = '<i class="ph ph-plus" aria-hidden="true"></i>';
-    piu.setAttribute('aria-label', `Segna una lezione fatta di ${esame.titolo}`);
-    piu.disabled = esame.fatte >= esame.totale_lezioni;
+    // Il piu' segna una giornata intera: e' l'unita' con cui si lavora.
+    piu.title = `Segna ${passo} ${nomeUnita(piano.unita, passo)} fatte`;
+    piu.setAttribute('aria-label', `Segna una giornata di ${fase.nome}`);
+    piu.disabled = fase.fatte >= totale;
 
     async function cambia(delta) {
-      const nuovo = Math.min(Math.max(esame.fatte + delta, 0), esame.totale_lezioni);
-      if (nuovo === esame.fatte) return;
+      const nuovo = Math.min(Math.max(fase.fatte + delta, 0), totale);
+      if (nuovo === fase.fatte) return;
       meno.disabled = true;
       piu.disabled = true;
-      if (await aggiornaFatteEsame(esame.id, nuovo)) {
-        const vero = sessione.esami.find((e) => e.id === esame.id);
-        if (vero) vero.fatte = nuovo;
+      if (await aggiornaFatteFase(fase.id, nuovo)) {
+        const vera = piano.fasi.find((f) => f.id === fase.id);
+        if (vera) vera.fatte = nuovo;
         disegna();
       } else {
         meno.disabled = false;
@@ -195,8 +254,8 @@ function creaScheda(sessione) {
       }
     }
 
-    meno.addEventListener('click', () => cambia(-1));
-    piu.addEventListener('click', () => cambia(1));
+    meno.addEventListener('click', () => cambia(-passo));
+    piu.addEventListener('click', () => cambia(passo));
 
     azioni.appendChild(meno);
     azioni.appendChild(piu);
@@ -207,43 +266,13 @@ function creaScheda(sessione) {
 
   card.appendChild(elenco);
 
-  /* I prossimi giorni: cosa studiare, non solo quanto */
-  if (calcolo.giorni.length > 0) {
-    const prossimi = document.createElement('div');
-    prossimi.className = 'piano-giorni';
-
-    calcolo.giorni.slice(0, 7).forEach((g) => {
-      const riga = document.createElement('div');
-      riga.className = 'piano-giorno' + (g.giorno === oggiIso() ? ' oggi' : '');
-
-      const data = document.createElement('span');
-      data.className = 'piano-giorno-data';
-      data.textContent = dataBreve(g.giorno);
-      riga.appendChild(data);
-
-      g.voci.forEach((v) => {
-        const voce = document.createElement('span');
-        voce.className = 'piano-giorno-voce';
-        voce.textContent = v.titolo;
-        voce.title = `${v.titolo}: ${v.da === v.a ? `lezione ${v.da}` : `lezioni ${v.da}-${v.a}`}`;
-        riga.appendChild(voce);
-
-        const numeri = document.createElement('span');
-        numeri.className = 'piano-giorno-quante';
-        numeri.textContent = v.da === v.a ? `${v.da}` : `${v.da}-${v.a}`;
-        riga.appendChild(numeri);
-      });
-
-      prossimi.appendChild(riga);
-    });
-
-    card.appendChild(prossimi);
-
+  if (calcolo.fattibile && calcolo.avanzano > 0) {
     const nota = document.createElement('p');
     nota.className = 'blocco-nota';
     nota.textContent =
-      'I giorni si riempiono dando la precedenza all esame che scade prima. ' +
-      'Se resti indietro, il piano si ricalcola da solo.';
+      calcolo.avanzano === 1
+        ? 'Avanza un giorno prima della fine della finestra.'
+        : `Avanzano ${calcolo.avanzano} giorni prima della fine della finestra.`;
     card.appendChild(nota);
   }
 
@@ -251,61 +280,97 @@ function creaScheda(sessione) {
 }
 
 function disegna() {
-  elSessioni.innerHTML = '';
+  elPiani.innerHTML = '';
 
-  if (sessioni.length === 0) {
-    elSessioni.innerHTML = `
+  if (piani.length === 0) {
+    elPiani.innerHTML = `
       <div class="stato-vuoto">
         <i class="ph ph-path" aria-hidden="true"></i>
-        <p>Nessuna sessione. Mettici dentro gli esami che hai davanti.</p>
+        <p>Nessuna materia organizzata. Comincia da quella che ti preoccupa di piu.</p>
       </div>
     `;
+    mostraOggi();
     return;
   }
 
-  sessioni.forEach((s) => elSessioni.appendChild(creaScheda(s)));
+  piani.forEach((p) => elPiani.appendChild(creaScheda(p)));
+  mostraOggi();
 }
 
-/* ---------- Righe della finestra ---------- */
+/* ---------- Finestra ---------- */
 
-function aggiungiRiga(preimpostato) {
+function aggiungiRigaFase(preimpostata) {
   const riga = document.createElement('div');
-  riga.className = 'riga-esame';
+  riga.className = 'riga-fase';
 
-  const titolo = document.createElement('input');
-  titolo.type = 'text';
-  titolo.placeholder = 'Materia';
-  titolo.className = 'riga-titolo';
-  titolo.required = true;
-  titolo.setAttribute('list', 'date-suggerite');
-  if (preimpostato?.titolo) titolo.value = preimpostato.titolo;
+  const nome = document.createElement('input');
+  nome.type = 'text';
+  nome.placeholder = 'Es. Prima lettura';
+  nome.required = true;
+  nome.setAttribute('aria-label', 'Nome della passata');
+  if (preimpostata?.nome) nome.value = preimpostata.nome;
 
-  const giorno = document.createElement('input');
-  giorno.type = 'date';
-  giorno.required = true;
-  giorno.setAttribute('aria-label', "Giorno dell'esame");
-  if (preimpostato?.giorno) giorno.value = preimpostato.giorno;
-
-  const lezioni = document.createElement('input');
-  lezioni.type = 'number';
-  lezioni.min = '1';
-  lezioni.max = '2000';
-  lezioni.required = true;
-  lezioni.placeholder = 'Lezioni';
-  lezioni.setAttribute('aria-label', 'Quante lezioni');
+  const giorni = document.createElement('input');
+  giorni.type = 'number';
+  giorni.min = '1';
+  giorni.max = '365';
+  giorni.required = true;
+  giorni.placeholder = 'Giorni';
+  giorni.setAttribute('aria-label', 'Quanti giorni');
+  if (preimpostata?.giorni) giorni.value = preimpostata.giorni;
+  giorni.addEventListener('input', aggiornaConto);
 
   const togli = document.createElement('button');
   togli.type = 'button';
   togli.className = 'btn-piu';
   togli.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
-  togli.setAttribute('aria-label', 'Togli questo esame');
+  togli.setAttribute('aria-label', 'Togli questa passata');
   togli.addEventListener('click', () => {
     riga.remove();
-    if (!elRighe.querySelector('.riga-esame')) aggiungiRiga();
+    if (!elRighe.querySelector('.riga-fase')) aggiungiRigaFase();
+    aggiornaConto();
   });
 
-  riga.append(titolo, giorno, lezioni, togli);
+  riga.append(nome, giorni, togli);
   elRighe.appendChild(riga);
+  aggiornaConto();
+}
+
+/* Dice subito se le passate stanno nella finestra, mentre si scrive:
+   scoprirlo dopo aver salvato sarebbe inutile. */
+function aggiornaConto() {
+  const chiesti = [...elRighe.querySelectorAll('.riga-fase')].reduce((s, r) => {
+    const v = Number(r.querySelectorAll('input')[1].value);
+    return s + (Number.isFinite(v) ? v : 0);
+  }, 0);
+
+  const el = document.getElementById('conto-fasi');
+  const modo = form.querySelector('input[name="modo"]:checked')?.value;
+
+  let disponibili = null;
+  const liberi = [...document.querySelectorAll('#giorni-liberi input:checked')].length;
+
+  if (modo === 'durata') {
+    const durata = Number(document.getElementById('piano-durata').value) || 0;
+    disponibili = Math.round(durata * ((7 - liberi) / 7));
+  } else {
+    const data = document.getElementById('piano-data').value;
+    if (data) {
+      const giorni = Math.round(
+        (new Date(data + 'T00:00:00') - new Date(oggiIso() + 'T00:00:00')) / 86400000
+      );
+      disponibili = Math.round(Math.max(giorni, 0) * ((7 - liberi) / 7));
+    }
+  }
+
+  if (disponibili === null) {
+    el.textContent = `Le passate chiedono ${chiesti} giorni.`;
+    el.className = 'conto-fasi';
+    return;
+  }
+
+  el.textContent = `Le passate chiedono ${chiesti} giorni di studio, nella finestra ce ne sono circa ${disponibili}.`;
+  el.className = 'conto-fasi' + (chiesti > disponibili ? ' stretto' : '');
 }
 
 function preparaFinestra() {
@@ -322,6 +387,7 @@ function preparaFinestra() {
     casella.name = 'liberi';
     casella.value = n;
     if (n === 7) casella.checked = true;
+    casella.addEventListener('change', aggiornaConto);
     etichetta.appendChild(casella);
 
     const testo = document.createElement('span');
@@ -331,43 +397,55 @@ function preparaFinestra() {
     scelta.appendChild(etichetta);
   });
 
-  // Le date gia' in calendario si possono richiamare scrivendo il nome.
-  const suggerimenti = document.createElement('datalist');
-  suggerimenti.id = 'date-suggerite';
-  date
-    .filter((d) => giorniMancanti(d.giorno) >= 0)
-    .forEach((d) => {
-      const opzione = document.createElement('option');
-      opzione.value = titoloData(d);
-      opzione.dataset.giorno = d.giorno;
-      suggerimenti.appendChild(opzione);
-    });
-  document.body.appendChild(suggerimenti);
+  /* Unita': l'etichetta e l'aiuto cambiano di conseguenza */
+  const unita = document.getElementById('piano-unita');
+  unita.addEventListener('change', () => {
+    document.getElementById('etichetta-unita').textContent = unita.value;
+    document.getElementById('aiuto-unita').hidden = unita.value !== 'giorni';
+  });
+  document.getElementById('aiuto-unita').hidden = true;
 
-  // Scrivendo un titolo che corrisponde a una data in calendario, il
-  // giorno si compila da solo.
-  elRighe.addEventListener('input', (e) => {
-    if (!e.target.classList.contains('riga-titolo')) return;
+  /* Durata oppure data */
+  form.querySelectorAll('input[name="modo"]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      const perData = radio.value === 'data' && radio.checked;
+      document.getElementById('campo-durata').hidden = perData;
+      document.getElementById('campo-data').hidden = !perData;
+      aggiornaConto();
+    });
+  });
+
+  document.getElementById('piano-durata').addEventListener('input', aggiornaConto);
+  document.getElementById('piano-data').addEventListener('input', aggiornaConto);
+
+  /* Scrivendo una materia che e' gia' in calendario, la data arriva sola */
+  document.getElementById('piano-materia').addEventListener('input', (e) => {
     const trovata = date.find(
       (d) => titoloData(d).toLowerCase() === e.target.value.trim().toLowerCase()
     );
     if (!trovata) return;
-    const campoGiorno = e.target.parentElement.querySelector('input[type="date"]');
-    if (campoGiorno && !campoGiorno.value) campoGiorno.value = trovata.giorno;
+    const campo = document.getElementById('piano-data');
+    if (!campo.value) campo.value = trovata.giorno;
+    aggiornaConto();
   });
 }
 
-document.getElementById('aggiungi-esame').addEventListener('click', () => aggiungiRiga());
+document.getElementById('aggiungi-fase').addEventListener('click', () => aggiungiRigaFase());
 
 document.getElementById('apri-nuovo').addEventListener('click', () => {
   form.reset();
   esito.textContent = '';
   esito.className = 'esito-form';
   elRighe.innerHTML = '';
-  aggiungiRiga();
+  FASI_PROPOSTE.forEach((f) => aggiungiRigaFase(f));
   document.querySelectorAll('#giorni-liberi input').forEach((c) => {
     c.checked = Number(c.value) === 7;
   });
+  document.getElementById('etichetta-unita').textContent = 'pagine';
+  document.getElementById('aiuto-unita').hidden = true;
+  document.getElementById('campo-durata').hidden = false;
+  document.getElementById('campo-data').hidden = true;
+  aggiornaConto();
   finestra.showModal();
 });
 
@@ -389,46 +467,62 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  const esami = [...elRighe.querySelectorAll('.riga-esame')].map((riga) => {
-    const campi = riga.querySelectorAll('input');
-    return {
-      titolo: campi[0].value.trim(),
-      giorno: campi[1].value,
-      totale_lezioni: Number(campi[2].value),
-    };
-  });
+  const modo = form.querySelector('input[name="modo"]:checked').value;
+  let fine;
 
-  if (esami.some((e2) => !e2.titolo || !e2.giorno || !e2.totale_lezioni)) {
-    esito.className = 'esito-form ko';
-    esito.textContent = 'Manca qualcosa in uno degli esami.';
-    return;
+  if (modo === 'durata') {
+    const durata = Number(document.getElementById('piano-durata').value);
+    if (!durata || durata < 2) {
+      esito.className = 'esito-form ko';
+      esito.textContent = 'Dai almeno due giorni.';
+      return;
+    }
+    const d = new Date(oggiIso() + 'T00:00:00');
+    d.setDate(d.getDate() + durata);
+    fine = d.toISOString().slice(0, 10);
+  } else {
+    fine = document.getElementById('piano-data').value;
+    if (!fine || fine <= oggiIso()) {
+      esito.className = 'esito-form ko';
+      esito.textContent = 'La data deve essere nel futuro.';
+      return;
+    }
   }
 
-  if (esami.some((e2) => e2.giorno <= oggiIso())) {
+  const fasi = [...elRighe.querySelectorAll('.riga-fase')].map((riga) => {
+    const campi = riga.querySelectorAll('input');
+    return { nome: campi[0].value.trim(), giorni: Number(campi[1].value) };
+  });
+
+  if (fasi.some((f) => !f.nome || !f.giorni)) {
     esito.className = 'esito-form ko';
-    esito.textContent = 'Gli esami devono essere nel futuro.';
+    esito.textContent = 'Manca qualcosa in una delle passate.';
     return;
   }
 
   esito.className = 'esito-form attesa';
   esito.textContent = 'Creazione';
 
-  const salvata = await inserisciSessione(
+  const salvato = await inserisciPiano(
     {
-      nome: document.getElementById('sessione-nome').value.trim(),
+      materia: document.getElementById('piano-materia').value.trim(),
+      unita: document.getElementById('piano-unita').value,
+      quantita: Number(document.getElementById('piano-quantita').value),
       inizio: oggiIso(),
+      fine,
       giorni_liberi: liberi,
     },
-    esami
+    fasi
   );
 
-  if (!salvata) {
+  if (!salvato) {
     esito.className = 'esito-form ko';
-    esito.textContent = 'Non sono riuscita a creare la sessione.';
+    esito.textContent = 'Non sono riuscita a creare il piano.';
     return;
   }
 
-  sessioni.unshift(salvata);
+  piani.push(salvato);
+  piani.sort((a, b) => a.fine.localeCompare(b.fine));
   finestra.close();
   disegna();
 });
@@ -437,13 +531,13 @@ form.addEventListener('submit', async (e) => {
 
 async function avvia() {
   try {
-    [sessioni, date] = await Promise.all([getSessioni(), getDateEsame()]);
+    [piani, date] = await Promise.all([getPiani(), getDateEsame()]);
 
     preparaFinestra();
     disegna();
 
     elScheletro.remove();
-    elSessioni.hidden = false;
+    elPiani.hidden = false;
   } catch (errore) {
     elScheletro.innerHTML = `<p class="messaggio-errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);

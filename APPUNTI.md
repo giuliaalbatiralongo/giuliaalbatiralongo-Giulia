@@ -49,6 +49,36 @@ database. Restano aperte:
 - Gli intervalli sono uguali per tutti. FSRS li adatterebbe alla persona,
   ma serve molto piu' storico di quello che abbiamo.
 
+### Organizzazione studio: come ragiona adesso
+
+Non piu' esami e lezioni, ma **una materia per volta**: quanto materiale
+c'e' (450 pagine, 35 lezioni, oppure "mi prende 15 giorni"), in quanto
+tempo, diviso in **passate**. Ogni passata rifa' tutto il materiale nei
+giorni che le spettano: per questo le ripetizioni sono piu' fitte della
+prima lettura, non perche' si legga piu' in fretta.
+
+Esempio di Giulia, verificato: 450 pagine in un mese, 10 giorni di
+prima lettura piu' 7 e 7 di ripetizioni, danno 45 pagine al giorno nella
+prima e 64 in ciascuna delle altre.
+
+Con l'unita' "giorni" non si calcola nessuna quantita' giornaliera: quel
+modo di contare serve proprio a chi non conta.
+
+Aperte:
+
+- Non si puo' **modificare** un piano: si elimina e si rifa
+- Le passate non si possono riordinare dopo
+- La conversione dal modello precedente ha portato un piano solo
+  ("Farmaco 2", 32 lezioni, 7 gennaio): era quello che c'era nel
+  database al momento
+
+### Prossimo pezzo del calendario: scegliere l'appello
+
+Giulia lo ha descritto e va costruito **nel calendario**, non qui:
+l'universita' propone piu' date per ogni esame, e lei sceglie a quale
+appello presentarsi (Farmacologia il 7 gennaio, Gastro il secondo
+appello il 18, e cosi' via). Le date le inserira' lei a mano.
+
 ### La visione: bacheca piu' elenco di disponibili
 
 Giulia ha spiegato dove vuole arrivare. In futuro, forse, un sistema

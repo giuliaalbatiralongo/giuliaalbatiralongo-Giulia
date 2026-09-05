@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=35">
+  <link rel="stylesheet" href="style.css?v=37">
 </head>
 <body>
   <div class="app">
@@ -60,28 +60,35 @@
         <div class="testata">
           <div>
             <h1 class="page-titolo">Organizzazione studio</h1>
-            <p class="page-sub">Metti dentro gli esami con le loro date e quante lezioni sono. Il ritmo che serve lo calcola lui.</p>
+            <p class="page-sub">Una materia per volta: quanto materiale c'e', in quanto tempo, e diviso in quante passate.</p>
           </div>
           <button type="button" class="btn" id="apri-nuovo">
-            <i class="ph ph-plus" aria-hidden="true"></i> Nuova sessione
+            <i class="ph ph-plus" aria-hidden="true"></i> Nuova materia
           </button>
         </div>
+
+        <section class="pannello oggi-riquadro" id="oggi" hidden>
+          <div class="sezione-testa">
+            <h2 class="sezione-titolo">Oggi</h2>
+          </div>
+          <div id="oggi-elenco"></div>
+        </section>
 
         <div id="scheletro">
           <div class="scheletro scheletro-card"></div>
         </div>
 
-        <div id="sessioni" hidden></div>
+        <div id="piani" hidden></div>
       </div>
     </main>
   </div>
 
-  <dialog id="finestra-sessione" class="finestra finestra-larga">
-    <form id="form-sessione" method="dialog">
+  <dialog id="finestra-piano" class="finestra finestra-larga">
+    <form id="form-piano" method="dialog">
       <div class="finestra-testata">
         <div>
           <p class="finestra-occhiello">Organizzazione studio</p>
-          <p class="finestra-titolo">Gli esami che devi dare</p>
+          <p class="finestra-titolo">Una materia</p>
         </div>
         <button type="button" class="btn-chiudi" id="chiudi-finestra" aria-label="Chiudi">
           <i class="ph ph-x" aria-hidden="true"></i>
@@ -90,30 +97,78 @@
 
       <div class="finestra-corpo">
         <div class="campo">
-          <label for="sessione-nome">Come la chiami</label>
-          <input type="text" id="sessione-nome" name="nome" required placeholder="Es. Sessione invernale">
+          <label for="piano-materia">Materia</label>
+          <input type="text" id="piano-materia" name="materia" required
+                 autocomplete="off" placeholder="Es. Farmacologia 2">
+        </div>
+
+        <div class="campo-doppio">
+          <div class="campo">
+            <label for="piano-unita">Come la conti</label>
+            <select id="piano-unita" name="unita">
+              <option value="pagine" selected>Pagine</option>
+              <option value="lezioni">Lezioni</option>
+              <option value="giorni">Giorni</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="piano-quantita">Quante <span id="etichetta-unita">pagine</span></label>
+            <input type="number" id="piano-quantita" name="quantita" min="1" max="20000" required
+                   placeholder="450">
+          </div>
+        </div>
+
+        <p class="campo-aiuto" id="aiuto-unita">
+          Con "giorni" non si calcola niente al giorno: si dice solo quanto tempo porta via.
+        </p>
+
+        <div class="campo">
+          <label>Entro quando</label>
+          <div class="scelta-finestra">
+            <label class="giorno-scelta">
+              <input type="radio" name="modo" value="durata" checked>
+              <span>Fra tot giorni</span>
+            </label>
+            <label class="giorno-scelta">
+              <input type="radio" name="modo" value="data">
+              <span>Entro una data</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="campo" id="campo-durata">
+          <label for="piano-durata">Quanti giorni ti dai</label>
+          <input type="number" id="piano-durata" name="durata" min="2" max="365" value="30">
+          <p class="campo-aiuto">Contati dal calendario, non di studio: i giorni liberi si tolgono dopo.</p>
+        </div>
+
+        <div class="campo" id="campo-data" hidden>
+          <label for="piano-data">Giorno dell'esame</label>
+          <input type="date" id="piano-data" name="data">
+          <p class="campo-aiuto" id="aiuto-data">Se l'esame e in calendario, scrivi la materia uguale e la data si compila da sola.</p>
         </div>
 
         <div class="campo">
           <label>Giorni che ti lasci libera</label>
           <div class="giorni-scelta" id="giorni-liberi"></div>
-          <p class="campo-aiuto">Il piano non ci mette lezioni sopra.</p>
         </div>
 
         <div class="campo">
-          <label>Esami</label>
-          <div id="righe-esami"></div>
-          <button type="button" class="btn btn-neutro btn-piccolo" id="aggiungi-esame">
-            <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un esame
+          <label>Passate</label>
+          <p class="campo-aiuto">Ogni passata rifa tutto il materiale, nei giorni che le dai. Per questo le ripetizioni sono piu fitte.</p>
+          <div id="righe-fasi"></div>
+          <button type="button" class="btn btn-neutro btn-piccolo" id="aggiungi-fase">
+            <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi una passata
           </button>
+          <p class="conto-fasi" id="conto-fasi"></p>
         </div>
       </div>
 
       <div class="finestra-fondo">
         <div class="finestra-azioni">
-          <span class="esito-form" id="sessione-esito"></span>
+          <span class="esito-form" id="piano-esito"></span>
           <button type="submit" class="btn">
-            <i class="ph ph-check" aria-hidden="true"></i> Crea la sessione
+            <i class="ph ph-check" aria-hidden="true"></i> Crea
           </button>
         </div>
       </div>
@@ -126,6 +181,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="piano.js?v=3"></script>
+  <script type="module" src="piano.js?v=4"></script>
 </body>
 </html>
