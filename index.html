@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=21">
+  <link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
   <div class="app">
@@ -17,10 +17,12 @@
       <div class="logo">AKESIS</div>
 
       <nav class="sidebar-nav">
+        <p class="nav-gruppo">Studio</p>
         <a href="index.html" class="nav-voce attivo"><i class="ph-fill ph-house" aria-hidden="true"></i><span>Home</span></a>
         <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
+        <p class="nav-gruppo" data-solo-admin hidden>Gestione</p>
         <a href="revisione.html" class="nav-voce" data-solo-admin hidden><i class="ph ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
       </nav>
 
@@ -36,35 +38,65 @@
     </aside>
 
     <main class="contenuto">
-      <div class="contenuto-interno">
+      <div class="contenuto-interno largo">
 
-        <header class="apertura">
-          <p class="apertura-saluto" id="saluto">Bentornata</p>
-          <h1 class="apertura-titolo">Akesis</h1>
-          <p class="apertura-testo">
-            Un posto solo per i casi clinici su cui esercitarti, le domande che
-            ricorrono agli orali e il materiale di studio. Quello che ripassi
-            resta segnato: l'app tiene conto di cosa hai consolidato e cosa no,
-            e ti ripropone per primo quello che ancora non sai.
-          </p>
-        </header>
-
-        <section class="apertura-stato" id="stato" hidden>
-          <h2 class="sezione-titolo"><i class="ph ph-chart-line" aria-hidden="true"></i> A che punto sei</h2>
-          <div class="stato-righe" id="stato-righe"></div>
+        <!-- Apertura. Il blocco pieno d'accento e' l'unico della pagina:
+             se ce ne fosse un secondo smetterebbe di essere un'apertura. -->
+        <section class="banner">
+          <div class="banner-testo">
+            <p class="banner-occhiello">Simulatore clinico e archivio di studio</p>
+            <h1 class="banner-titolo">Akesis</h1>
+            <p class="banner-riga">
+              Casi clinici su cui esercitarti, le domande che tornano agli orali
+              e il materiale di studio, in un posto solo. Quello che ripassi resta
+              segnato, e quello che ancora non sai torna per primo.
+            </p>
+            <a class="btn btn-chiaro" href="quiz.html">
+              <i class="ph ph-play" aria-hidden="true"></i> Inizia una sessione
+            </a>
+          </div>
+          <i class="ph ph-sparkle banner-segno" aria-hidden="true"></i>
         </section>
 
-        <section>
-          <h2 class="sezione-titolo"><i class="ph ph-compass" aria-hidden="true"></i> Cosa trovi qui</h2>
+        <div class="tessere" id="tessere">
+          <div class="scheletro scheletro-tessera"></div>
+          <div class="scheletro scheletro-tessera"></div>
+          <div class="scheletro scheletro-tessera"></div>
+          <div class="scheletro scheletro-tessera"></div>
+        </div>
 
-          <div id="scheletro" class="materie-grid">
-            <div class="scheletro scheletro-card"></div>
-            <div class="scheletro scheletro-card"></div>
-            <div class="scheletro scheletro-card"></div>
+        <div class="home-colonne">
+          <div class="home-principale">
+            <div class="sezione-testa">
+              <h2 class="sezione-titolo">Cosa trovi qui</h2>
+            </div>
+
+            <div id="scheletro" class="materie-grid">
+              <div class="scheletro scheletro-card"></div>
+              <div class="scheletro scheletro-card"></div>
+            </div>
+
+            <div id="sezioni" class="materie-grid" hidden></div>
           </div>
 
-          <div id="sezioni" class="materie-grid" hidden></div>
-        </section>
+          <aside class="home-lato">
+            <section class="pannello" id="stato" hidden>
+              <div class="sezione-testa">
+                <h2 class="sezione-titolo">A che punto sei</h2>
+              </div>
+              <div class="stato-righe" id="stato-righe"></div>
+              <p class="pannello-nota" id="stato-nota"></p>
+            </section>
+
+            <section class="pannello" id="attesa" hidden>
+              <div class="sezione-testa">
+                <h2 class="sezione-titolo">Da revisionare</h2>
+                <a href="revisione.html" class="link-testo">Apri</a>
+              </div>
+              <ul class="elenco-secco" id="attesa-elenco"></ul>
+            </section>
+          </aside>
+        </div>
 
         <p class="nota-nome">
           Akesis, dal greco <i lang="grc">akesis</i>, cura. Nella mitologia greca
@@ -82,6 +114,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="home.js?v=12"></script>
+  <script type="module" src="home.js?v=14"></script>
 </body>
 </html>

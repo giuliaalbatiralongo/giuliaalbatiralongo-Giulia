@@ -4,20 +4,56 @@ import {
   getMateriali,
   getCasiInAttesa,
   getMaterialiInAttesa,
+  getRisposte,
+  calcolaStatistiche,
 } from './db.js?v=13';
 import { proteggiPagina } from './auth.js?v=7';
 
 const elScheletro = document.getElementById('scheletro');
 const elSezioni = document.getElementById('sezioni');
+const elTessere = document.getElementById('tessere');
 const elStato = document.getElementById('stato');
 const elStatoRighe = document.getElementById('stato-righe');
-const elSaluto = document.getElementById('saluto');
+const elStatoNota = document.getElementById('stato-nota');
+const elAttesa = document.getElementById('attesa');
+const elAttesaElenco = document.getElementById('attesa-elenco');
 
-function plurale(n, singolare, plurale_) {
-  return `${n} ${n === 1 ? singolare : plurale_}`;
+function plurale(n, uno, molti) {
+  return `${n} ${n === 1 ? uno : molti}`;
 }
 
-/* ---------- Le sezioni dell'app ---------- */
+/* ---------- Tessere in cima: numero grande, etichetta piccola ---------- */
+
+function creaTessera(tessera, posizione) {
+  const el = document.createElement(tessera.indirizzo ? 'a' : 'div');
+  el.className = 'tessera';
+  if (tessera.indirizzo) el.href = tessera.indirizzo;
+
+  // Le tessere entrano una dopo l'altra, non tutte insieme.
+  el.style.setProperty('--ritardo', `${posizione * 40}ms`);
+
+  const icona = document.createElement('span');
+  icona.className = 'tessera-icona';
+  const i = document.createElement('i');
+  i.className = `ph ${tessera.icona}`;
+  i.setAttribute('aria-hidden', 'true');
+  icona.appendChild(i);
+  el.appendChild(icona);
+
+  const valore = document.createElement('p');
+  valore.className = 'tessera-valore';
+  valore.textContent = tessera.valore;
+  el.appendChild(valore);
+
+  const etichetta = document.createElement('p');
+  etichetta.className = 'tessera-etichetta';
+  etichetta.textContent = tessera.etichetta;
+  el.appendChild(etichetta);
+
+  return el;
+}
+
+/* ---------- Card delle sezioni ---------- */
 
 function creaCardSezione(sezione) {
   const a = document.createElement('a');
@@ -58,7 +94,7 @@ function creaCardSezione(sezione) {
   return a;
 }
 
-/* ---------- Riga di avanzamento ---------- */
+/* ---------- Colonna destra: avanzamento ---------- */
 
 function creaRigaStato(etichetta, quanti, totale) {
   const riga = document.createElement('div');
@@ -69,7 +105,6 @@ function creaRigaStato(etichetta, quanti, totale) {
   nome.textContent = etichetta;
   riga.appendChild(nome);
 
-  // La barra dice a colpo d'occhio la proporzione, il numero la precisione.
   const barra = document.createElement('span');
   barra.className = 'stato-barra';
   const pieno = document.createElement('span');
@@ -86,7 +121,7 @@ function creaRigaStato(etichetta, quanti, totale) {
   return riga;
 }
 
-function mostraStato(casi) {
+function mostraStato(casi, statistiche) {
   if (casi.length === 0) return;
 
   const conta = { consolidato: 0, da_ripassare: 0, nuovo: 0 };
@@ -96,22 +131,99 @@ function mostraStato(casi) {
 
   elStatoRighe.appendChild(creaRigaStato('Consolidati', conta.consolidato, casi.length));
   elStatoRighe.appendChild(creaRigaStato('Da ripassare', conta.da_ripassare, casi.length));
-  elStatoRighe.appendChild(creaRigaStato('Ancora da vedere', conta.nuovo, casi.length));
+  elStatoRighe.appendChild(creaRigaStato('Da vedere', conta.nuovo, casi.length));
+
+  // Una riga di senso, non solo numeri: cosa conviene fare adesso.
+  if (statistiche.totale === 0) {
+    elStatoNota.textContent = 'Non hai ancora risposto a nessun caso.';
+  } else if (conta.da_ripassare > 0) {
+    elStatoNota.textContent = `${plurale(conta.da_ripassare, 'caso aspetta', 'casi aspettano')} un ripasso.`;
+  } else if (conta.nuovo > 0) {
+    elStatoNota.textContent = `Tutto ripassato. ${plurale(conta.nuovo, 'caso', 'casi')} ancora da vedere.`;
+  } else {
+    elStatoNota.textContent = 'Hai consolidato tutti i casi disponibili.';
+  }
 
   elStato.hidden = false;
+}
+
+/* ---------- Colonna destra: coda di revisione ---------- */
+
+function mostraAttesa(casiAttesa, materialiAttesa) {
+  const voci = [
+    ...casiAttesa.map((c) => ({ testo: c.domanda, tipo: 'Caso clinico' })),
+    ...materialiAttesa.map((m) => ({ testo: m.titolo, tipo: 'Materiale' })),
+  ];
+
+  if (voci.length === 0) return;
+
+  voci.slice(0, 4).forEach((voce) => {
+    const li = document.createElement('li');
+
+    const tipo = document.createElement('span');
+    tipo.className = 'elenco-secco-tipo';
+    tipo.textContent = voce.tipo;
+    li.appendChild(tipo);
+
+    const testo = document.createElement('span');
+    testo.className = 'elenco-secco-testo';
+    testo.textContent = voce.testo;
+    li.appendChild(testo);
+
+    elAttesaElenco.appendChild(li);
+  });
+
+  if (voci.length > 4) {
+    const li = document.createElement('li');
+    li.className = 'elenco-secco-resto';
+    li.textContent = `e altre ${voci.length - 4}`;
+    elAttesaElenco.appendChild(li);
+  }
+
+  elAttesa.hidden = false;
 }
 
 /* ---------- Avvio ---------- */
 
 async function avvia(profilo) {
-  if (profilo.nome) elSaluto.textContent = `Bentornata, ${profilo.nome}`;
-
   try {
-    const [casi, domande, materiali] = await Promise.all([
+    const [casi, domande, materiali, risposte] = await Promise.all([
       getCasiClinici(),
       getDomandeEsame(),
       getMateriali(),
+      getRisposte(),
     ]);
+
+    const statistiche = calcolaStatistiche(risposte);
+    const consolidati = casi.filter((c) => c.stato === 'consolidato').length;
+
+    elTessere.innerHTML = '';
+    [
+      {
+        valore: `${consolidati}/${casi.length}`,
+        etichetta: 'Casi consolidati',
+        icona: 'ph-check-circle',
+        indirizzo: 'casi.html',
+      },
+      {
+        valore: statistiche.accuratezza === null ? '0' : `${statistiche.accuratezza}%`,
+        etichetta: statistiche.accuratezza === null ? 'Risposte date' : 'Risposte esatte',
+        icona: 'ph-target',
+        indirizzo: 'quiz.html',
+      },
+      {
+        valore: domande.length,
+        etichetta: "Domande d'esame",
+        icona: 'ph-exam',
+        indirizzo: 'domande.html',
+      },
+      {
+        valore: materiali.length,
+        etichetta: 'Documenti',
+        icona: 'ph-folder',
+        indirizzo: 'materiali.html',
+      },
+    ].forEach((t, i) => elTessere.appendChild(creaTessera(t, i)));
 
     const sezioni = [
       {
@@ -140,32 +252,19 @@ async function avvia(profilo) {
       },
     ];
 
-    // La revisione compare solo a chi deve approvare, e solo se c'e'
-    // qualcosa da guardare: una sezione vuota non serve a nessuno.
+    elScheletro.remove();
+    sezioni.forEach((s) => elSezioni.appendChild(creaCardSezione(s)));
+    elSezioni.hidden = false;
+
+    mostraStato(casi, statistiche);
+
     if (profilo.ruolo === 'admin') {
       const [casiAttesa, materialiAttesa] = await Promise.all([
         getCasiInAttesa(),
         getMaterialiInAttesa(),
       ]);
-      const quanti = casiAttesa.length + materialiAttesa.length;
-
-      if (quanti > 0) {
-        sezioni.push({
-          nome: 'Revisione',
-          indirizzo: 'revisione.html',
-          icona: 'ph-seal-check',
-          conteggio: plurale(quanti, 'proposta in attesa', 'proposte in attesa'),
-          descrizione:
-            'Casi e materiali proposti dagli studenti. Restano invisibili agli altri finche non li approvi.',
-        });
-      }
+      mostraAttesa(casiAttesa, materialiAttesa);
     }
-
-    elScheletro.remove();
-    sezioni.forEach((s) => elSezioni.appendChild(creaCardSezione(s)));
-    elSezioni.hidden = false;
-
-    mostraStato(casi);
   } catch (errore) {
     elScheletro.innerHTML = `<p class="messaggio-errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);

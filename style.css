@@ -40,6 +40,9 @@
   --accento: #5b4bd6;
   --accento-hover: #4a3cbd;
   --accento-tenue: #efedfd;
+  /* Il banner porta sempre testo bianco: il suo fondo non segue
+     l'accento, che al buio schiarisce e perderebbe leggibilita'. */
+  --banner-fondo: #5b4bd6;
 
   /* Stati di ripasso */
   --st-nuovo: #8a8d99;
@@ -80,6 +83,7 @@
     --accento: #8b7cf0;
     --accento-hover: #a294f5;
     --accento-tenue: rgba(139, 124, 240, 0.14);
+    --banner-fondo: #4334a8;
     --st-nuovo: #7a7e8a;
     --st-ripassare: #d99938;
     --st-consolidato: #4bbd80;
@@ -1892,72 +1896,259 @@ a.profilo-btn {
 }
 
 /* ============================================================
-   Home: apertura e avanzamento
+   Home: apertura, tessere, colonna di stato
    ============================================================ */
 
-.apertura {
-  max-width: 62ch;
-  margin-bottom: 40px;
-}
+.contenuto-interno.largo { max-width: 1180px; }
 
-.apertura-saluto {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--testo-3);
-  letter-spacing: -0.004em;
-  margin-bottom: 10px;
-}
-
-/* Il nome dell'app in apertura usa lo stesso carattere del marchio
-   nella barra laterale: e' la stessa cosa, deve sembrarlo. */
-.apertura-titolo {
-  font-family: 'Montserrat', 'Plus Jakarta Sans', system-ui, sans-serif;
+/* Etichette di gruppo nella barra laterale. Servono adesso che le voci
+   sono cinque, e serviranno di piu' quando saranno dieci. */
+.nav-gruppo {
+  padding: 0 10px;
+  margin: 0 0 6px;
+  font-size: 10.5px;
   font-weight: 700;
-  font-size: 38px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--testo-3);
+}
+
+.nav-gruppo:not(:first-child) { margin-top: 22px; }
+
+/* ---------- Apertura ---------- */
+
+.banner {
+  position: relative;
+  overflow: hidden;
+  padding: 34px 36px 36px;
+  margin-bottom: 20px;
+  border-radius: var(--r-card);
+  background: var(--banner-fondo);
+  color: #ffffff;
+}
+
+.banner-testo { position: relative; z-index: 1; max-width: 58ch; }
+
+.banner-occhiello {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 12px;
+}
+
+.banner-titolo {
+  font-family: "Montserrat", "Plus Jakarta Sans", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 34px;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.banner-riga {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+  margin-bottom: 22px;
+}
+
+/* Un solo segno decorativo, tagliato dal bordo: da' profondita' senza
+   diventare un motivo di sfondo. */
+.banner-segno {
+  position: absolute;
+  right: -26px;
+  top: -18px;
+  font-size: 210px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+/* Pulsante chiaro: sul fondo d'accento quello viola sparirebbe. */
+.btn-chiaro {
+  background: #ffffff;
+  color: var(--banner-fondo);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-chiaro:hover { background: rgba(255, 255, 255, 0.9); }
+}
+
+/* ---------- Tessere ---------- */
+
+.tessere {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 34px;
+}
+
+.tessera {
+  display: block;
+  padding: 16px 18px 18px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+  box-shadow: var(--ombra-1);
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 180ms var(--curva), border-color 180ms var(--curva),
+    transform 180ms var(--curva);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a.tessera:hover {
+    border-color: var(--linea-forte);
+    box-shadow: var(--ombra-2);
+    transform: translateY(-1px);
+  }
+}
+
+a.tessera:active { transform: scale(0.99); }
+
+.tessera-icona {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 12px;
+  border-radius: 9px;
+  background: var(--accento-tenue);
+  color: var(--accento);
+}
+
+.tessera-icona i { font-size: 17px; }
+
+/* Numero grande, etichetta piccola: il colpo d'occhio sta nel numero. */
+.tessera-valore {
+  font-size: 26px;
+  font-weight: 700;
   letter-spacing: -0.022em;
   line-height: 1.1;
-  margin-bottom: 14px;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 3px;
 }
 
-.apertura-testo {
-  font-size: 15px;
-  line-height: 1.65;
+.tessera-etichetta {
+  font-size: 12.5px;
   color: var(--testo-2);
 }
 
-.apertura-stato { margin-bottom: 36px; }
+/* Entrata scalata di poco, una tessera dopo l'altra. */
+@media (prefers-reduced-motion: no-preference) {
+  .tessera {
+    animation: tessera-entra 220ms var(--curva) both;
+    animation-delay: var(--ritardo, 0ms);
+  }
+}
+
+@keyframes tessera-entra {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.scheletro-tessera { height: 108px; border-radius: var(--r-card); }
+
+/* ---------- Due colonne ---------- */
+
+.home-colonne {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 316px;
+  gap: 24px;
+  align-items: start;
+}
+
+.home-principale .materie-grid { grid-template-columns: 1fr; gap: 12px; }
+
+.home-lato {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pannello {
+  padding: 18px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+  box-shadow: var(--ombra-1);
+}
+
+.pannello-nota {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--linea);
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+.sezione-testa {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.sezione-testa .sezione-titolo { margin-bottom: 0; }
+
+/* ---------- Elenco secco della colonna destra ---------- */
+
+.elenco-secco {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.elenco-secco li { display: flex; flex-direction: column; gap: 2px; }
+
+.elenco-secco-tipo {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--testo-3);
+}
+
+.elenco-secco-testo {
+  font-size: 13px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.elenco-secco-resto { font-size: 12.5px; color: var(--testo-3); }
+
+/* ---------- Avanzamento ---------- */
 
 .stato-righe {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 460px;
-  padding: 16px 18px;
-  border: 1px solid var(--linea);
-  border-radius: var(--r-card);
-  background: var(--superficie);
+  gap: 11px;
 }
 
 .stato-riga {
   display: grid;
-  grid-template-columns: 132px 1fr 32px;
+  grid-template-columns: 104px 1fr 30px;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
-.stato-riga-nome {
-  font-size: 13px;
-  color: var(--testo-2);
-}
+.stato-riga-nome { font-size: 12.5px; color: var(--testo-2); }
 
 .stato-riga-valore {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-/* Nessuna traccia colorata di sfondo: solo la parte piena, sull'accento. */
 .stato-barra {
   position: relative;
   height: 4px;
@@ -1973,9 +2164,11 @@ a.profilo-btn {
   background: var(--accento);
 }
 
+/* ---------- Chiusura ---------- */
+
 .nota-nome {
   max-width: 62ch;
-  margin-top: 44px;
+  margin-top: 40px;
   padding-top: 20px;
   border-top: 1px solid var(--linea);
   font-size: 12.5px;
@@ -1985,7 +2178,17 @@ a.profilo-btn {
 
 .nota-nome i { font-style: italic; }
 
+/* ---------- Schermi stretti ---------- */
+
+@media (max-width: 1080px) {
+  .home-colonne { grid-template-columns: 1fr; }
+  .tessere { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 640px) {
-  .apertura-titolo { font-size: 30px; }
-  .stato-riga { grid-template-columns: 108px 1fr 28px; }
+  .banner { padding: 26px 22px 28px; }
+  .banner-titolo { font-size: 27px; }
+  .banner-segno { font-size: 150px; right: -34px; }
+  .tessere { grid-template-columns: 1fr; }
+  .stato-riga { grid-template-columns: 96px 1fr 28px; }
 }
