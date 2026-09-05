@@ -3,10 +3,12 @@ import {
   registrati,
   riscattaInvito,
   reinviaConferma,
+  accediConGoogle,
+  nomeSuggerito,
   getSessione,
   getProfilo,
   esci,
-} from './auth.js?v=3';
+} from './auth.js?v=4';
 
 const viste = {
   accedi: document.getElementById('vista-accedi'),
@@ -42,6 +44,14 @@ document.getElementById('vai-registrati').addEventListener('click', () => mostra
 document.getElementById('vai-accedi').addEventListener('click', () => mostraVista('accedi'));
 document.getElementById('conferma-vai-accedi').addEventListener('click', () => mostraVista('accedi'));
 document.getElementById('esci-attiva').addEventListener('click', () => esci());
+
+document.querySelectorAll('[data-google]').forEach((bottone) => {
+  bottone.addEventListener('click', async () => {
+    messaggio('Apertura di Google in corso', 'attesa');
+    const risultato = await accediConGoogle();
+    if (!risultato.ok) messaggio(risultato.errore, 'ko');
+  });
+});
 
 document.getElementById('btn-reinvia').addEventListener('click', async (e) => {
   e.target.disabled = true;
@@ -135,6 +145,10 @@ async function avvia() {
     window.location.replace('index.html');
     return;
   }
+
+  // Chi entra con Google ha gia' un nome: lo proponiamo, resta modificabile.
+  const campoNome = document.getElementById('attiva-nome');
+  if (!campoNome.value) campoNome.value = await nomeSuggerito();
 
   mostraVista('attiva');
   if (new URLSearchParams(window.location.search).has('attiva')) {

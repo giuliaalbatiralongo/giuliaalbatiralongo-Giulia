@@ -53,6 +53,34 @@ export async function registrati(email, password) {
   return { ok: true, sessioneAttiva: Boolean(data.session) };
 }
 
+/* Accesso con Google. Il codice di invito resta obbligatorio: entrare
+   con Google crea l'account ma non il profilo, quindi si finisce
+   ugualmente sulla schermata di attivazione. */
+export async function accediConGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: urlConferma() },
+  });
+
+  if (error) {
+    console.error('Errore accesso con Google:', error);
+    return {
+      ok: false,
+      errore:
+        'Accesso con Google non disponibile. Va prima configurato nel pannello Supabase.',
+    };
+  }
+  return { ok: true };
+}
+
+// Google fornisce gia' il nome dell'account: lo proponiamo come
+// suggerimento, restando modificabile prima della conferma.
+export async function nomeSuggerito() {
+  const { data } = await supabase.auth.getUser();
+  const meta = data.user?.user_metadata || {};
+  return meta.full_name || meta.name || '';
+}
+
 // Ogni nuovo invio invalida il link precedente: e' il motivo per cui
 // registrarsi due volte fa fallire il primo link ricevuto.
 export async function reinviaConferma(email) {

@@ -1,4 +1,4 @@
-import { getSessione, getProfilo, reinviaConferma, leggiErroreDaUrl } from './auth.js?v=3';
+import { getSessione, getProfilo, reinviaConferma, leggiErroreDaUrl } from './auth.js?v=4';
 
 const viste = {
   attesa: document.getElementById('vista-attesa'),
@@ -57,7 +57,7 @@ async function avvia() {
   const sessione = await getSessione();
   if (!sessione) {
     document.getElementById('testo-errore').textContent =
-      'Non ho trovato una conferma valida in questo link.';
+      'Non ho trovato un accesso valido. Riprova dalla schermata di accesso, oppure chiedi un nuovo link qui sotto.';
     mostraVista('errore');
     return;
   }
