@@ -1,8 +1,19 @@
-import { caricaMateriale } from './db.js?v=9';
-import { proteggiPagina } from './auth.js?v=5';
+import { caricaMateriale } from './db.js?v=11';
+import { proteggiPagina } from './auth.js?v=6';
 
 const form = document.getElementById('form-materiale');
 const elEsito = document.getElementById('esito');
+const elNota = document.getElementById('nota-approvazione');
+const bottone = form.querySelector('button[type="submit"]');
+
+function messaggio(testo, tipo, icona) {
+  elEsito.className = `esito-form ${tipo}`;
+  if (icona) {
+    elEsito.innerHTML = `<i class="ph-fill ${icona}" aria-hidden="true"></i> ${testo}`;
+  } else {
+    elEsito.textContent = testo;
+  }
+}
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -11,28 +22,39 @@ form.addEventListener('submit', async (e) => {
   const file = dati.get('file');
   const argomento = dati.get('argomento');
 
-  const metadati = {
+  bottone.disabled = true;
+  messaggio('Caricamento in corso', 'attesa');
+
+  const risultato = await caricaMateriale(file, {
     tipo: dati.get('tipo'),
     materia: dati.get('materia'),
     argomento: argomento ? argomento.trim() || null : null,
     titolo: dati.get('titolo'),
-  };
+    chiave: (dati.get('chiave') || '').trim() || null,
+  });
 
-  elEsito.className = 'esito-form attesa';
-  elEsito.textContent = 'Caricamento in corso';
+  bottone.disabled = false;
 
-  const salvato = await caricaMateriale(file, metadati);
+  if (!risultato.ok) {
+    messaggio(risultato.errore, 'ko', 'ph-x-circle');
+    return;
+  }
 
-  if (salvato) {
-    elEsito.className = 'esito-form ok';
-    elEsito.innerHTML =
-      '<i class="ph-fill ph-check-circle" aria-hidden="true"></i> Materiale caricato. Lo trovi nella pagina Materiali.';
-    form.reset();
+  form.reset();
+
+  if (risultato.pubblicazione === 'pubblicato') {
+    messaggio('Materiale caricato. Lo trovi nella pagina Materiali.', 'ok', 'ph-check-circle');
   } else {
-    elEsito.className = 'esito-form ko';
-    elEsito.innerHTML =
-      '<i class="ph-fill ph-x-circle" aria-hidden="true"></i> Non sono riuscita a caricare il materiale. Riprova.';
+    messaggio(
+      'Materiale inviato. Sara' + "'" + ' visibile agli altri dopo l' + "'" + 'approvazione.',
+      'ok',
+      'ph-paper-plane-tilt'
+    );
   }
 });
 
-proteggiPagina();
+proteggiPagina().then((profilo) => {
+  // Chi non e' amministratrice deve sapere in anticipo che il documento
+  // passa da un'approvazione, non scoprirlo dopo aver caricato.
+  if (profilo && profilo.ruolo !== 'admin') elNota.hidden = false;
+});

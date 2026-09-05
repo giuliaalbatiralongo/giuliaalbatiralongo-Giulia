@@ -1600,3 +1600,66 @@ a.profilo-btn {
   letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
 }
+
+/* ============================================================
+   Materiali protetti e code di revisione
+   ============================================================ */
+
+/* Numero di elementi accanto al titolo di sezione. Non e' un badge
+   colorato: e' la stessa scala tipografica, in tono minore. */
+.sezione-conteggio {
+  margin-left: 6px;
+  font-weight: 500;
+  color: var(--testo-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.sezione-titolo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sezione-titolo i {
+  font-size: 17px;
+  color: var(--testo-2);
+}
+
+#sezione-materiali { margin-top: 32px; }
+
+/* Documento chiuso: al posto del link, il campo per la chiave. */
+.sblocco {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sblocco-campo {
+  width: 148px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.sblocco .esito-form {
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.btn-piccolo {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12.5px;
+}
+
+.btn-piccolo i { font-size: 14px; }
+
+/* Il lucchetto accanto al titolo sta sulla stessa linea del testo,
+   senza spostarne la base. */
+.elenco-testo i {
+  font-size: 14px;
+  color: var(--testo-3);
+  vertical-align: -1px;
+}
+
+.azioni-revisione .link-testo { margin-right: auto; }

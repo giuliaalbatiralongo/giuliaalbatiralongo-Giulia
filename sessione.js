@@ -2,10 +2,11 @@ import {
   getCasiClinici,
   aggiornaStatoCaso,
   getMateriali,
+  linkMateriali,
   registraRisposta,
-} from './db.js?v=9';
+} from './db.js?v=11';
 import { iconaPerMateria } from './materie.js?v=3';
-import { proteggiPagina } from './auth.js?v=5';
+import { proteggiPagina } from './auth.js?v=6';
 
 const parametri = new URLSearchParams(window.location.search);
 const materiaFiltro = parametri.get('materia');
@@ -73,21 +74,42 @@ async function mostraMaterialiCorrelati(materia) {
     return;
   }
 
+  // L'archivio e' privato: qui servono i link firmati, non l'indirizzo
+  // pubblico di una volta. Chi non ha ancora la chiave di un documento
+  // protetto lo vede indicato come chiuso, senza link.
+  const indirizzi = await linkMateriali(
+    materiali.filter((m) => m.sbloccato).map((m) => m.percorso)
+  );
+
   elPannelloLista.innerHTML = '';
   materiali.forEach((m) => {
     const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.href = m.url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
+    const indirizzo = indirizzi.get(m.percorso);
 
     const icona = document.createElement('i');
-    icona.className = 'ph ph-file-pdf';
+    icona.className = m.sbloccato ? 'ph ph-file-pdf' : 'ph ph-lock-key';
     icona.setAttribute('aria-hidden', 'true');
-    a.appendChild(icona);
-    a.appendChild(document.createTextNode(m.titolo));
 
-    li.appendChild(a);
+    if (m.sbloccato && indirizzo) {
+      const a = document.createElement('a');
+      a.href = indirizzo;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.appendChild(icona);
+      a.appendChild(document.createTextNode(m.titolo));
+      li.appendChild(a);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'elenco-meta';
+      span.appendChild(icona);
+      span.appendChild(
+        document.createTextNode(
+          m.sbloccato ? m.titolo : `${m.titolo} (serve la chiave)`
+        )
+      );
+      li.appendChild(span);
+    }
+
     elPannelloLista.appendChild(li);
   });
   elPannello.hidden = false;

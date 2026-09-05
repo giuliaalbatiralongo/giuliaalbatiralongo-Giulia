@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
   <div class="app">
@@ -37,14 +37,35 @@
 
     <main class="contenuto">
       <div class="contenuto-interno">
-        <h1 class="page-titolo">Casi da revisionare</h1>
-        <p class="page-sub">Proposte arrivate dagli studenti. Restano invisibili nel quiz finché non le approvi.</p>
+        <h1 class="page-titolo">Da revisionare</h1>
+        <p class="page-sub">Proposte arrivate dagli studenti. Restano invisibili agli altri finché non le approvi.</p>
 
         <div id="scheletro">
           <div class="scheletro scheletro-card"></div>
         </div>
 
-        <div id="proposte"></div>
+        <section id="sezione-casi" hidden>
+          <h2 class="sezione-titolo">
+            <i class="ph ph-cards" aria-hidden="true"></i>
+            Casi clinici <span class="sezione-conteggio" id="conteggio-casi"></span>
+          </h2>
+          <div id="proposte"></div>
+        </section>
+
+        <section id="sezione-materiali" hidden>
+          <h2 class="sezione-titolo">
+            <i class="ph ph-folder" aria-hidden="true"></i>
+            Materiali <span class="sezione-conteggio" id="conteggio-materiali"></span>
+          </h2>
+          <div id="proposte-materiali"></div>
+        </section>
+
+        <div id="tutto-fatto" hidden>
+          <div class="stato-vuoto">
+            <i class="ph ph-seal-check" aria-hidden="true"></i>
+            <p>Nessuna proposta in attesa. Tutto revisionato.</p>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -55,6 +76,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="revisione.js?v=1"></script>
+  <script type="module" src="revisione.js?v=3"></script>
 </body>
 </html>

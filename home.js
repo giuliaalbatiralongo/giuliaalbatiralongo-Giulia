@@ -1,6 +1,6 @@
-import { getCasiClinici } from './db.js?v=9';
+import { getCasiClinici } from './db.js?v=11';
 import { iconaPerMateria } from './materie.js?v=3';
-import { proteggiPagina } from './auth.js?v=5';
+import { proteggiPagina } from './auth.js?v=6';
 
 const STATI = ['nuovo', 'da_ripassare', 'consolidato'];
 const ETICHETTE_STATO = {

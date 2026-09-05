@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
   <div class="app">
@@ -83,6 +83,27 @@
             <input type="file" id="file" name="file" accept="application/pdf" required>
           </div>
 
+          <div class="campo">
+            <label for="chiave">Chiave di accesso <span class="campo-nota">facoltativa</span></label>
+            <input type="text" id="chiave" name="chiave"
+                   autocomplete="off" autocorrect="off" spellcheck="false">
+            <p class="campo-aiuto">
+              Lascia vuoto per un documento aperto a tutti. Se la compili, il
+              documento resta chiuso: si apre solo a chi conosce la chiave.
+            </p>
+            <p class="campo-avviso">
+              <i class="ph ph-warning" aria-hidden="true"></i>
+              La chiave non viene salvata in chiaro e non si puo' recuperare.
+              Se la dimentichi, l'unica strada e' ricaricare il documento.
+            </p>
+          </div>
+
+          <p class="campo-aiuto" id="nota-approvazione" hidden>
+            <i class="ph ph-info" aria-hidden="true"></i>
+            Il documento non sara' subito visibile agli altri: resta in attesa
+            finche' l'amministratrice non lo approva.
+          </p>
+
           <button type="submit" class="btn" style="align-self: flex-start">
             <i class="ph ph-upload-simple" aria-hidden="true"></i> Carica materiale
           </button>
@@ -99,6 +120,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="carica-materiale.js?v=8"></script>
+  <script type="module" src="carica-materiale.js?v=9"></script>
 </body>
 </html>

@@ -1,9 +1,21 @@
-import { getCasiInAttesa, approvaCaso, eliminaCaso } from './db.js?v=9';
-import { proteggiPagina } from './auth.js?v=5';
+import {
+  getCasiInAttesa,
+  approvaCaso,
+  eliminaCaso,
+  getMaterialiInAttesa,
+  approvaMateriale,
+  eliminaMateriale,
+  linkMateriali,
+} from './db.js?v=11';
+import { proteggiPagina } from './auth.js?v=6';
 import { iconaPerMateria } from './materie.js?v=3';
 
 const elScheletro = document.getElementById('scheletro');
 const elProposte = document.getElementById('proposte');
+const elProposteMateriali = document.getElementById('proposte-materiali');
+const elSezioneCasi = document.getElementById('sezione-casi');
+const elSezioneMateriali = document.getElementById('sezione-materiali');
+const elTuttoFatto = document.getElementById('tutto-fatto');
 
 function creaOpzioni(caso) {
   const ul = document.createElement('ul');
@@ -83,7 +95,7 @@ function creaProposta(caso) {
     rifiuta.disabled = true;
     if (await approvaCaso(caso.id)) {
       card.remove();
-      controllaSeVuoto();
+      aggiornaConteggi();
     } else {
       esito.className = 'esito-form ko';
       esito.textContent = 'Non sono riuscita ad approvare il caso.';
@@ -98,7 +110,7 @@ function creaProposta(caso) {
     rifiuta.disabled = true;
     if (await eliminaCaso(caso.id)) {
       card.remove();
-      controllaSeVuoto();
+      aggiornaConteggi();
     } else {
       esito.className = 'esito-form ko';
       esito.textContent = 'Non sono riuscita a eliminare il caso.';
@@ -115,17 +127,139 @@ function creaProposta(caso) {
   return card;
 }
 
-function mostraVuoto() {
-  elProposte.innerHTML = `
-    <div class="stato-vuoto">
-      <i class="ph ph-seal-check" aria-hidden="true"></i>
-      <p>Nessuna proposta in attesa. Tutto revisionato.</p>
-    </div>
-  `;
+function formattaPeso(byte) {
+  if (!byte) return null;
+  if (byte < 1024 * 1024) return `${Math.round(byte / 1024)} KB`;
+  return `${(byte / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`;
 }
 
-function controllaSeVuoto() {
-  if (!elProposte.querySelector('.card-caso')) mostraVuoto();
+function formattaData(iso) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString('it-IT', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+/* ---------- Materiali proposti ---------- */
+
+function creaPropostaMateriale(materiale, indirizzo) {
+  const card = document.createElement('article');
+  card.className = 'card-caso';
+
+  const materia = document.createElement('p');
+  materia.className = 'caso-materia';
+  const icona = document.createElement('i');
+  icona.className = `ph ${iconaPerMateria(materiale.materia)}`;
+  icona.setAttribute('aria-hidden', 'true');
+  materia.appendChild(icona);
+  materia.appendChild(
+    document.createTextNode(
+      materiale.argomento ? `${materiale.materia} \u00b7 ${materiale.argomento}` : materiale.materia
+    )
+  );
+  card.appendChild(materia);
+
+  const titolo = document.createElement('p');
+  titolo.className = 'caso-domanda';
+  if (materiale.ha_chiave) {
+    const lucchetto = document.createElement('i');
+    lucchetto.className = 'ph ph-lock-key';
+    lucchetto.setAttribute('aria-hidden', 'true');
+    titolo.appendChild(lucchetto);
+    titolo.appendChild(document.createTextNode(' '));
+  }
+  titolo.appendChild(document.createTextNode(materiale.titolo));
+  card.appendChild(titolo);
+
+  const dettagli = document.createElement('p');
+  dettagli.className = 'caso-spiegazione';
+  const pezzi = [`caricato da ${materiale.autoreNome}`];
+  const data = formattaData(materiale.created_at);
+  if (data) pezzi.push(data);
+  const peso = formattaPeso(materiale.dimensione);
+  if (peso) pezzi.push(peso);
+  if (materiale.ha_chiave) pezzi.push('protetto da chiave');
+  dettagli.textContent = pezzi.join(' \u00b7 ');
+  card.appendChild(dettagli);
+
+  const azioni = document.createElement('div');
+  azioni.className = 'azioni-revisione';
+
+  const approva = document.createElement('button');
+  approva.type = 'button';
+  approva.className = 'btn';
+  approva.innerHTML = '<i class="ph ph-check" aria-hidden="true"></i> Approva e pubblica';
+
+  const rifiuta = document.createElement('button');
+  rifiuta.type = 'button';
+  rifiuta.className = 'btn btn-neutro';
+  rifiuta.innerHTML = '<i class="ph ph-trash" aria-hidden="true"></i> Elimina';
+
+  const esito = document.createElement('span');
+  esito.className = 'esito-form';
+
+  // Prima di approvare si deve poter guardare cosa si sta approvando.
+  if (indirizzo) {
+    const apri = document.createElement('a');
+    apri.href = indirizzo;
+    apri.target = '_blank';
+    apri.rel = 'noopener noreferrer';
+    apri.className = 'link-testo';
+    apri.innerHTML = 'Apri PDF <i class="ph ph-arrow-up-right" aria-hidden="true"></i>';
+    azioni.appendChild(apri);
+  }
+
+  approva.addEventListener('click', async () => {
+    approva.disabled = true;
+    rifiuta.disabled = true;
+    if (await approvaMateriale(materiale.id)) {
+      card.remove();
+      aggiornaConteggi();
+    } else {
+      esito.className = 'esito-form ko';
+      esito.textContent = 'Non sono riuscita ad approvare il materiale.';
+      approva.disabled = false;
+      rifiuta.disabled = false;
+    }
+  });
+
+  rifiuta.addEventListener('click', async () => {
+    if (!window.confirm(`Eliminare definitivamente "${materiale.titolo}" e il suo file?`)) return;
+    approva.disabled = true;
+    rifiuta.disabled = true;
+    if (await eliminaMateriale(materiale.id, materiale.percorso)) {
+      card.remove();
+      aggiornaConteggi();
+    } else {
+      esito.className = 'esito-form ko';
+      esito.textContent = 'Non sono riuscita a eliminare il materiale.';
+      approva.disabled = false;
+      rifiuta.disabled = false;
+    }
+  });
+
+  azioni.appendChild(approva);
+  azioni.appendChild(rifiuta);
+  azioni.appendChild(esito);
+  card.appendChild(azioni);
+
+  return card;
+}
+
+/* ---------- Conteggi e stato vuoto ---------- */
+
+function aggiornaConteggi() {
+  const casi = elProposte.querySelectorAll('.card-caso').length;
+  const materiali = elProposteMateriali.querySelectorAll('.card-caso').length;
+
+  elSezioneCasi.hidden = casi === 0;
+  elSezioneMateriali.hidden = materiali === 0;
+  elTuttoFatto.hidden = casi + materiali > 0;
+
+  document.getElementById('conteggio-casi').textContent = casi || '';
+  document.getElementById('conteggio-materiali').textContent = materiali || '';
 }
 
 async function avvia(profilo) {
@@ -136,15 +270,19 @@ async function avvia(profilo) {
   }
 
   try {
-    const proposte = await getCasiInAttesa();
+    const [casi, materiali] = await Promise.all([getCasiInAttesa(), getMaterialiInAttesa()]);
+    const indirizzi = await linkMateriali(materiali.map((m) => m.percorso));
+
     elScheletro.remove();
 
-    if (proposte.length === 0) {
-      mostraVuoto();
-      return;
-    }
+    casi.forEach((caso) => elProposte.appendChild(creaProposta(caso)));
+    materiali.forEach((materiale) =>
+      elProposteMateriali.appendChild(
+        creaPropostaMateriale(materiale, indirizzi.get(materiale.percorso))
+      )
+    );
 
-    proposte.forEach((caso) => elProposte.appendChild(creaProposta(caso)));
+    aggiornaConteggi();
   } catch (errore) {
     elScheletro.innerHTML = `<p class="messaggio-errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);

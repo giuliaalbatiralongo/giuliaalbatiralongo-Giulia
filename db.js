@@ -106,12 +106,32 @@ export async function inserisciCaso(caso) {
   return true;
 }
 
-export async function getMateriali(materia) {
-  let query = supabase.from('materiali').select('*').order('created_at', { ascending: false });
+const ARCHIVIO = 'dispense';
 
-  if (materia) {
-    query = query.eq('materia', materia);
-  }
+/* Il nome di chi ha caricato, per mostrarlo accanto ai documenti. */
+async function nomiAutori(elencoId) {
+  const unici = [...new Set(elencoId.filter(Boolean))];
+  if (unici.length === 0) return new Map();
+
+  const { data } = await supabase.from('profili').select('id, nome').in('id', unici);
+  return new Map((data || []).map((p) => [p.id, p.nome]));
+}
+
+/* Non chiediamo mai la colonna chiave_hash: al sito basta sapere se un
+   documento e' protetto, e quello lo dice ha_chiave. */
+const CAMPI_MATERIALE =
+  'id, materia, argomento, titolo, tipo, percorso, dimensione, autore, pubblicazione, ha_chiave, created_at';
+
+export async function getMateriali(materia, opzioni = {}) {
+  const { includiInAttesa = false } = opzioni;
+
+  let query = supabase
+    .from('materiali')
+    .select(CAMPI_MATERIALE)
+    .order('created_at', { ascending: false });
+
+  if (materia) query = query.eq('materia', materia);
+  if (!includiInAttesa) query = query.eq('pubblicazione', 'pubblicato');
 
   const { data, error } = await query;
 
@@ -119,36 +139,148 @@ export async function getMateriali(materia) {
     console.error('Errore nel caricamento dei materiali:', error);
     return [];
   }
+
+  const [nomi, mio] = await Promise.all([nomiAutori(data.map((m) => m.autore)), idUtente()]);
+  const { data: sblocchi } = await supabase.from('sblocchi_materiale').select('materiale_id');
+  const gia = new Set((sblocchi || []).map((s) => s.materiale_id));
+
+  return data.map((materiale) => ({
+    ...materiale,
+    autoreNome: nomi.get(materiale.autore) || 'Sconosciuto',
+    mio: materiale.autore === mio,
+    // Chi l'ha caricato non deve inserire la chiave che ha scelto lui.
+    sbloccato: !materiale.ha_chiave || gia.has(materiale.id) || materiale.autore === mio,
+  }));
+}
+
+/* L'archivio e' privato: ogni apertura passa da un link firmato che vale
+   un'ora. Se la persona non ne ha diritto, Supabase rifiuta di crearlo. */
+export async function linkMateriale(percorso) {
+  const { data, error } = await supabase.storage
+    .from(ARCHIVIO)
+    .createSignedUrl(percorso, 3600);
+
+  if (error) {
+    console.error('Errore nella creazione del link:', error);
+    return null;
+  }
+  return data.signedUrl;
+}
+
+/* Un link per volta costa una chiamata a testa: per un elenco li
+   chiediamo tutti insieme. Chi non ha diritto a un file semplicemente
+   non riceve il suo link, senza far fallire gli altri. */
+export async function linkMateriali(percorsi) {
+  const puliti = percorsi.filter(Boolean);
+  if (puliti.length === 0) return new Map();
+
+  const { data, error } = await supabase.storage
+    .from(ARCHIVIO)
+    .createSignedUrls(puliti, 3600);
+
+  if (error) {
+    console.error('Errore nella creazione dei link:', error);
+    return new Map();
+  }
+
+  return new Map(
+    (data || [])
+      .filter((voce) => voce.signedUrl && !voce.error)
+      .map((voce) => [voce.path, voce.signedUrl])
+  );
+}
+
+export async function sbloccaMateriale(id, chiave) {
+  const { data, error } = await supabase.rpc('sblocca_materiale', {
+    p_materiale_id: id,
+    p_chiave: chiave,
+  });
+
+  if (error) {
+    console.error('Errore nello sblocco del materiale:', error);
+    return { ok: false, errore: 'Non sono riuscita a verificare la chiave. Riprova.' };
+  }
   return data;
 }
 
+/* Prima il file, poi la registrazione. L'autore, lo stato di pubblicazione
+   e l'impronta della chiave li decide il database: qui non si possono
+   forzare. */
 export async function caricaMateriale(file, metadati) {
-  const percorsoFile = `${Date.now()}-${file.name}`;
+  const utente = await idUtente();
+  if (!utente) return { ok: false, errore: 'Sessione scaduta. Esci e rientra.' };
 
-  const { error: erroreUpload } = await supabase.storage.from('dispense').upload(percorsoFile, file);
+  const nomePulito = file.name.replace(/[^\w.\- ]+/g, '_');
+  const percorso = `${utente}/${Date.now()}-${nomePulito}`;
 
-  if (erroreUpload) {
-    console.error('Errore nel caricamento del file:', erroreUpload);
-    return false;
+  const { error: erroreArchivio } = await supabase.storage.from(ARCHIVIO).upload(percorso, file);
+
+  if (erroreArchivio) {
+    console.error('Errore nel caricamento del file:', erroreArchivio);
+    return { ok: false, errore: 'Non sono riuscita a caricare il file.' };
   }
 
-  const { data: datiUrl } = supabase.storage.from('dispense').getPublicUrl(percorsoFile);
+  const { data, error } = await supabase.rpc('registra_materiale', {
+    p_percorso: percorso,
+    p_titolo: metadati.titolo,
+    p_materia: metadati.materia,
+    p_argomento: metadati.argomento,
+    p_tipo: metadati.tipo,
+    p_dimensione: file.size,
+    p_chiave: metadati.chiave || null,
+  });
 
-  const { error: erroreInserimento } = await supabase
+  // Se la scheda non si salva, il file resta li' a occupare spazio
+  // senza comparire da nessuna parte: meglio toglierlo subito.
+  if (error || !data?.ok) {
+    await supabase.storage.from(ARCHIVIO).remove([percorso]);
+    console.error('Errore nel salvataggio del materiale:', error || data);
+    return { ok: false, errore: data?.errore || 'Non sono riuscita a salvare il materiale.' };
+  }
+
+  return data;
+}
+
+export async function getMaterialiInAttesa() {
+  const { data, error } = await supabase
     .from('materiali')
-    .insert([
-      {
-        ...metadati,
-        url: datiUrl.publicUrl,
-        dimensione: file.size,
-        autore: await idUtente(),
-      },
-    ]);
+    .select(CAMPI_MATERIALE)
+    .eq('pubblicazione', 'in_attesa')
+    .order('created_at', { ascending: true });
 
-  if (erroreInserimento) {
-    console.error('Errore nel salvataggio del materiale:', erroreInserimento);
+  if (error) {
+    console.error('Errore nel caricamento dei materiali in attesa:', error);
+    return [];
+  }
+
+  const nomi = await nomiAutori(data.map((m) => m.autore));
+  return data.map((m) => ({ ...m, autoreNome: nomi.get(m.autore) || 'Sconosciuto' }));
+}
+
+export async function approvaMateriale(id) {
+  const { error } = await supabase
+    .from('materiali')
+    .update({ pubblicazione: 'pubblicato' })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Errore nell approvazione del materiale:', error);
     return false;
   }
+  return true;
+}
+
+/* Prima la scheda, poi il file: se togliessimo prima il file, un errore
+   sulla scheda lascerebbe un documento che compare ma non si apre. */
+export async function eliminaMateriale(id, percorso) {
+  const { error } = await supabase.from('materiali').delete().eq('id', id);
+
+  if (error) {
+    console.error('Errore nell eliminazione del materiale:', error);
+    return false;
+  }
+
+  if (percorso) await supabase.storage.from(ARCHIVIO).remove([percorso]);
   return true;
 }
 
