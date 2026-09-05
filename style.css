@@ -3351,3 +3351,86 @@ label.giorno-scelta:has(input:checked) {
 }
 
 .servizio-segnato i { font-size: 16px; color: var(--st-consolidato); }
+
+/* ============================================================
+   Sessione: piu' esami insieme
+   ============================================================ */
+
+.finestra-larga { width: min(680px, calc(100vw - 32px)); }
+
+.esami-elenco {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 18px;
+}
+
+.esame-riga {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 160px) 54px 76px;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.esame-riga:last-child { border-bottom: none; }
+
+.esame-nome {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.esame-meta {
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+.esame-conto {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.esame-azioni {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+/* I giorni mostrano anche quale materia, non solo quante lezioni:
+   in una sessione la domanda e' cosa studiare, non quanto. */
+.piano-giorno-voce {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--testo-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.piano-giorno { min-width: 108px; }
+
+/* Righe di inserimento degli esami nella finestra */
+.riga-esame {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px 92px 32px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.riga-esame input { font-size: 13px; padding: 8px 10px; }
+
+@media (max-width: 620px) {
+  .riga-esame { grid-template-columns: minmax(0, 1fr) 32px; }
+  .riga-esame input[type="date"],
+  .riga-esame input[type="number"] { grid-column: 1 / 2; }
+  .esame-riga { grid-template-columns: minmax(0, 1fr) 54px 76px; }
+  .esame-riga .stato-barra { display: none; }
+}

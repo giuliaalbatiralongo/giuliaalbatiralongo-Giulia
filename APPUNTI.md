@@ -49,6 +49,32 @@ database. Restano aperte:
 - Gli intervalli sono uguali per tutti. FSRS li adatterebbe alla persona,
   ma serve molto piu' storico di quello che abbiamo.
 
+### La visione: bacheca piu' elenco di disponibili
+
+Giulia ha spiegato dove vuole arrivare. In futuro, forse, un sistema
+vendibile a studenti di qualunque universita' e corso di laurea. Adesso,
+due cose distinte:
+
+1. Una **bacheca di confronto**, dove si chiedono consigli sulla
+   preparazione degli esami
+2. Un **elenco di persone disponibili**, gratuitamente o a pagamento, ad
+   aiutare a pianificare la sessione
+
+Ha scartato l'idea intermedia (il piano condiviso da far commentare).
+
+**Fatto:** l'oggetto sessione, che era il tassello mancante a monte.
+Il suo esempio era "devo fare questi esami, le date sono queste": il
+piano a un esame solo non bastava.
+
+**Da chiedere prima di costruire l'elenco dei disponibili:**
+
+- Se il denaro passa dentro Akesis o si accorda fuori. Cambia tutto:
+  fatturazione, condizioni d'uso, chi risponde se qualcuno non paga
+- Come si sa chi ha gia' dato un esame. Autodichiarato (semplice, e fra
+  colleghi basta) oppure ricavato dal calendario (debole)
+- Come avviene il contatto: messaggi dentro Akesis, oppure una richiesta
+  che chi aiuta accetta e poi ci si sente fuori
+
 ### Ripasso pre-esame: SOSPESO per decisione di Giulia
 
 Gemini aveva proposto: nei 14 giorni prima di un esame, dare priorita' ai

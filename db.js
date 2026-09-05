@@ -613,106 +613,196 @@ export function creaIcs(date) {
   return righe.join('\r\n');
 }
 
-/* ---------- Piani di studio ---------- */
+/* ---------- Sessioni di esami ---------- */
 
-export async function getPianiStudio() {
+export async function getSessioni() {
   const { data, error } = await supabase
-    .from('piani_studio')
-    .select('*')
-    .order('fine', { ascending: true });
+    .from('sessioni')
+    .select('*, esami:sessione_esami(*)')
+    .order('inizio', { ascending: false });
 
   if (error) {
-    console.error('Errore nel caricamento dei piani:', error);
+    console.error('Errore nel caricamento delle sessioni:', error);
     return [];
   }
-  return data;
+
+  return data.map((s) => ({
+    ...s,
+    esami: (s.esami || []).sort((a, b) => a.giorno.localeCompare(b.giorno)),
+  }));
 }
 
-export async function inserisciPiano(piano) {
-  const { data, error } = await supabase.from('piani_studio').insert([piano]).select('*').single();
+export async function inserisciSessione(sessione, esami) {
+  const { data, error } = await supabase.from('sessioni').insert([sessione]).select('*').single();
 
   if (error) {
-    console.error('Errore nel salvataggio del piano:', error);
+    console.error('Errore nel salvataggio della sessione:', error);
     return null;
   }
-  return data;
+
+  const righe = esami.map((e) => ({ ...e, sessione_id: data.id }));
+  const { data: salvati, error: erroreEsami } = await supabase
+    .from('sessione_esami')
+    .insert(righe)
+    .select('*');
+
+  // Una sessione senza esami non serve a niente: se gli esami non
+  // entrano, si toglie anche lei invece di lasciarla monca.
+  if (erroreEsami) {
+    console.error('Errore nel salvataggio degli esami:', erroreEsami);
+    await supabase.from('sessioni').delete().eq('id', data.id);
+    return null;
+  }
+
+  return { ...data, esami: salvati.sort((a, b) => a.giorno.localeCompare(b.giorno)) };
 }
 
-export async function aggiornaFattePiano(id, fatte) {
-  const { error } = await supabase.from('piani_studio').update({ fatte }).eq('id', id);
+export async function aggiornaFatteEsame(id, fatte) {
+  const { error } = await supabase.from('sessione_esami').update({ fatte }).eq('id', id);
 
   if (error) {
-    console.error('Errore nell aggiornamento del piano:', error);
+    console.error('Errore nell aggiornamento:', error);
     return false;
   }
   return true;
 }
 
-export async function eliminaPiano(id) {
-  const { error } = await supabase.from('piani_studio').delete().eq('id', id);
+export async function eliminaSessione(id) {
+  const { error } = await supabase.from('sessioni').delete().eq('id', id);
 
   if (error) {
-    console.error('Errore nell eliminazione del piano:', error);
+    console.error('Errore nell eliminazione della sessione:', error);
     return false;
   }
   return true;
 }
 
-/* Il piano di marcia, ricalcolato da oggi in avanti.
+/* I giorni su cui si puo' studiare, da oggi (o dall'inizio) all'ultimo
+   esame, saltando quelli che ci si e' lasciati liberi. */
+function giorniDiStudio(inizio, ultimoGiorno, giorniLiberi) {
+  const liberi = new Set((giorniLiberi || []).map(Number));
+  const giorni = [];
 
-   Non e' un elenco fisso deciso il primo giorno: le lezioni che restano
-   si ridistribuiscono sui giorni che restano. Se un giorno salti, il
-   giorno dopo ne hai una in piu', non un arretrato che cresce. */
-export function calcolaPiano(piano, oggiIso) {
-  const oggi = oggiIso || new Date().toISOString().slice(0, 10);
-  const partenza = piano.inizio > oggi ? piano.inizio : oggi;
+  const cursore = new Date(inizio + 'T00:00:00');
+  const fine = new Date(ultimoGiorno + 'T00:00:00');
 
-  const giorniUtili = [];
-  const cursore = new Date(partenza + 'T00:00:00');
-  const fine = new Date(piano.fine + 'T00:00:00');
-  const liberi = new Set((piano.giorni_liberi || []).map(Number));
-
-  // Il giorno dell'esame non e' un giorno di studio.
   while (cursore < fine) {
-    // getDay() da' 0 per domenica: lo portiamo a 1 lunedi ... 7 domenica.
     const settimana = cursore.getDay() === 0 ? 7 : cursore.getDay();
     if (!liberi.has(settimana)) {
       const m = String(cursore.getMonth() + 1).padStart(2, '0');
       const g = String(cursore.getDate()).padStart(2, '0');
-      giorniUtili.push(`${cursore.getFullYear()}-${m}-${g}`);
+      giorni.push(`${cursore.getFullYear()}-${m}-${g}`);
     }
     cursore.setDate(cursore.getDate() + 1);
   }
 
-  const restano = Math.max(piano.totale_lezioni - piano.fatte, 0);
+  return giorni;
+}
 
-  if (restano === 0) {
-    return { giorni: [], restano: 0, giorniUtili: giorniUtili.length, alGiorno: 0, fattibile: true };
+/* Il piano di una sessione intera.
+
+   Il ritmo non si sceglie: si calcola. Ogni esame impone un vincolo,
+   cioe' che tutte le lezioni sue e di quelli prima di lui stiano nei
+   giorni disponibili entro la sua data. Il ritmo necessario e' il piu'
+   alto fra questi vincoli: basta un esame stretto all'inizio per
+   costringere tutto il resto.
+
+   Poi i giorni si riempiono in ordine, dando la precedenza all'esame che
+   scade prima. Un giorno puo' chiudere un esame e cominciare il
+   successivo, come succede davvero. */
+export function calcolaSessione(sessione, oggiIso) {
+  const oggi = oggiIso || new Date().toISOString().slice(0, 10);
+  const partenza = sessione.inizio > oggi ? sessione.inizio : oggi;
+
+  const esami = [...(sessione.esami || [])]
+    .map((e) => ({ ...e, restano: Math.max(e.totale_lezioni - e.fatte, 0) }))
+    .sort((a, b) => a.giorno.localeCompare(b.giorno));
+
+  const daFare = esami.filter((e) => e.restano > 0 && e.giorno > oggi);
+
+  if (daFare.length === 0) {
+    return { ritmo: 0, giorni: [], vincoli: [], fattibile: true, esami };
   }
 
-  if (giorniUtili.length === 0) {
-    return { giorni: [], restano, giorniUtili: 0, alGiorno: restano, fattibile: false };
-  }
+  const ultimo = daFare[daFare.length - 1].giorno;
+  const tuttiIGiorni = giorniDiStudio(partenza, ultimo, sessione.giorni_liberi);
 
-  // Distribuzione a resto: i giorni iniziali prendono una lezione in piu'
-  // invece di arrotondare tutto per eccesso.
-  const base = Math.floor(restano / giorniUtili.length);
-  const avanzo = restano % giorniUtili.length;
-
-  let numero = piano.fatte;
-  const giorni = giorniUtili.map((giorno, i) => {
-    const quante = base + (i < avanzo ? 1 : 0);
-    const da = numero + 1;
-    numero += quante;
-    return { giorno, quante, da, a: numero };
+  // Un vincolo per esame: le lezioni cumulate devono stare nei giorni
+  // che restano prima della sua data.
+  let cumulate = 0;
+  const vincoli = daFare.map((e) => {
+    cumulate += e.restano;
+    const disponibili = tuttiIGiorni.filter((g) => g < e.giorno).length;
+    return {
+      titolo: e.titolo,
+      giorno: e.giorno,
+      cumulate,
+      disponibili,
+      richiesto: disponibili > 0 ? cumulate / disponibili : Infinity,
+    };
   });
 
+  const ritmo = Math.max(...vincoli.map((v) => v.richiesto));
+  const stretto = vincoli.find((v) => v.richiesto === ritmo);
+
+  if (!Number.isFinite(ritmo)) {
+    return { ritmo: Infinity, giorni: [], vincoli, stretto, fattibile: false, esami };
+  }
+
+  /* Riempimento dei giorni. Il resto frazionario si porta avanti invece
+     di arrotondare ogni giorno, altrimenti la somma non torna. */
+  const rimaste = new Map(daFare.map((e) => [e.id, e.restano]));
+  const fatteFinora = new Map(daFare.map((e) => [e.id, e.fatte]));
+  let indice = 0;
+  let avanzo = 0;
+  const giorni = [];
+
+  tuttiIGiorni.forEach((giorno) => {
+    avanzo += ritmo;
+    let quante = Math.floor(avanzo + 1e-9);
+    if (quante <= 0) return;
+    avanzo -= quante;
+
+    const voci = [];
+
+    while (quante > 0 && indice < daFare.length) {
+      const esame = daFare[indice];
+
+      // Un esame gia' passato quel giorno non si studia piu'.
+      if (esame.giorno <= giorno) {
+        indice += 1;
+        continue;
+      }
+
+      const restano = rimaste.get(esame.id);
+      if (restano <= 0) {
+        indice += 1;
+        continue;
+      }
+
+      const prese = Math.min(restano, quante);
+      const da = fatteFinora.get(esame.id) + 1;
+      fatteFinora.set(esame.id, fatteFinora.get(esame.id) + prese);
+      rimaste.set(esame.id, restano - prese);
+      quante -= prese;
+
+      voci.push({ esameId: esame.id, titolo: esame.titolo, quante: prese, da, a: da + prese - 1 });
+    }
+
+    if (voci.length > 0) giorni.push({ giorno, voci });
+  });
+
+  const nonAssegnate = [...rimaste.values()].reduce((s, v) => s + v, 0);
+
   return {
-    giorni: giorni.filter((g) => g.quante > 0),
-    restano,
-    giorniUtili: giorniUtili.length,
-    alGiorno: restano / giorniUtili.length,
-    fattibile: restano / giorniUtili.length <= 8,
+    ritmo,
+    giorni,
+    vincoli,
+    stretto,
+    // Oltre le otto lezioni al giorno non e' un piano, e' una speranza.
+    fattibile: nonAssegnate === 0 && ritmo <= 8,
+    nonAssegnate,
+    esami,
   };
 }
 

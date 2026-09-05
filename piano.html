@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Piano di studio - Akesis</title>
+  <title>Sessione - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=31">
+  <link rel="stylesheet" href="style.css?v=32">
 </head>
 <body>
   <div class="app">
@@ -26,7 +26,7 @@
         <p class="nav-gruppo">Studio</p>
         <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
         <a href="calendario.html" class="nav-voce"><i class="ph ph-calendar-dots" aria-hidden="true"></i><span>Calendario</span></a>
-        <a href="piano.html" class="nav-voce attivo"><i class="ph-fill ph-path" aria-hidden="true"></i><span>Piano di studio</span></a>
+        <a href="piano.html" class="nav-voce attivo"><i class="ph-fill ph-path" aria-hidden="true"></i><span>Sessione</span></a>
         <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
         <a href="ssm.html" class="nav-voce"><i class="ph ph-target" aria-hidden="true"></i><span>Test SSM</span></a>
@@ -59,11 +59,11 @@
       <div class="contenuto-interno largo">
         <div class="testata">
           <div>
-            <h1 class="page-titolo">Piano di studio</h1>
-            <p class="page-sub">Dici quante lezioni ci sono ed entro quando. Il resto lo divide lui, e lo rifa ogni giorno.</p>
+            <h1 class="page-titolo">Sessione</h1>
+            <p class="page-sub">Metti dentro gli esami con le loro date e quante lezioni sono. Il ritmo che serve lo calcola lui.</p>
           </div>
           <button type="button" class="btn" id="apri-nuovo">
-            <i class="ph ph-plus" aria-hidden="true"></i> Nuovo piano
+            <i class="ph ph-plus" aria-hidden="true"></i> Nuova sessione
           </button>
         </div>
 
@@ -71,17 +71,17 @@
           <div class="scheletro scheletro-card"></div>
         </div>
 
-        <div id="piani" hidden></div>
+        <div id="sessioni" hidden></div>
       </div>
     </main>
   </div>
 
-  <dialog id="finestra-piano" class="finestra">
-    <form id="form-piano" method="dialog">
+  <dialog id="finestra-sessione" class="finestra finestra-larga">
+    <form id="form-sessione" method="dialog">
       <div class="finestra-testata">
         <div>
-          <p class="finestra-occhiello">Piano di studio</p>
-          <p class="finestra-titolo">Verso quale esame</p>
+          <p class="finestra-occhiello">Sessione</p>
+          <p class="finestra-titolo">Gli esami che devi dare</p>
         </div>
         <button type="button" class="btn-chiudi" id="chiudi-finestra" aria-label="Chiudi">
           <i class="ph ph-x" aria-hidden="true"></i>
@@ -90,44 +90,30 @@
 
       <div class="finestra-corpo">
         <div class="campo">
-          <label for="piano-data">Esame in calendario <span class="campo-nota">se c'e' gia'</span></label>
-          <select id="piano-data" name="data_esame_id">
-            <option value="">Non collegarlo a nessuna data</option>
-          </select>
-          <p class="campo-aiuto">Collegandolo, la data dell'esame si compila da sola.</p>
+          <label for="sessione-nome">Come la chiami</label>
+          <input type="text" id="sessione-nome" name="nome" required placeholder="Es. Sessione invernale">
         </div>
 
         <div class="campo">
-          <label for="piano-titolo">Materia</label>
-          <input type="text" id="piano-titolo" name="titolo" required
-                 placeholder="Es. Farmacologia 2">
-        </div>
-
-        <div class="campo-doppio">
-          <div class="campo">
-            <label for="piano-lezioni">Quante lezioni</label>
-            <input type="number" id="piano-lezioni" name="totale_lezioni" min="1" max="2000" required
-                   placeholder="34">
-            <p class="campo-aiuto">Sbobine, registrazioni, o come le chiami tu.</p>
-          </div>
-          <div class="campo">
-            <label for="piano-fine">Giorno dell'esame</label>
-            <input type="date" id="piano-fine" name="fine" required>
-          </div>
-        </div>
-
-        <div class="campo">
-          <label>Giorni che ti lasci liberi</label>
+          <label>Giorni che ti lasci libera</label>
           <div class="giorni-scelta" id="giorni-liberi"></div>
-          <p class="campo-aiuto">Il piano non ci mette lezioni sopra. Puoi lasciarne uno solo, o nessuno.</p>
+          <p class="campo-aiuto">Il piano non ci mette lezioni sopra.</p>
+        </div>
+
+        <div class="campo">
+          <label>Esami</label>
+          <div id="righe-esami"></div>
+          <button type="button" class="btn btn-neutro btn-piccolo" id="aggiungi-esame">
+            <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un esame
+          </button>
         </div>
       </div>
 
       <div class="finestra-fondo">
         <div class="finestra-azioni">
-          <span class="esito-form" id="piano-esito"></span>
+          <span class="esito-form" id="sessione-esito"></span>
           <button type="submit" class="btn">
-            <i class="ph ph-check" aria-hidden="true"></i> Crea il piano
+            <i class="ph ph-check" aria-hidden="true"></i> Crea la sessione
           </button>
         </div>
       </div>
@@ -140,6 +126,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="piano.js?v=1"></script>
+  <script type="module" src="piano.js?v=3"></script>
 </body>
 </html>
