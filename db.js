@@ -286,54 +286,109 @@ export async function eliminaMateriale(id, percorso) {
 
 /* ---------- Domande d'esame ---------- */
 
-export async function getDomandeEsame() {
-  const { data, error } = await supabase
+export async function getDomandeEsame(materia) {
+  let query = supabase
     .from('domande_esame')
     .select('*')
     .order('volte', { ascending: false })
     .order('created_at', { ascending: false });
 
+  if (materia) query = query.eq('materia', materia);
+
+  const { data, error } = await query;
+
   if (error) {
     console.error('Errore nel caricamento delle domande:', error);
     return [];
   }
-  return data;
+
+  // Quante note ha ciascuna domanda: serve a scrivere "2 note" sul
+  // pulsante senza dover caricare il testo di tutte in anticipo.
+  const { data: note } = await supabase.from('note_domanda').select('domanda_id');
+  const conteggio = new Map();
+  (note || []).forEach((n) => {
+    conteggio.set(n.domanda_id, (conteggio.get(n.domanda_id) || 0) + 1);
+  });
+
+  return data.map((domanda) => ({ ...domanda, quanteNote: conteggio.get(domanda.id) || 0 }));
 }
 
 export async function inserisciDomandaEsame(domanda) {
-  const { error } = await supabase.from('domande_esame').insert([domanda]);
+  const { nota, ...campi } = domanda;
+
+  const { data, error } = await supabase
+    .from('domande_esame')
+    .insert([campi])
+    .select('id')
+    .single();
 
   if (error) {
     console.error('Errore nel salvataggio della domanda:', error);
     return false;
   }
+
+  // La nota iniziale, se c'e', diventa la prima nota della domanda.
+  if (nota && nota.trim()) await aggiungiNota(data.id, nota);
+
   return true;
 }
 
-// Incrementa il contatore leggendo il valore corrente e riscrivendolo.
-// Con una sola persona che scrive va bene; se in futuro l'app diventa
-// multiutente conviene spostare l'incremento in una funzione lato database.
-export async function incrementaVolte(id, volteAttuali) {
-  const { error } = await supabase
-    .from('domande_esame')
-    .update({ volte: volteAttuali + 1 })
-    .eq('id', id);
+/* L'incremento lo fa il database: se due persone premono il pulsante
+   nello stesso momento, prima veniva contata una sola volta. */
+export async function incrementaVolte(id) {
+  const { data, error } = await supabase.rpc('incrementa_volte', { p_id: id });
 
   if (error) {
     console.error('Errore nell aggiornamento del conteggio:', error);
-    return false;
+    return null;
   }
-  return true;
+  return data;
 }
 
-export async function aggiornaNoteDomanda(id, note) {
-  const { error } = await supabase
-    .from('domande_esame')
-    .update({ note })
-    .eq('id', id);
+/* ---------- Note delle domande ----------
+   Piu' persone possono annotare la stessa domanda: ognuna scrive la
+   propria, nessuno sovrascrive quella di un altro. */
+
+export async function getNoteDomanda(domandaId) {
+  const { data, error } = await supabase
+    .from('note_domanda')
+    .select('id, testo, autore, created_at')
+    .eq('domanda_id', domandaId)
+    .order('created_at', { ascending: true });
 
   if (error) {
-    console.error('Errore nel salvataggio delle note:', error);
+    console.error('Errore nel caricamento delle note:', error);
+    return [];
+  }
+
+  const [nomi, mio] = await Promise.all([nomiAutori(data.map((n) => n.autore)), idUtente()]);
+
+  return data.map((nota) => ({
+    ...nota,
+    autoreNome: nomi.get(nota.autore) || 'Sconosciuto',
+    mia: nota.autore === mio,
+  }));
+}
+
+export async function aggiungiNota(domandaId, testo) {
+  const { data, error } = await supabase
+    .from('note_domanda')
+    .insert([{ domanda_id: domandaId, testo: testo.trim() }])
+    .select('id, testo, autore, created_at')
+    .single();
+
+  if (error) {
+    console.error('Errore nel salvataggio della nota:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function eliminaNota(id) {
+  const { error } = await supabase.from('note_domanda').delete().eq('id', id);
+
+  if (error) {
+    console.error('Errore nell eliminazione della nota:', error);
     return false;
   }
   return true;

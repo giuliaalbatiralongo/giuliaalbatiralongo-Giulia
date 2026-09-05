@@ -1,5 +1,5 @@
-import { inserisciDomandaEsame } from './db.js?v=11';
-import { proteggiPagina } from './auth.js?v=6';
+import { inserisciDomandaEsame } from './db.js?v=13';
+import { proteggiPagina } from './auth.js?v=7';
 
 const form = document.getElementById('form-domanda');
 const elEsito = document.getElementById('esito');
@@ -9,13 +9,15 @@ form.addEventListener('submit', async (e) => {
 
   const dati = new FormData(form);
   const argomento = dati.get('argomento');
-  const note = dati.get('note');
+  const nota = dati.get('note');
 
   const nuovaDomanda = {
     materia: dati.get('materia'),
     argomento: argomento ? argomento.trim() || null : null,
     domanda: dati.get('domanda'),
-    note: note ? note.trim() || null : null,
+    // La nota iniziale diventa la prima nota della domanda:
+    // le note ora sono righe a se stanti, piu' di una per domanda.
+    nota: nota ? nota.trim() || null : null,
     volte: 1,
   };
 

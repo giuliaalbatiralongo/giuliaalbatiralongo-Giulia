@@ -6,8 +6,8 @@ import {
   approvaMateriale,
   eliminaMateriale,
   linkMateriali,
-} from './db.js?v=11';
-import { proteggiPagina } from './auth.js?v=6';
+} from './db.js?v=13';
+import { proteggiPagina } from './auth.js?v=7';
 import { iconaPerMateria } from './materie.js?v=3';
 
 const elScheletro = document.getElementById('scheletro');

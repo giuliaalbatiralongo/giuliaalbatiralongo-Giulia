@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
   <div class="app">
@@ -37,16 +37,41 @@
 
     <main class="contenuto">
       <div class="contenuto-interno">
-        <h1 class="page-titolo">Le tue materie</h1>
-        <p class="page-sub">Scegli una materia da ripassare, oppure esercitati su tutte insieme.</p>
 
-        <div id="scheletro" class="materie-grid">
-          <div class="scheletro scheletro-card"></div>
-          <div class="scheletro scheletro-card"></div>
-          <div class="scheletro scheletro-card"></div>
-        </div>
+        <header class="apertura">
+          <p class="apertura-saluto" id="saluto">Bentornata</p>
+          <h1 class="apertura-titolo">Akesis</h1>
+          <p class="apertura-testo">
+            Un posto solo per i casi clinici su cui esercitarti, le domande che
+            ricorrono agli orali e il materiale di studio. Quello che ripassi
+            resta segnato: l'app tiene conto di cosa hai consolidato e cosa no,
+            e ti ripropone per primo quello che ancora non sai.
+          </p>
+        </header>
 
-        <div id="materie" class="materie-grid" hidden></div>
+        <section class="apertura-stato" id="stato" hidden>
+          <h2 class="sezione-titolo"><i class="ph ph-chart-line" aria-hidden="true"></i> A che punto sei</h2>
+          <div class="stato-righe" id="stato-righe"></div>
+        </section>
+
+        <section>
+          <h2 class="sezione-titolo"><i class="ph ph-compass" aria-hidden="true"></i> Cosa trovi qui</h2>
+
+          <div id="scheletro" class="materie-grid">
+            <div class="scheletro scheletro-card"></div>
+            <div class="scheletro scheletro-card"></div>
+            <div class="scheletro scheletro-card"></div>
+          </div>
+
+          <div id="sezioni" class="materie-grid" hidden></div>
+        </section>
+
+        <p class="nota-nome">
+          Akesis, dal greco <i lang="grc">akesis</i>, cura. Nella mitologia greca
+          Aceso era la figlia di Asclepio che presiedeva al processo di guarigione,
+          non all'istante in cui si guarisce.
+        </p>
+
       </div>
     </main>
   </div>
@@ -57,6 +82,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="home.js?v=10"></script>
+  <script type="module" src="home.js?v=12"></script>
 </body>
 </html>

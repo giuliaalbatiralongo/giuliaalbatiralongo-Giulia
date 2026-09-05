@@ -1663,3 +1663,329 @@ a.profilo-btn {
 }
 
 .azioni-revisione .link-testo { margin-right: auto; }
+
+/* ============================================================
+   Domande esami: note a comparsa e interrogazione
+   ============================================================ */
+
+.elenco-domande {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Piede della card: le note non stanno aperte, si chiedono. */
+.domanda-piede {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--linea);
+}
+
+.btn-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px 5px 8px;
+  border: 1px solid var(--linea-forte);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+  color: var(--testo);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 160ms var(--curva), color 160ms var(--curva);
+}
+
+.btn-note i { font-size: 15px; color: var(--testo-2); }
+
+.btn-note.vuoto { color: var(--testo-3); }
+.btn-note.vuoto i { color: var(--testo-3); }
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-note:hover { border-color: var(--accento); color: var(--accento); }
+  .btn-note:hover i { color: var(--accento); }
+}
+
+.btn-note:active { transform: scale(0.98); }
+
+/* ---------- Il riquadro delle note ---------- */
+
+.finestra {
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(640px, calc(100vh - 64px));
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+  color: var(--testo);
+  box-shadow: var(--ombra-3);
+  overflow: hidden;
+}
+
+.finestra::backdrop {
+  background: rgba(17, 17, 26, 0.32);
+  backdrop-filter: blur(3px);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .finestra::backdrop { backdrop-filter: none; background: rgba(17, 17, 26, 0.5); }
+}
+
+.finestra[open] {
+  animation: finestra-entra 180ms var(--curva);
+}
+
+@keyframes finestra-entra {
+  from { opacity: 0; transform: translateY(6px) scale(0.99); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .finestra[open] { animation: none; }
+}
+
+.finestra-testata {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--linea);
+}
+
+.finestra-occhiello {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--testo-3);
+  margin-bottom: 4px;
+}
+
+.finestra-titolo {
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.008em;
+}
+
+.btn-chiudi {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--r-controllo);
+  background: transparent;
+  color: var(--testo-2);
+  cursor: pointer;
+  transition: background-color 160ms var(--curva), color 160ms var(--curva);
+}
+
+.btn-chiudi i { font-size: 17px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-chiudi:hover { background: var(--superficie-alt); color: var(--testo); }
+}
+
+.finestra-corpo {
+  padding: 16px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.finestra-vuoto {
+  font-size: 13px;
+  color: var(--testo-3);
+  padding: 6px 0;
+}
+
+.nota {
+  padding: 12px 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie-alt);
+}
+
+.nota-testo {
+  font-size: 13.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.nota-piede {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+.finestra-fondo {
+  padding: 14px 20px 18px;
+  border-top: 1px solid var(--linea);
+  background: var(--superficie);
+}
+
+.campo-etichetta {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.004em;
+}
+
+.finestra-azioni {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.finestra-azioni .esito-form { margin: 0; margin-right: auto; font-size: 12.5px; }
+
+/* ---------- Interrogazione ---------- */
+
+.comandi-interrogazione {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+}
+
+.comandi-etichetta {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--testo-2);
+  margin-right: 4px;
+}
+
+.interrogazione-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.interrogazione-avanzamento {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--testo-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.interrogazione-azioni {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* ============================================================
+   Home: apertura e avanzamento
+   ============================================================ */
+
+.apertura {
+  max-width: 62ch;
+  margin-bottom: 40px;
+}
+
+.apertura-saluto {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--testo-3);
+  letter-spacing: -0.004em;
+  margin-bottom: 10px;
+}
+
+/* Il nome dell'app in apertura usa lo stesso carattere del marchio
+   nella barra laterale: e' la stessa cosa, deve sembrarlo. */
+.apertura-titolo {
+  font-family: 'Montserrat', 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 38px;
+  letter-spacing: -0.022em;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+
+.apertura-testo {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--testo-2);
+}
+
+.apertura-stato { margin-bottom: 36px; }
+
+.stato-righe {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 460px;
+  padding: 16px 18px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+}
+
+.stato-riga {
+  display: grid;
+  grid-template-columns: 132px 1fr 32px;
+  align-items: center;
+  gap: 12px;
+}
+
+.stato-riga-nome {
+  font-size: 13px;
+  color: var(--testo-2);
+}
+
+.stato-riga-valore {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Nessuna traccia colorata di sfondo: solo la parte piena, sull'accento. */
+.stato-barra {
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--linea);
+  overflow: hidden;
+}
+
+.stato-barra-pieno {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 2px;
+  background: var(--accento);
+}
+
+.nota-nome {
+  max-width: 62ch;
+  margin-top: 44px;
+  padding-top: 20px;
+  border-top: 1px solid var(--linea);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--testo-3);
+}
+
+.nota-nome i { font-style: italic; }
+
+@media (max-width: 640px) {
+  .apertura-titolo { font-size: 30px; }
+  .stato-riga { grid-template-columns: 108px 1fr 28px; }
+}

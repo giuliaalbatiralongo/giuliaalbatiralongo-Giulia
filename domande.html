@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
   <div class="app">
@@ -39,10 +39,10 @@
       <div class="contenuto-interno">
         <div class="testata">
           <div>
-            <h1 class="page-titolo">Domande esami</h1>
-            <p class="page-sub">Le domande che ricorrono agli orali, ordinate dalla più chiesta. Il pulsante più aggiunge una segnalazione.</p>
+            <h1 class="page-titolo" id="titolo">Domande esami</h1>
+            <p class="page-sub" id="sottotitolo">Le domande che ricorrono agli orali, raccolte per materia.</p>
           </div>
-          <a href="aggiungi-domanda.html" class="btn"><i class="ph ph-plus" aria-hidden="true"></i> Aggiungi domanda</a>
+          <div id="azioni-testata"></div>
         </div>
 
         <div id="scheletro">
@@ -50,10 +50,37 @@
           <div class="scheletro scheletro-card"></div>
         </div>
 
-        <div id="domande"></div>
+        <div id="contenuto-domande"></div>
       </div>
     </main>
   </div>
+
+  <!-- Riquadro delle note. Resta chiuso finche' non si chiede di vederle. -->
+  <dialog id="finestra-note" class="finestra">
+    <div class="finestra-testata">
+      <div>
+        <p class="finestra-occhiello">Note sulla domanda</p>
+        <p class="finestra-titolo" id="note-domanda"></p>
+      </div>
+      <button type="button" class="btn-chiudi" id="chiudi-note" aria-label="Chiudi le note">
+        <i class="ph ph-x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="finestra-corpo" id="note-elenco"></div>
+
+    <form class="finestra-fondo" id="form-nota">
+      <label class="campo-etichetta" for="nota-testo">Aggiungi la tua nota</label>
+      <textarea id="nota-testo" rows="2" required
+                placeholder="Cosa ha chiesto di preciso, come voleva la risposta"></textarea>
+      <div class="finestra-azioni">
+        <span class="esito-form" id="nota-esito"></span>
+        <button type="submit" class="btn btn-piccolo">
+          <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi nota
+        </button>
+      </div>
+    </form>
+  </dialog>
 
   <script>
     window.addEventListener('error', (e) => {
@@ -61,6 +88,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="domande.js?v=4"></script>
+  <script type="module" src="domande.js?v=6"></script>
 </body>
 </html>

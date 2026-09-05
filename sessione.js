@@ -4,9 +4,9 @@ import {
   getMateriali,
   linkMateriali,
   registraRisposta,
-} from './db.js?v=11';
+} from './db.js?v=13';
 import { iconaPerMateria } from './materie.js?v=3';
-import { proteggiPagina } from './auth.js?v=6';
+import { proteggiPagina } from './auth.js?v=7';
 
 const parametri = new URLSearchParams(window.location.search);
 const materiaFiltro = parametri.get('materia');
