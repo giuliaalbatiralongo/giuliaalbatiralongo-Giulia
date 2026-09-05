@@ -55,8 +55,22 @@ Il calendario c'e' (griglia del mese, prossime date con conto alla
 rovescia, appelli, esami a cui si e' iscritti, scadenze). Le date nascono
 private, con una spunta per renderle visibili a tutti.
 
+Copre anche tirocini, lezioni singole e preappelli, e il titolo puo'
+restare vuoto. Ogni categoria ha il suo colore.
+
+**Sul codice colore.** Contraddice la regola dell'accento unico che
+avevamo bloccato: e' stata una scelta esplicita di Giulia. I sei colori
+sono stati verificati con lo strumento della skill dei grafici (banda di
+luminosita', saturazione, separazione per daltonismo, contrasto), con
+valori distinti per chiaro e scuro. L'ordine in `TIPI_DATA` e' quello
+verificato: **non va cambiato senza rifare la verifica**. "Altro" resta
+senza colore di proposito.
+
 Aperte:
 
+- Giulia ha detto "io decido" quali colori: oggi la corrispondenza fra
+  categoria e colore e' fissa. Renderla scegliibile e' possibile, ma
+  vanno offerti solo i sei colori verificati
 - Non si puo' ancora **modificare** una data: si elimina e si riscrive
 - Nessun promemoria: la data si vede solo aprendo Akesis
 - Le date condivise le puo' aggiungere chiunque. Se un giorno saranno

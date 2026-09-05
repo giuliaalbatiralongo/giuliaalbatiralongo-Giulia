@@ -54,6 +54,21 @@
      l'accento, che al buio schiarisce e perderebbe leggibilita'. */
   --banner-fondo: #5b4bd6;
 
+  /* Codice colore del calendario.
+     Tavolozza verificata con lo strumento della skill dei grafici:
+     banda di luminosita', saturazione minima, separazione per
+     daltonismo (peggiore coppia adiacente delta E 11,2) e contrasto
+     sul fondo. L'ordine e' quello verificato: non va cambiato senza
+     rifare la verifica. Il colore non e' mai l'unico segnale, ogni
+     voce porta anche icona e testo. */
+  --tipo-iscritta: #5b4bd6;
+  --tipo-appello: #0f9d8f;
+  --tipo-preappello: #b5730d;
+  --tipo-tirocinio: #c0396b;
+  --tipo-lezione: #2563b0;
+  --tipo-scadenza: #4d7c0f;
+  --tipo-altro: #8a8d99;
+
   /* Stati di ripasso */
   --st-nuovo: #8a8d99;
   --st-ripassare: #b4700f;
@@ -94,6 +109,16 @@
     --accento-hover: #a294f5;
     --accento-tenue: rgba(139, 124, 240, 0.14);
     --banner-fondo: #4334a8;
+
+    /* Al buio i colori non si ribaltano: sono valori loro, verificati
+       contro il fondo scuro. */
+    --tipo-iscritta: #8b7cf0;
+    --tipo-appello: #0aa08f;
+    --tipo-preappello: #bd7c18;
+    --tipo-tirocinio: #cf4a72;
+    --tipo-lezione: #4785cc;
+    --tipo-scadenza: #6f9128;
+    --tipo-altro: #7a7e8a;
     --st-nuovo: #7a7e8a;
     --st-ripassare: #d99938;
     --st-consolidato: #4bbd80;
@@ -1917,6 +1942,7 @@ a.profilo-btn {
    ============================================================ */
 
 .contenuto-interno.largo { max-width: 1180px; }
+.contenuto-interno.pieno { max-width: 1460px; }
 
 /* Etichette di gruppo nella barra laterale. Servono adesso che le voci
    sono cinque, e serviranno di piu' quando saranno dieci. */
@@ -2680,16 +2706,18 @@ body.barra-chiusa .contenuto {
    ============================================================ */
 
 .calendario-impianto {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 20px;
-  align-items: start;
-}
-
-.calendario-lato {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+}
+
+/* Il calendario prende tutta la larghezza: e' la cosa che si guarda.
+   Quello che prima gli stava a fianco passa sotto, su due colonne. */
+.calendario-sotto {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
 }
 
 .mese { padding: 18px 20px 20px; }
@@ -2754,13 +2782,13 @@ body.barra-chiusa .contenuto {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  /* Altezza fissa, non quadrata: su un contenitore largo una cella
-     quadrata diventa alta duecento pixel e il numero galleggia nel vuoto. */
-  height: 52px;
-  padding: 0;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 4px;
+  /* Alta abbastanza da mostrare tre voci sotto il numero. Non quadrata:
+     su un contenitore largo una cella quadrata diventerebbe altissima. */
+  height: 118px;
+  padding: 6px 5px 5px;
   border: 1px solid transparent;
   border-radius: var(--r-controllo);
   background: transparent;
@@ -2771,7 +2799,12 @@ body.barra-chiusa .contenuto {
   transition: background-color 160ms var(--curva), border-color 160ms var(--curva);
 }
 
-.cella-numero { font-variant-numeric: tabular-nums; }
+.cella-numero {
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  padding-left: 3px;
+  flex-shrink: 0;
+}
 
 /* I giorni degli altri mesi restano, ma spenti: togliendoli la griglia
    avrebbe buchi e si perderebbe il senso della settimana. */
@@ -2782,7 +2815,7 @@ body.barra-chiusa .contenuto {
   font-weight: 700;
 }
 
-.cella-giorno.con-date { background: var(--superficie-alt); }
+.cella-giorno.con-date { border-color: var(--linea); }
 
 .cella-giorno.scelto {
   background: var(--accento-tenue);
@@ -2798,17 +2831,73 @@ body.barra-chiusa .contenuto {
   outline-offset: 1px;
 }
 
-.cella-segni {
+/* ---------- Voci dentro la cella ---------- */
+
+.cella-eventi {
   display: flex;
+  flex-direction: column;
   gap: 3px;
-  height: 5px;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.cella-punto {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accento);
+/* Il colore della categoria tinge il fondo e il bordo sinistro. Non e'
+   pero' l'unico segnale: ogni voce porta anche l'icona del tipo e il
+   testo, perche' il colore da solo non basta a chi non lo distingue. */
+.evento {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 5px;
+  border-radius: 5px;
+  border-left: 3px solid var(--colore);
+  background: var(--superficie-alt);
+  background: color-mix(in srgb, var(--colore) 13%, var(--superficie));
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: left;
+  min-width: 0;
+}
+
+.evento i { font-size: 12px; color: var(--colore); flex-shrink: 0; }
+
+.evento-testo {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.cella-resto {
+  padding-left: 6px;
+  font-size: 10.5px;
+  color: var(--testo-3);
+  text-align: left;
+}
+
+/* ---------- Legenda ---------- */
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-left: 12px;
+}
+
+.legenda-voce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--testo-2);
+  white-space: nowrap;
+}
+
+.legenda-segno {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex-shrink: 0;
 }
 
 /* ---------- Prossime date ---------- */
@@ -2976,5 +3065,16 @@ input[type="time"]:focus {
 
 @media (max-width: 560px) {
   .campo-doppio { grid-template-columns: 1fr; }
-  .cella-giorno { height: 44px; font-size: 12px; }
+  .cella-giorno { height: 92px; font-size: 12px; }
+}
+
+/* La testata del mese ospita anche la legenda: su schermi stretti va
+   a capo invece di comprimere i comandi. */
+.mese-testa { flex-wrap: wrap; }
+.mese-nome { flex: 0 0 auto; min-width: 150px; }
+.mese-testa .link-bottone { margin-right: auto; }
+
+@media (max-width: 900px) {
+  .calendario-sotto { grid-template-columns: 1fr; }
+  .legenda { margin-left: 0; width: 100%; }
 }

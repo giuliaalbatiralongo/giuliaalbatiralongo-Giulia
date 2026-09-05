@@ -5,8 +5,10 @@ import {
   giorniMancanti,
   contoAllaRovescia,
   nomeTipoData,
+  titoloData,
+  tipoData,
   TIPI_DATA,
-} from './db.js?v=19';
+} from './db.js?v=20';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -38,7 +40,31 @@ function chiave(data) {
 }
 
 function iconaTipo(tipo) {
-  return (TIPI_DATA.find((t) => t.chiave === tipo) || TIPI_DATA[3]).icona;
+  return tipoData(tipo).icona;
+}
+
+/* Il colore di una categoria arriva da un token del foglio di stile,
+   cosi' chiaro e scuro restano due tavolozze separate. */
+function coloreTipo(tipo) {
+  return `var(--tipo-${tipoData(tipo).chiave})`;
+}
+
+function disegnaLegenda() {
+  const el = document.getElementById('legenda');
+  el.innerHTML = '';
+
+  TIPI_DATA.forEach((t) => {
+    const voce = document.createElement('span');
+    voce.className = 'legenda-voce';
+
+    const segno = document.createElement('span');
+    segno.className = 'legenda-segno';
+    segno.style.background = `var(--tipo-${t.chiave})`;
+    voce.appendChild(segno);
+
+    voce.appendChild(document.createTextNode(t.nome));
+    el.appendChild(voce);
+  });
 }
 
 /* ---------- Griglia del mese ---------- */
@@ -69,8 +95,16 @@ function disegnaMese() {
   const oggi = chiave(new Date());
   elGriglia.innerHTML = '';
 
-  // Sei righe fisse: cosi' la griglia non cambia altezza cambiando mese.
-  for (let i = 0; i < 42; i += 1) {
+  // Tante righe quante ne servono davvero. Con celle alte, una sesta
+  // riga interamente del mese successivo e' una fascia di vuoto.
+  const giorniNelMese = new Date(
+    meseMostrato.getFullYear(),
+    meseMostrato.getMonth() + 1,
+    0
+  ).getDate();
+  const celle = Math.ceil((scarto + giorniNelMese) / 7) * 7;
+
+  for (let i = 0; i < celle; i += 1) {
     const data = new Date(inizio);
     data.setDate(data.getDate() + i);
     const k = chiave(data);
@@ -92,24 +126,42 @@ function disegnaMese() {
     cella.appendChild(numero);
 
     if (voci.length > 0) {
-      const segni = document.createElement('span');
-      segni.className = 'cella-segni';
-      // Massimo tre punti: oltre, il numero dice il resto.
-      voci.slice(0, 3).forEach(() => {
-        const punto = document.createElement('span');
-        punto.className = 'cella-punto';
-        segni.appendChild(punto);
-      });
-      cella.appendChild(segni);
+      const eventi = document.createElement('span');
+      eventi.className = 'cella-eventi';
 
-      const etichetta = voci
-        .map((v) => `${nomeTipoData(v.tipo)}: ${v.materia}`)
-        .join('. ');
+      // Tre voci per cella: oltre, la riga finale dice quante restano.
+      voci.slice(0, 3).forEach((v) => {
+        const evento = document.createElement('span');
+        evento.className = 'evento';
+        evento.style.setProperty('--colore', coloreTipo(v.tipo));
+
+        const icona = document.createElement('i');
+        icona.className = `ph ${iconaTipo(v.tipo)}`;
+        icona.setAttribute('aria-hidden', 'true');
+        evento.appendChild(icona);
+
+        const testo = document.createElement('span');
+        testo.className = 'evento-testo';
+        testo.textContent = v.ora ? `${v.ora.slice(0, 5)} ${titoloData(v)}` : titoloData(v);
+        evento.appendChild(testo);
+
+        eventi.appendChild(evento);
+      });
+
+      if (voci.length > 3) {
+        const resto = document.createElement('span');
+        resto.className = 'cella-resto';
+        resto.textContent = `e altri ${voci.length - 3}`;
+        eventi.appendChild(resto);
+      }
+
+      cella.appendChild(eventi);
+
+      const etichetta = voci.map((v) => `${nomeTipoData(v.tipo)}: ${titoloData(v)}`).join('. ');
       cella.setAttribute(
         'aria-label',
         `${data.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })}. ${etichetta}`
       );
-      cella.title = etichetta;
     } else {
       cella.setAttribute(
         'aria-label',
@@ -133,12 +185,13 @@ function creaVoce(voce, dentroPannello) {
 
   const icona = document.createElement('i');
   icona.className = `ph ${iconaTipo(voce.tipo)}`;
+  icona.style.color = coloreTipo(voce.tipo);
   icona.setAttribute('aria-hidden', 'true');
   testa.appendChild(icona);
 
   const materia = document.createElement('span');
   materia.className = 'data-voce-materia';
-  materia.textContent = voce.materia;
+  materia.textContent = titoloData(voce);
   testa.appendChild(materia);
 
   riga.appendChild(testa);
@@ -165,7 +218,7 @@ function creaVoce(voce, dentroPannello) {
     togli.className = 'link-bottone';
     togli.textContent = 'Elimina';
     togli.addEventListener('click', async () => {
-      if (!window.confirm(`Eliminare ${voce.materia} del ${voce.giorno}?`)) return;
+      if (!window.confirm(`Eliminare ${titoloData(voce)} del ${voce.giorno}?`)) return;
       togli.disabled = true;
       if (await eliminaDataEsame(voce.id)) {
         date = date.filter((d) => d.id !== voce.id);
@@ -242,6 +295,7 @@ function disegnaProssime() {
     // Il numero grande e' quello che si cerca davvero guardando qui.
     quando.textContent = g === 0 ? 'oggi' : g;
     if (g > 0) quando.classList.add('numero');
+    quando.style.color = coloreTipo(voce.tipo);
     riga.appendChild(quando);
 
     const testo = document.createElement('span');
@@ -249,7 +303,7 @@ function disegnaProssime() {
 
     const materia = document.createElement('span');
     materia.className = 'prossima-materia';
-    materia.textContent = voce.materia;
+    materia.textContent = titoloData(voce);
     testo.appendChild(materia);
 
     const meta = document.createElement('span');
@@ -320,7 +374,7 @@ form.addEventListener('submit', async (e) => {
 
   const salvata = await inserisciDataEsame({
     tipo: dati.get('tipo'),
-    materia: dati.get('materia').trim(),
+    materia: pulisci(dati.get('materia')),
     giorno: dati.get('giorno'),
     ora: pulisci(dati.get('ora')),
     luogo: pulisci(dati.get('luogo')),
@@ -367,6 +421,7 @@ async function avvia() {
     date = await getDateEsame();
 
     disegnaIntestazione();
+    disegnaLegenda();
     disegnaMese();
     disegnaProssime();
 

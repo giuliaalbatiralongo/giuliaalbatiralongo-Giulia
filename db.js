@@ -435,15 +435,34 @@ export async function eliminaNota(id) {
 
 /* ---------- Calendario ---------- */
 
+/* L'ordine conta: e' quello con cui la tavolozza dei colori e' stata
+   verificata, tinte vicine tenute lontane fra loro. Cambiarlo senza
+   rifare la verifica rischia di rendere due categorie indistinguibili
+   a chi ha problemi di percezione dei colori.
+
+   "Altro" resta senza colore di proposito: e' l'assenza di categoria, e
+   un grigio in mezzo a sei tinte non passerebbe comunque i controlli. */
 export const TIPI_DATA = [
-  { chiave: 'iscritta', nome: 'Sono iscritta', icona: 'ph-seal-check' },
+  { chiave: 'iscritta', nome: 'Esame', icona: 'ph-seal-check' },
   { chiave: 'appello', nome: 'Appello', icona: 'ph-calendar-blank' },
+  { chiave: 'preappello', nome: 'Preappello', icona: 'ph-calendar-plus' },
+  { chiave: 'tirocinio', nome: 'Tirocinio', icona: 'ph-first-aid-kit' },
+  { chiave: 'lezione', nome: 'Lezione', icona: 'ph-chalkboard-simple' },
   { chiave: 'scadenza', nome: 'Scadenza', icona: 'ph-hourglass-medium' },
   { chiave: 'altro', nome: 'Altro', icona: 'ph-dot-outline' },
 ];
 
+export function tipoData(chiave) {
+  return TIPI_DATA.find((t) => t.chiave === chiave) || TIPI_DATA[TIPI_DATA.length - 1];
+}
+
 export function nomeTipoData(chiave) {
-  return (TIPI_DATA.find((t) => t.chiave === chiave) || TIPI_DATA[3]).nome;
+  return tipoData(chiave).nome;
+}
+
+/* Il titolo puo' mancare: per un tirocinio spesso basta il tipo. */
+export function titoloData(voce) {
+  return voce.materia || nomeTipoData(voce.tipo);
 }
 
 export async function getDateEsame() {

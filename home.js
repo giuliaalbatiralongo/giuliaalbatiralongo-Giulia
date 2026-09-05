@@ -14,7 +14,7 @@ import {
   getTempoStudio,
   sommaPerSezione,
   formattaDurata,
-} from './db.js?v=19';
+} from './db.js?v=20';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');

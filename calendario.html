@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=29">
+  <link rel="stylesheet" href="style.css?v=30">
 </head>
 <body>
   <div class="app">
@@ -52,7 +52,7 @@
     </button>
 
     <main class="contenuto">
-      <div class="contenuto-interno largo">
+      <div class="contenuto-interno pieno">
         <div class="testata">
           <div>
             <h1 class="page-titolo">Calendario</h1>
@@ -79,13 +79,14 @@
                 <i class="ph ph-caret-right" aria-hidden="true"></i>
               </button>
               <button type="button" class="link-bottone" id="torna-oggi">Oggi</button>
+              <div class="legenda" id="legenda"></div>
             </div>
 
             <div class="griglia-giorni" id="intestazione-giorni" aria-hidden="true"></div>
             <div class="griglia-mese" id="griglia-mese"></div>
           </section>
 
-          <aside class="calendario-lato">
+          <div class="calendario-sotto">
             <section class="pannello">
               <div class="sezione-testa">
                 <h2 class="sezione-titolo">In arrivo</h2>
@@ -100,7 +101,7 @@
               </div>
               <div id="dettaglio-giorno"></div>
             </section>
-          </aside>
+          </div>
 
         </div>
       </div>
@@ -123,16 +124,20 @@
         <div class="campo">
           <label for="data-tipo">Che cos'e'</label>
           <select id="data-tipo" name="tipo" required>
-            <option value="iscritta">Sono iscritta</option>
+            <option value="iscritta">Esame</option>
             <option value="appello" selected>Appello</option>
+            <option value="preappello">Preappello</option>
+            <option value="tirocinio">Tirocinio</option>
+            <option value="lezione">Lezione</option>
             <option value="scadenza">Scadenza</option>
             <option value="altro">Altro</option>
           </select>
         </div>
 
         <div class="campo">
-          <label for="data-materia">Materia</label>
-          <input type="text" id="data-materia" name="materia" list="materie-suggerite" required>
+          <label for="data-materia">Titolo <span class="campo-nota">facoltativo</span></label>
+          <input type="text" id="data-materia" name="materia" list="materie-suggerite"
+                 placeholder="Materia, reparto, o cosa vuoi">
           <datalist id="materie-suggerite">
             <option value="Farmacologia 2">
             <option value="Gastroenterologia">
@@ -189,6 +194,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="calendario.js?v=1"></script>
+  <script type="module" src="calendario.js?v=3"></script>
 </body>
 </html>
