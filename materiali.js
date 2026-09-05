@@ -1,24 +1,36 @@
 import { getMateriali } from './db.js?v=6';
-import { creaIconaMateria } from './materie.js?v=2';
+import { iconaPerMateria } from './materie.js?v=3';
 
 function creaVoceMateriale(materiale) {
   const li = document.createElement('li');
 
-  const testo = document.createElement('span');
-  testo.className = 'vignetta-breve';
-  testo.textContent = materiale.titolo + (materiale.argomento ? ` — ${materiale.argomento}` : '');
-  li.appendChild(testo);
+  const blocco = document.createElement('div');
+  blocco.className = 'elenco-blocco';
+
+  const titolo = document.createElement('div');
+  titolo.className = 'elenco-testo';
+  titolo.textContent = materiale.titolo;
+  blocco.appendChild(titolo);
+
+  if (materiale.argomento) {
+    const meta = document.createElement('div');
+    meta.className = 'elenco-meta';
+    meta.textContent = materiale.argomento;
+    blocco.appendChild(meta);
+  }
+
+  li.appendChild(blocco);
 
   const link = document.createElement('a');
   link.href = materiale.url;
   link.target = '_blank';
   link.rel = 'noopener noreferrer';
-  link.className = 'link-cambia';
+  link.className = 'link-testo';
+  link.appendChild(document.createTextNode('Apri PDF'));
 
   const icona = document.createElement('i');
-  icona.className = 'ph ph-arrow-square-out';
+  icona.className = 'ph ph-arrow-up-right';
   icona.setAttribute('aria-hidden', 'true');
-  link.appendChild(document.createTextNode('Apri PDF'));
   link.appendChild(icona);
 
   li.appendChild(link);
@@ -30,17 +42,22 @@ function creaGruppoMateria(nome, materialiMateria) {
   const div = document.createElement('div');
   div.className = 'gruppo-materia';
 
-  const header = document.createElement('div');
-  header.className = 'gruppo-materia-header';
-  header.appendChild(creaIconaMateria(nome, true));
+  const testata = document.createElement('div');
+  testata.className = 'gruppo-materia-testata';
+
+  const icona = document.createElement('i');
+  icona.className = `ph ${iconaPerMateria(nome)}`;
+  icona.setAttribute('aria-hidden', 'true');
+  testata.appendChild(icona);
 
   const h3 = document.createElement('h3');
   h3.textContent = nome;
-  header.appendChild(h3);
+  testata.appendChild(h3);
 
-  div.appendChild(header);
+  div.appendChild(testata);
 
   const ul = document.createElement('ul');
+  ul.className = 'elenco';
   materialiMateria.forEach((m) => ul.appendChild(creaVoceMateriale(m)));
   div.appendChild(ul);
 
@@ -48,8 +65,8 @@ function creaGruppoMateria(nome, materialiMateria) {
 }
 
 async function mostraMateriali() {
-  const elScheletro = document.getElementById('scheletro-materiali');
-  const contenitoreEl = document.getElementById('materiali');
+  const elScheletro = document.getElementById('scheletro');
+  const contenitore = document.getElementById('materiali');
 
   try {
     const materiali = await getMateriali();
@@ -57,11 +74,9 @@ async function mostraMateriali() {
     if (materiali.length === 0) {
       elScheletro.innerHTML = `
         <div class="stato-vuoto">
-          <i class="ph ph-file-dashed stato-vuoto-icona" aria-hidden="true"></i>
+          <i class="ph ph-file-dashed" aria-hidden="true"></i>
           <p>Nessun materiale caricato finora.</p>
-          <a class="btn-primario" href="carica-materiale.html">
-            <i class="ph ph-upload-simple" aria-hidden="true"></i> Carica il primo PDF
-          </a>
+          <a class="btn" href="carica-materiale.html"><i class="ph ph-upload-simple" aria-hidden="true"></i> Carica il primo PDF</a>
         </div>
       `;
       return;
@@ -69,13 +84,12 @@ async function mostraMateriali() {
 
     elScheletro.remove();
 
-    const materieUniche = [...new Set(materiali.map((m) => m.materia))].sort();
-    materieUniche.forEach((nome) => {
-      const materialiMateria = materiali.filter((m) => m.materia === nome);
-      contenitoreEl.appendChild(creaGruppoMateria(nome, materialiMateria));
+    const materie = [...new Set(materiali.map((m) => m.materia))].sort();
+    materie.forEach((nome) => {
+      contenitore.appendChild(creaGruppoMateria(nome, materiali.filter((m) => m.materia === nome)));
     });
   } catch (errore) {
-    elScheletro.innerHTML = `<p class="errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
+    elScheletro.innerHTML = `<p class="messaggio-errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);
   }
 }

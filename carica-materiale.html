@@ -3,73 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carica materiale — Simulatore Casi Clinici</title>
+  <title>Carica materiale - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
-  <header class="top-bar">
-    <div class="top-bar-inner">
-      <div class="marchio">
-        <i class="ph ph-stethoscope marchio-icona" aria-hidden="true"></i>
-        <div>
-          <h1>Simulatore Casi Clinici</h1>
-          <p class="sottotitolo">Carica materiale</p>
-        </div>
-      </div>
-      <nav class="top-nav">
-        <a href="index.html">Home</a>
-        <a href="ripassa.html">Ripassa</a>
-        <a href="casi.html">I miei casi</a>
-        <a href="materiali.html" class="attivo">Materiali</a>
-        <a href="aggiungi.html">Aggiungi</a>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">AKESIS</div>
+
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
+        <a href="ripassa.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Ripassa</span></a>
+        <a href="casi.html" class="nav-voce"><i class="ph ph-list-checks" aria-hidden="true"></i><span>I miei casi</span></a>
+        <a href="materiali.html" class="nav-voce attivo"><i class="ph-fill ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
+        <a href="aggiungi.html" class="nav-voce"><i class="ph ph-plus-circle" aria-hidden="true"></i><span>Aggiungi</span></a>
       </nav>
-    </div>
-  </header>
 
-  <main>
-    <div class="contenuto-stretto">
-      <h2 class="page-title">Carica un materiale</h2>
-      <p class="page-sub">Un PDF (dispensa, articolo, riassunto) collegato a una materia.</p>
-
-      <form id="form-materiale">
-        <label for="materia">Materia</label>
-        <input type="text" id="materia" name="materia" list="materie-suggerite" required>
-        <datalist id="materie-suggerite">
-          <option value="Farmacologia 2">
-          <option value="Gastroenterologia">
-          <option value="Malattie Infettive">
-          <option value="Anatomia Patologica">
-          <option value="Organi di Senso">
-        </datalist>
-
-        <label for="argomento">Argomento <span class="opzionale">(facoltativo)</span></label>
-        <input type="text" id="argomento" name="argomento" placeholder="Es. Anticoagulanti">
-
-        <label for="titolo">Titolo del documento</label>
-        <input type="text" id="titolo" name="titolo" placeholder="Es. Dispensa anticoagulanti orali" required>
-
-        <label for="file">File PDF</label>
-        <input type="file" id="file" name="file" accept="application/pdf" required>
-
-        <button type="submit">
-          <i class="ph ph-upload-simple" aria-hidden="true"></i> Carica materiale
+      <div class="sidebar-fondo">
+        <button class="profilo-btn" type="button" disabled aria-disabled="true">
+          <span class="profilo-avatar"><i class="ph ph-user" aria-hidden="true"></i></span>
+          <span class="profilo-testo">
+            <span class="profilo-nome">Profilo</span>
+            <span class="profilo-nota">Presto disponibile</span>
+          </span>
         </button>
-      </form>
+      </div>
+    </aside>
 
-      <p id="esito-caricamento"></p>
-    </div>
-  </main>
+    <main class="contenuto">
+      <div class="contenuto-interno">
+        <div class="testata">
+          <div>
+            <h1 class="page-titolo">Carica un materiale</h1>
+            <p class="page-sub">Un PDF collegato a una materia: dispensa, articolo o riassunto.</p>
+          </div>
+          <a href="materiali.html" class="link-testo"><i class="ph ph-arrow-left" aria-hidden="true"></i> Torna ai materiali</a>
+        </div>
+
+        <form id="form-materiale" class="form">
+          <div class="campo">
+            <label for="materia">Materia</label>
+            <input type="text" id="materia" name="materia" list="materie-suggerite" required>
+            <datalist id="materie-suggerite">
+              <option value="Farmacologia 2">
+              <option value="Gastroenterologia">
+              <option value="Malattie Infettive">
+              <option value="Anatomia Patologica">
+              <option value="Organi di Senso">
+            </datalist>
+          </div>
+
+          <div class="campo">
+            <label for="argomento">Argomento <span class="campo-nota">facoltativo</span></label>
+            <input type="text" id="argomento" name="argomento" placeholder="Es. Anticoagulanti">
+          </div>
+
+          <div class="campo">
+            <label for="titolo">Titolo del documento</label>
+            <input type="text" id="titolo" name="titolo" placeholder="Es. Dispensa anticoagulanti orali" required>
+          </div>
+
+          <div class="campo">
+            <label for="file">File PDF</label>
+            <input type="file" id="file" name="file" accept="application/pdf" required>
+          </div>
+
+          <button type="submit" class="btn" style="align-self: flex-start">
+            <i class="ph ph-upload-simple" aria-hidden="true"></i> Carica materiale
+          </button>
+        </form>
+
+        <p id="esito" class="esito-form"></p>
+      </div>
+    </main>
+  </div>
 
   <script>
     window.addEventListener('error', (e) => {
-      const el = document.getElementById('esito-caricamento');
+      const el = document.getElementById('esito');
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="carica-materiale.js?v=2"></script>
+  <script type="module" src="carica-materiale.js?v=3"></script>
 </body>
 </html>

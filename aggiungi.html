@@ -3,107 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aggiungi caso — Simulatore Casi Clinici</title>
+  <title>Aggiungi caso - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
-  <header class="top-bar">
-    <div class="top-bar-inner">
-      <div class="marchio">
-        <i class="ph ph-stethoscope marchio-icona" aria-hidden="true"></i>
-        <div>
-          <h1>Simulatore Casi Clinici</h1>
-          <p class="sottotitolo">Aggiungi un caso</p>
-        </div>
-      </div>
-      <nav class="top-nav">
-        <a href="index.html">Home</a>
-        <a href="ripassa.html">Ripassa</a>
-        <a href="casi.html">I miei casi</a>
-        <a href="materiali.html">Materiali</a>
-        <a href="aggiungi.html" class="attivo">Aggiungi</a>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">AKESIS</div>
+
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
+        <a href="ripassa.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Ripassa</span></a>
+        <a href="casi.html" class="nav-voce"><i class="ph ph-list-checks" aria-hidden="true"></i><span>I miei casi</span></a>
+        <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
+        <a href="aggiungi.html" class="nav-voce attivo"><i class="ph-fill ph-plus-circle" aria-hidden="true"></i><span>Aggiungi</span></a>
       </nav>
-    </div>
-  </header>
 
-  <main>
-    <div class="contenuto-stretto">
-      <h2 class="page-title">Aggiungi un nuovo caso</h2>
-      <p class="page-sub">Il caso entra subito nel ripasso con stato "nuovo".</p>
-
-      <form id="form-caso">
-        <label for="materia">Materia</label>
-        <input type="text" id="materia" name="materia" list="materie-suggerite" required>
-        <datalist id="materie-suggerite">
-          <option value="Farmacologia 2">
-          <option value="Gastroenterologia">
-          <option value="Malattie Infettive">
-          <option value="Anatomia Patologica">
-          <option value="Organi di Senso">
-        </datalist>
-
-        <label for="argomento">Argomento <span class="opzionale">(facoltativo)</span></label>
-        <input type="text" id="argomento" name="argomento" placeholder="Es. Anticoagulanti">
-
-        <label for="vignetta">Vignetta clinica</label>
-        <textarea id="vignetta" name="vignetta" rows="4" required></textarea>
-
-        <label for="domanda">Domanda</label>
-        <textarea id="domanda" name="domanda" rows="2" required></textarea>
-
-        <p class="hint">Compila le quattro opzioni e seleziona quale è la risposta corretta.</p>
-
-        <div class="opzione-form">
-          <label for="opzione_a">
-            <input type="radio" name="corretta" value="a" required aria-label="Opzione A corretta">
-            Opzione A
-          </label>
-          <input type="text" id="opzione_a" name="opzione_a" required>
-        </div>
-        <div class="opzione-form">
-          <label for="opzione_b">
-            <input type="radio" name="corretta" value="b" aria-label="Opzione B corretta">
-            Opzione B
-          </label>
-          <input type="text" id="opzione_b" name="opzione_b" required>
-        </div>
-        <div class="opzione-form">
-          <label for="opzione_c">
-            <input type="radio" name="corretta" value="c" aria-label="Opzione C corretta">
-            Opzione C
-          </label>
-          <input type="text" id="opzione_c" name="opzione_c" required>
-        </div>
-        <div class="opzione-form">
-          <label for="opzione_d">
-            <input type="radio" name="corretta" value="d" aria-label="Opzione D corretta">
-            Opzione D
-          </label>
-          <input type="text" id="opzione_d" name="opzione_d" required>
-        </div>
-
-        <label for="spiegazione">Spiegazione</label>
-        <textarea id="spiegazione" name="spiegazione" rows="3" required></textarea>
-
-        <button type="submit">
-          <i class="ph ph-floppy-disk" aria-hidden="true"></i> Salva caso
+      <div class="sidebar-fondo">
+        <button class="profilo-btn" type="button" disabled aria-disabled="true">
+          <span class="profilo-avatar"><i class="ph ph-user" aria-hidden="true"></i></span>
+          <span class="profilo-testo">
+            <span class="profilo-nome">Profilo</span>
+            <span class="profilo-nota">Presto disponibile</span>
+          </span>
         </button>
-      </form>
+      </div>
+    </aside>
 
-      <p id="esito-salvataggio"></p>
-    </div>
-  </main>
+    <main class="contenuto">
+      <div class="contenuto-interno">
+        <h1 class="page-titolo">Aggiungi un caso</h1>
+        <p class="page-sub">Il caso entra subito nel ripasso con stato nuovo.</p>
+
+        <form id="form-caso" class="form">
+          <div class="campo">
+            <label for="materia">Materia</label>
+            <input type="text" id="materia" name="materia" list="materie-suggerite" required>
+            <datalist id="materie-suggerite">
+              <option value="Farmacologia 2">
+              <option value="Gastroenterologia">
+              <option value="Malattie Infettive">
+              <option value="Anatomia Patologica">
+              <option value="Organi di Senso">
+            </datalist>
+          </div>
+
+          <div class="campo">
+            <label for="argomento">Argomento <span class="campo-nota">facoltativo</span></label>
+            <input type="text" id="argomento" name="argomento" placeholder="Es. Anticoagulanti">
+          </div>
+
+          <div class="campo">
+            <label for="vignetta">Vignetta clinica</label>
+            <textarea id="vignetta" name="vignetta" rows="5" required></textarea>
+          </div>
+
+          <div class="campo">
+            <label for="domanda">Domanda</label>
+            <textarea id="domanda" name="domanda" rows="2" required></textarea>
+          </div>
+
+          <div class="gruppo-opzioni">
+            <p class="gruppo-opzioni-nota">Compila le quattro opzioni e seleziona quella corretta.</p>
+
+            <div class="riga-opzione">
+              <label for="opzione_a"><input type="radio" name="corretta" value="a" required> Opzione A</label>
+              <input type="text" id="opzione_a" name="opzione_a" required>
+            </div>
+            <div class="riga-opzione">
+              <label for="opzione_b"><input type="radio" name="corretta" value="b"> Opzione B</label>
+              <input type="text" id="opzione_b" name="opzione_b" required>
+            </div>
+            <div class="riga-opzione">
+              <label for="opzione_c"><input type="radio" name="corretta" value="c"> Opzione C</label>
+              <input type="text" id="opzione_c" name="opzione_c" required>
+            </div>
+            <div class="riga-opzione">
+              <label for="opzione_d"><input type="radio" name="corretta" value="d"> Opzione D</label>
+              <input type="text" id="opzione_d" name="opzione_d" required>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="spiegazione">Spiegazione</label>
+            <textarea id="spiegazione" name="spiegazione" rows="4" required></textarea>
+          </div>
+
+          <button type="submit" class="btn" style="align-self: flex-start">
+            <i class="ph ph-check" aria-hidden="true"></i> Salva caso
+          </button>
+        </form>
+
+        <p id="esito" class="esito-form"></p>
+      </div>
+    </main>
+  </div>
 
   <script>
     window.addEventListener('error', (e) => {
-      const el = document.getElementById('esito-salvataggio');
+      const el = document.getElementById('esito');
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="aggiungi.js?v=5"></script>
+  <script type="module" src="aggiungi.js?v=6"></script>
 </body>
 </html>

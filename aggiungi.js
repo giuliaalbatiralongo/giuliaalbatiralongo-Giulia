@@ -1,37 +1,41 @@
 import { inserisciCaso } from './db.js?v=6';
 
 const form = document.getElementById('form-caso');
-const elEsito = document.getElementById('esito-salvataggio');
+const elEsito = document.getElementById('esito');
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const datiForm = new FormData(form);
-  const argomento = datiForm.get('argomento');
+  const dati = new FormData(form);
+  const argomento = dati.get('argomento');
+
   const nuovoCaso = {
-    materia: datiForm.get('materia'),
+    materia: dati.get('materia'),
     argomento: argomento ? argomento.trim() || null : null,
-    vignetta: datiForm.get('vignetta'),
-    domanda: datiForm.get('domanda'),
-    opzione_a: datiForm.get('opzione_a'),
-    opzione_b: datiForm.get('opzione_b'),
-    opzione_c: datiForm.get('opzione_c'),
-    opzione_d: datiForm.get('opzione_d'),
-    risposta_corretta: datiForm.get('corretta'),
-    spiegazione: datiForm.get('spiegazione'),
+    vignetta: dati.get('vignetta'),
+    domanda: dati.get('domanda'),
+    opzione_a: dati.get('opzione_a'),
+    opzione_b: dati.get('opzione_b'),
+    opzione_c: dati.get('opzione_c'),
+    opzione_d: dati.get('opzione_d'),
+    risposta_corretta: dati.get('corretta'),
+    spiegazione: dati.get('spiegazione'),
     stato: 'nuovo',
   };
+
+  elEsito.className = 'esito-form attesa';
+  elEsito.textContent = 'Salvataggio in corso';
 
   const salvato = await inserisciCaso(nuovoCaso);
 
   if (salvato) {
+    elEsito.className = 'esito-form ok';
     elEsito.innerHTML =
-      '<i class="ph ph-check-circle" aria-hidden="true"></i> Caso salvato. Lo trovi in "Ripassa" e in "I miei casi".';
-    elEsito.className = 'successo';
+      '<i class="ph-fill ph-check-circle" aria-hidden="true"></i> Caso salvato. Lo trovi in Ripassa e nei tuoi casi.';
     form.reset();
   } else {
+    elEsito.className = 'esito-form ko';
     elEsito.innerHTML =
-      '<i class="ph ph-x-circle" aria-hidden="true"></i> Non sono riuscita a salvare il caso. Riprova.';
-    elEsito.className = 'errore';
+      '<i class="ph-fill ph-x-circle" aria-hidden="true"></i> Non sono riuscita a salvare il caso. Riprova.';
   }
 });

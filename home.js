@@ -1,11 +1,11 @@
 import { getCasiClinici } from './db.js?v=6';
-import { creaIconaMateria } from './materie.js?v=2';
+import { iconaPerMateria } from './materie.js?v=3';
 
 const STATI = ['nuovo', 'da_ripassare', 'consolidato'];
 const ETICHETTE_STATO = {
-  nuovo: 'nuovo',
+  nuovo: 'nuovi',
   da_ripassare: 'da ripassare',
-  consolidato: 'consolidato',
+  consolidato: 'consolidati',
 };
 
 function contaPerStato(casiMateria) {
@@ -16,64 +16,68 @@ function contaPerStato(casiMateria) {
   return conteggi;
 }
 
-function creaPill(stato, numero) {
-  const span = document.createElement('span');
-  span.className = `pill pill-${stato}`;
-  span.textContent = `${numero} ${ETICHETTE_STATO[stato]}`;
-  return span;
-}
-
 function creaCardMateria(nome, casiMateria, isTutte = false) {
   const a = document.createElement('a');
   a.className = 'materia-card' + (isTutte ? ' tutte' : '');
   a.href = isTutte ? 'ripassa.html' : `ripassa.html?materia=${encodeURIComponent(nome)}`;
 
-  const top = document.createElement('div');
-  top.className = 'materia-card-top';
-  top.appendChild(creaIconaMateria(isTutte ? null : nome));
+  const testata = document.createElement('div');
+  testata.className = 'materia-testata';
 
-  const h3 = document.createElement('h3');
-  h3.textContent = isTutte ? 'Tutte le materie' : nome;
-  top.appendChild(h3);
+  const badge = document.createElement('span');
+  badge.className = 'materia-icona';
+  const icona = document.createElement('i');
+  icona.className = `ph ${iconaPerMateria(isTutte ? null : nome)}`;
+  icona.setAttribute('aria-hidden', 'true');
+  badge.appendChild(icona);
+  testata.appendChild(badge);
 
-  a.appendChild(top);
+  const testo = document.createElement('div');
+  const titolo = document.createElement('div');
+  titolo.className = 'materia-nome';
+  titolo.textContent = isTutte ? 'Tutte le materie' : nome;
+  testo.appendChild(titolo);
 
-  const stats = document.createElement('div');
-  stats.className = 'materia-stats';
+  const conteggio = document.createElement('div');
+  conteggio.className = 'materia-conteggio';
+  conteggio.textContent = `${casiMateria.length} ${casiMateria.length === 1 ? 'caso' : 'casi'}`;
+  testo.appendChild(conteggio);
+
+  testata.appendChild(testo);
+  a.appendChild(testata);
+
+  const stati = document.createElement('div');
+  stati.className = 'materia-stati';
   const conteggi = contaPerStato(casiMateria);
   STATI.forEach((stato) => {
     if (conteggi[stato] > 0) {
-      stats.appendChild(creaPill(stato, conteggi[stato]));
+      const span = document.createElement('span');
+      span.className = `stato stato-${stato}`;
+      span.textContent = `${conteggi[stato]} ${ETICHETTE_STATO[stato]}`;
+      stati.appendChild(span);
     }
   });
-  a.appendChild(stats);
+  a.appendChild(stati);
 
   return a;
 }
 
-function mostraStatoVuoto(contenitore) {
-  contenitore.innerHTML = `
-    <div class="stato-vuoto">
-      <i class="ph ph-folder-open stato-vuoto-icona" aria-hidden="true"></i>
-      <p>Non hai ancora nessun caso clinico.</p>
-      <a class="btn-primario" href="aggiungi.html">
-        <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi il primo caso
-      </a>
-    </div>
-  `;
-  contenitore.hidden = false;
-}
-
 async function avvia() {
-  const elScheletro = document.getElementById('scheletro-home');
+  const elScheletro = document.getElementById('scheletro');
   const elMaterie = document.getElementById('materie');
 
   try {
     const casi = await getCasiClinici();
-    elScheletro.remove();
 
     if (casi.length === 0) {
-      mostraStatoVuoto(elMaterie);
+      elScheletro.innerHTML = `
+        <div class="stato-vuoto">
+          <i class="ph ph-folder-open" aria-hidden="true"></i>
+          <p>Non hai ancora nessun caso clinico.</p>
+          <a class="btn" href="aggiungi.html"><i class="ph ph-plus" aria-hidden="true"></i> Aggiungi il primo caso</a>
+        </div>
+      `;
+      elScheletro.className = '';
       return;
     }
 
@@ -81,13 +85,14 @@ async function avvia() {
 
     elMaterie.appendChild(creaCardMateria(null, casi, true));
     materieUniche.forEach((nome) => {
-      const casiMateria = casi.filter((c) => c.materia === nome);
-      elMaterie.appendChild(creaCardMateria(nome, casiMateria));
+      elMaterie.appendChild(creaCardMateria(nome, casi.filter((c) => c.materia === nome)));
     });
 
+    elScheletro.remove();
     elMaterie.hidden = false;
   } catch (errore) {
-    elScheletro.innerHTML = `<p class="errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
+    elScheletro.className = '';
+    elScheletro.innerHTML = `<p class="messaggio-errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);
   }
 }

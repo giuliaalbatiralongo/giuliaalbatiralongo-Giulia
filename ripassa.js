@@ -1,5 +1,5 @@
 import { getCasiClinici, aggiornaStatoCaso, getMateriali } from './db.js?v=6';
-import { iconaPerMateria } from './materie.js?v=2';
+import { iconaPerMateria } from './materie.js?v=3';
 
 const parametri = new URLSearchParams(window.location.search);
 const materiaFiltro = parametri.get('materia');
@@ -8,35 +8,29 @@ let casi = [];
 let casoCorrente = null;
 const materialiPerMateria = {};
 
-const elScheletro = document.getElementById('scheletro-caso');
+const elScheletro = document.getElementById('scheletro');
 const elCaso = document.getElementById('caso');
-const elTitoloMateria = document.getElementById('titolo-materia');
-const elMateria = document.getElementById('materia-label');
-const elVignetta = document.getElementById('vignetta-text');
-const elDomanda = document.getElementById('domanda-text');
+const elTitolo = document.getElementById('titolo-materia');
+const elCasoMateria = document.getElementById('caso-materia');
+const elVignetta = document.getElementById('caso-vignetta');
+const elDomanda = document.getElementById('caso-domanda');
 const elOpzioni = document.getElementById('opzioni');
 const elRisultato = document.getElementById('risultato');
 const elProssimo = document.getElementById('prossimo');
-const elMaterialiLaterali = document.getElementById('materiali-laterali');
-const elMaterialiLaterialiLista = document.getElementById('materiali-laterali-lista');
+const elPannello = document.getElementById('materiali-laterali');
+const elPannelloLista = document.getElementById('materiali-laterali-lista');
 
-elTitoloMateria.textContent = materiaFiltro || 'Tutte le materie';
+elTitolo.textContent = materiaFiltro || 'Tutte le materie';
 
-// Logica di avanzamento: nuovo -> da_ripassare -> consolidato.
-// Una risposta sbagliata riporta sempre il caso a "da_ripassare",
-// anche se era gia' consolidato.
+// Avanzamento: nuovo -> da_ripassare -> consolidato.
+// Una risposta sbagliata riporta sempre il caso a "da_ripassare".
 function calcolaProssimoStato(statoAttuale, rispostaCorretta) {
-  if (!rispostaCorretta) {
-    return 'da_ripassare';
-  }
-  if (statoAttuale === 'nuovo') {
-    return 'da_ripassare';
-  }
+  if (!rispostaCorretta) return 'da_ripassare';
+  if (statoAttuale === 'nuovo') return 'da_ripassare';
   return 'consolidato';
 }
 
-// I casi non ancora consolidati hanno priorita': se ce ne sono,
-// il prossimo caso viene scelto solo tra quelli.
+// I casi non ancora consolidati hanno priorita'.
 function scegliCaso() {
   const daRipassare = casi.filter((c) => c.stato !== 'consolidato');
   const pool = daRipassare.length > 0 ? daRipassare : casi;
@@ -50,11 +44,11 @@ async function mostraMaterialiCorrelati(materia) {
   const materiali = materialiPerMateria[materia];
 
   if (materiali.length === 0) {
-    elMaterialiLaterali.hidden = true;
+    elPannello.hidden = true;
     return;
   }
 
-  elMaterialiLaterialiLista.innerHTML = '';
+  elPannelloLista.innerHTML = '';
   materiali.forEach((m) => {
     const li = document.createElement('li');
     const a = document.createElement('a');
@@ -69,21 +63,22 @@ async function mostraMaterialiCorrelati(materia) {
     a.appendChild(document.createTextNode(m.titolo));
 
     li.appendChild(a);
-    elMaterialiLaterialiLista.appendChild(li);
+    elPannelloLista.appendChild(li);
   });
-  elMaterialiLaterali.hidden = false;
+  elPannello.hidden = false;
 }
 
 function mostraCaso(caso) {
   casoCorrente = caso;
 
-  const { icona } = iconaPerMateria(caso.materia);
-  elMateria.innerHTML = '';
-  const iconaEl = document.createElement('i');
-  iconaEl.className = `ph ${icona}`;
-  iconaEl.setAttribute('aria-hidden', 'true');
-  elMateria.appendChild(iconaEl);
-  elMateria.appendChild(document.createTextNode(caso.materia));
+  elCasoMateria.innerHTML = '';
+  const icona = document.createElement('i');
+  icona.className = `ph ${iconaPerMateria(caso.materia)}`;
+  icona.setAttribute('aria-hidden', 'true');
+  elCasoMateria.appendChild(icona);
+  elCasoMateria.appendChild(
+    document.createTextNode(caso.argomento ? `${caso.materia} · ${caso.argomento}` : caso.materia)
+  );
 
   elVignetta.textContent = caso.vignetta;
   elDomanda.textContent = caso.domanda;
@@ -105,8 +100,8 @@ function mostraCaso(caso) {
     btn.className = 'opzione-btn';
 
     const lettera = document.createElement('span');
-    lettera.className = 'lettera';
-    lettera.textContent = `${opz.lettera.toUpperCase()})`;
+    lettera.className = 'opzione-lettera';
+    lettera.textContent = opz.lettera.toUpperCase();
     btn.appendChild(lettera);
     btn.appendChild(document.createTextNode(opz.testo));
 
@@ -127,10 +122,10 @@ async function rispondi(letteraScelta, bottoneCliccato) {
   elRisultato.hidden = false;
   elRisultato.innerHTML = `
     <p class="esito">
-      <i class="ph ${corretto ? 'ph-check-circle' : 'ph-x-circle'}" aria-hidden="true"></i>
+      <i class="ph-fill ${corretto ? 'ph-check-circle' : 'ph-x-circle'}" aria-hidden="true"></i>
       ${corretto ? 'Risposta corretta' : 'Risposta errata'}
     </p>
-    <p>${casoCorrente.spiegazione}</p>
+    <p class="spiegazione">${casoCorrente.spiegazione}</p>
   `;
   elProssimo.hidden = false;
 
@@ -147,28 +142,18 @@ elProssimo.addEventListener('click', () => {
   mostraCaso(scegliCaso());
 });
 
-function mostraStatoVuoto(messaggio) {
-  elScheletro.innerHTML = `
-    <div class="stato-vuoto">
-      <i class="ph ph-folder-open stato-vuoto-icona" aria-hidden="true"></i>
-      <p>${messaggio}</p>
-      <a class="btn-primario" href="aggiungi.html">
-        <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un caso
-      </a>
-    </div>
-  `;
-}
-
 async function avvia() {
   try {
     casi = await getCasiClinici(materiaFiltro || undefined);
 
     if (casi.length === 0) {
-      mostraStatoVuoto(
-        materiaFiltro
-          ? `Nessun caso per "${materiaFiltro}".`
-          : 'Nessun caso nel database.'
-      );
+      elScheletro.innerHTML = `
+        <div class="stato-vuoto">
+          <i class="ph ph-folder-open" aria-hidden="true"></i>
+          <p>${materiaFiltro ? `Nessun caso per ${materiaFiltro}.` : 'Nessun caso nel database.'}</p>
+          <a class="btn" href="aggiungi.html"><i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un caso</a>
+        </div>
+      `;
       return;
     }
 
@@ -176,7 +161,7 @@ async function avvia() {
     elCaso.hidden = false;
     mostraCaso(scegliCaso());
   } catch (errore) {
-    elScheletro.innerHTML = `<p class="errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
+    elScheletro.innerHTML = `<p class="messaggio-errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);
   }
 }
