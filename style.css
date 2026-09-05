@@ -1129,12 +1129,19 @@ i[class*="ph-"] {
    Pannello materiali correlati
    ============================================================ */
 
+/* Un pannello e' un riquadro, e basta. L'appiccicosita' allo
+   scorrimento vale solo per il pannello dei materiali dentro la
+   sessione di quiz, dove serve a tenerlo accanto al caso: applicata a
+   tutti, faceva scavalcare il calendario al riquadro "In arrivo". */
 .pannello {
   background: var(--superficie);
   border: 1px solid var(--linea);
   border-radius: var(--r-card);
   box-shadow: var(--ombra-1);
   padding: 18px;
+}
+
+.ripassa-layout .pannello {
   position: sticky;
   top: 40px;
 }
@@ -1583,7 +1590,7 @@ a.profilo-btn {
 
 @media (max-width: 1000px) {
   .ripassa-layout { grid-template-columns: 1fr; }
-  .pannello { position: static; }
+  .ripassa-layout .pannello { position: static; }
 }
 
 @media (max-width: 820px) {
@@ -2142,14 +2149,6 @@ a.tessera:active { transform: scale(0.99); }
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.pannello {
-  padding: 18px;
-  border: 1px solid var(--linea);
-  border-radius: var(--r-card);
-  background: var(--superficie);
-  box-shadow: var(--ombra-1);
 }
 
 .pannello-nota {
