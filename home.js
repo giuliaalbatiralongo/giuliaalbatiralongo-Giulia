@@ -7,7 +7,7 @@ import {
   getRisposte,
   calcolaStatistiche,
 } from './db.js?v=13';
-import { proteggiPagina } from './auth.js?v=7';
+import { proteggiPagina } from './auth.js?v=8';
 
 const elScheletro = document.getElementById('scheletro');
 const elSezioni = document.getElementById('sezioni');

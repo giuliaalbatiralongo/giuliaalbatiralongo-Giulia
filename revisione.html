@@ -9,18 +9,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="style.css?v=23">
 </head>
 <body>
   <div class="app">
-    <aside class="sidebar">
-      <div class="logo">AKESIS</div>
+    <aside class="sidebar" id="barra">
+      <div class="sidebar-testa">
+        <div class="logo">AKESIS</div>
+        <button type="button" class="btn-barra" id="chiudi-barra"
+                aria-label="Nascondi il menu" aria-controls="barra" aria-expanded="true">
+          <i class="ph ph-sidebar-simple" aria-hidden="true"></i>
+        </button>
+      </div>
 
       <nav class="sidebar-nav">
         <p class="nav-gruppo">Studio</p>
         <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
         <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
+        <a href="ssm.html" class="nav-voce"><i class="ph ph-target" aria-hidden="true"></i><span>Test SSM</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <p class="nav-gruppo" data-solo-admin hidden>Gestione</p>
         <a href="revisione.html" class="nav-voce attivo" data-solo-admin hidden><i class="ph-fill ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
@@ -36,6 +43,11 @@
         </button>
       </div>
     </aside>
+
+    <button type="button" class="btn-barra btn-barra-fuori" id="apri-barra" hidden
+            aria-label="Mostra il menu" aria-controls="barra" aria-expanded="false">
+      <i class="ph ph-sidebar-simple" aria-hidden="true"></i>
+    </button>
 
     <main class="contenuto">
       <div class="contenuto-interno">

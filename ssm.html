@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Materiali - Akesis</title>
+  <title>Test SSM - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,8 +27,8 @@
         <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
         <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
-        <a href="ssm.html" class="nav-voce"><i class="ph ph-target" aria-hidden="true"></i><span>Test SSM</span></a>
-        <a href="materiali.html" class="nav-voce attivo"><i class="ph-fill ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
+        <a href="ssm.html" class="nav-voce attivo"><i class="ph-fill ph-target" aria-hidden="true"></i><span>Test SSM</span></a>
+        <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <p class="nav-gruppo" data-solo-admin hidden>Gestione</p>
         <a href="revisione.html" class="nav-voce" data-solo-admin hidden><i class="ph ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
       </nav>
@@ -51,30 +51,46 @@
 
     <main class="contenuto">
       <div class="contenuto-interno">
-        <div class="testata">
-          <div>
-            <h1 class="page-titolo" id="titolo">Materiali di studio</h1>
-            <p class="page-sub" id="sottotitolo">Scegli una categoria per vedere i documenti.</p>
+        <h1 class="page-titolo">Test SSM</h1>
+        <p class="page-sub">Simulatore per il concorso di specializzazione.</p>
+
+        <div class="in-preparazione">
+          <span class="in-preparazione-segno">
+            <i class="ph ph-target" aria-hidden="true"></i>
+          </span>
+
+          <h2 class="in-preparazione-titolo">Questa sezione non e' ancora attiva</h2>
+
+          <p class="in-preparazione-testo">
+            Qui andranno le domande dei test di specializzazione degli anni
+            passati, raccolte anno per anno, per esercitarsi con lo stesso
+            formato della prova vera: quiz a risposta multipla, a tempo,
+            con il punteggio calcolato come al concorso.
+          </p>
+
+          <p class="in-preparazione-testo">
+            La sezione resta chiusa finche non ci sono le domande. Aprirla
+            vuota servirebbe solo a ricordare che e vuota.
+          </p>
+
+          <div class="in-preparazione-passi">
+            <h3 class="in-preparazione-sottotitolo">Quando ci torneremo, servira decidere</h3>
+            <ul>
+              <li>Da dove arrivano le domande e come si caricano, una alla volta o a blocchi</li>
+              <li>Se una prova rispetta i tempi e il punteggio del concorso, oppure serve solo ad allenarsi</li>
+              <li>Se conservare i risultati di ogni simulazione per vedere l andamento</li>
+              <li>Se le domande restano divise per anno, per materia, o per entrambe le cose</li>
+            </ul>
           </div>
-          <div id="azioni-testata"></div>
-        </div>
 
-        <div id="scheletro">
-          <div class="scheletro scheletro-riga" style="width: 180px"></div>
-          <div class="scheletro scheletro-card"></div>
+          <a href="index.html" class="link-testo">
+            <i class="ph ph-arrow-left" aria-hidden="true"></i> Torna alla home
+          </a>
         </div>
-
-        <div id="contenuto-materiali"></div>
       </div>
     </main>
   </div>
 
-  <script>
-    window.addEventListener('error', (e) => {
-      const el = document.getElementById('scheletro');
-      if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
-    });
-  </script>
-  <script type="module" src="materiali.js?v=9"></script>
+  <script type="module" src="ssm.js?v=1"></script>
 </body>
 </html>

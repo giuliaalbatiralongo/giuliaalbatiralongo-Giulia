@@ -1,5 +1,5 @@
 import { inserisciCaso } from './db.js?v=13';
-import { proteggiPagina } from './auth.js?v=7';
+import { proteggiPagina } from './auth.js?v=8';
 
 let profiloCorrente = null;
 

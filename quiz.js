@@ -1,6 +1,6 @@
 import { getCasiClinici, getRisposte, calcolaStatistiche } from './db.js?v=13';
 import { iconaPerMateria } from './materie.js?v=3';
-import { proteggiPagina } from './auth.js?v=7';
+import { proteggiPagina } from './auth.js?v=8';
 
 const STATI = ['nuovo', 'da_ripassare', 'consolidato'];
 const ETICHETTE_PLURALE = {

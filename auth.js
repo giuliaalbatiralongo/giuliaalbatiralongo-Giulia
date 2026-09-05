@@ -157,7 +157,65 @@ export async function proteggiPagina() {
 
   mostraProfiloInSidebar(profilo);
   adeguaInterfacciaAlRuolo(profilo);
+  preparaBarraLaterale();
   return profilo;
+}
+
+/* ---------- Barra laterale apribile ----------
+   La scelta viene ricordata nel browser, cosi' passando da una pagina
+   all'altra il menu resta come l'hai lasciato. Se il browser vieta di
+   salvare (finestra anonima, dati di sito bloccati) la scelta vale
+   solo per la pagina aperta: e' un fastidio, non un errore. */
+
+const CHIAVE_BARRA = 'akesis-barra';
+
+function barraChiusaDaMemoria() {
+  try {
+    return window.localStorage.getItem(CHIAVE_BARRA) === 'chiusa';
+  } catch (errore) {
+    return false;
+  }
+}
+
+function ricordaStatoBarra(chiusa) {
+  try {
+    window.localStorage.setItem(CHIAVE_BARRA, chiusa ? 'chiusa' : 'aperta');
+  } catch (errore) {
+    /* niente da fare */
+  }
+}
+
+function preparaBarraLaterale() {
+  const barra = document.getElementById('barra');
+  const chiudi = document.getElementById('chiudi-barra');
+  const apri = document.getElementById('apri-barra');
+  if (!barra || !chiudi || !apri) return;
+
+  function applica(chiusa, daClic) {
+    document.body.classList.toggle('barra-chiusa', chiusa);
+    chiudi.setAttribute('aria-expanded', String(!chiusa));
+    apri.setAttribute('aria-expanded', String(!chiusa));
+    apri.hidden = !chiusa;
+    if (daClic) ricordaStatoBarra(chiusa);
+  }
+
+  applica(barraChiusaDaMemoria(), false);
+
+  // Le transizioni si accendono dopo il primo disegno: senza questo,
+  // aprendo una pagina col menu gia' chiuso lo si vedrebbe scivolare via.
+  requestAnimationFrame(() => document.body.classList.add('barra-pronta'));
+
+  // Chiudendo, il comando sparisce: chi usa la tastiera resterebbe senza
+  // punto di partenza, quindi lo spostiamo sul pulsante che compare.
+  chiudi.addEventListener('click', () => {
+    applica(true, true);
+    apri.focus();
+  });
+
+  apri.addEventListener('click', () => {
+    applica(false, true);
+    chiudi.focus();
+  });
 }
 
 /* Nasconde a chi non e' amministratrice le parti riservate. Non e' una

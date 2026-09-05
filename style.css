@@ -175,14 +175,21 @@ i[class*="ph-"] {
   }
 }
 
+.sidebar-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 2px 0 10px;
+  margin-bottom: 26px;
+}
+
 .logo {
   font-family: "Montserrat", system-ui, sans-serif;
   font-weight: 700;
   font-size: 19px;
   letter-spacing: 0.13em;
   color: var(--testo);
-  padding: 4px 10px 0;
-  margin-bottom: 26px;
   user-select: none;
 }
 
@@ -1947,11 +1954,13 @@ a.profilo-btn {
   margin-bottom: 12px;
 }
 
+/* Una frase sola: puo' portare piu' peso di un paragrafo. */
 .banner-riga {
-  font-size: 14.5px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.88);
-  margin-bottom: 22px;
+  font-size: 17px;
+  line-height: 1.45;
+  letter-spacing: -0.008em;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 24px;
 }
 
 /* Un solo segno decorativo, tagliato dal bordo: da' profondita' senza
@@ -2191,4 +2200,165 @@ a.tessera:active { transform: scale(0.99); }
   .banner-segno { font-size: 150px; right: -34px; }
   .tessere { grid-template-columns: 1fr; }
   .stato-riga { grid-template-columns: 96px 1fr 28px; }
+}
+
+/* ============================================================
+   Barra laterale apribile
+   ============================================================ */
+
+.btn-barra {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--r-controllo);
+  background: transparent;
+  color: var(--testo-3);
+  cursor: pointer;
+  transition: color 160ms var(--curva), background-color 160ms var(--curva),
+    transform 160ms var(--curva);
+}
+
+.btn-barra i { font-size: 18px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-barra:hover { background: var(--accento-tenue); color: var(--accento); }
+}
+
+.btn-barra:active { transform: scale(0.94); }
+
+/* Il comando che resta quando il menu e' via. */
+.btn-barra-fuori {
+  position: fixed;
+  top: 18px;
+  left: 14px;
+  z-index: 30;
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  box-shadow: var(--ombra-1);
+  color: var(--testo-2);
+}
+
+/* La barra scivola via con transform, che non costa nulla al browser.
+   Il contenuto invece deve davvero riprendersi lo spazio, e per farlo
+   serve cambiare i margini: e' l'unica proprieta' di impaginazione che
+   animiamo, su un solo contenitore, per 220ms. */
+body.barra-pronta .sidebar {
+  transition: transform 220ms var(--curva);
+}
+
+body.barra-pronta .contenuto {
+  transition: margin-left 220ms var(--curva), padding-left 220ms var(--curva);
+}
+
+body.barra-chiusa .sidebar {
+  transform: translateX(-100%);
+}
+
+body.barra-chiusa .contenuto {
+  margin-left: 0;
+  padding-left: 70px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.barra-pronta .sidebar,
+  body.barra-pronta .contenuto { transition: none; }
+}
+
+/* Sotto gli 820px il menu e' gia' una riga in alto, compatta:
+   aprirla e chiuderla non avrebbe senso. */
+@media (max-width: 820px) {
+  .btn-barra, .btn-barra-fuori { display: none; }
+  .nav-gruppo { display: none; }
+
+  .sidebar-testa {
+    margin: 0;
+    padding: 0;
+  }
+
+  body.barra-chiusa .sidebar { transform: none; }
+  body.barra-chiusa .contenuto { margin-left: 0; padding-left: 20px; }
+}
+
+/* ============================================================
+   Sezione in preparazione
+   ============================================================ */
+
+.in-preparazione {
+  max-width: 60ch;
+  padding: 32px;
+  border: 1px dashed var(--linea-forte);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+}
+
+/* Bordo tratteggiato e segno spento: si deve capire che e' un cantiere
+   prima ancora di leggere. */
+.in-preparazione-segno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  background: var(--superficie-alt);
+  color: var(--testo-3);
+}
+
+.in-preparazione-segno i { font-size: 22px; }
+
+.in-preparazione-titolo {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  margin-bottom: 12px;
+}
+
+.in-preparazione-testo {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--testo-2);
+  margin-bottom: 14px;
+}
+
+.in-preparazione-passi {
+  margin: 24px 0;
+  padding: 16px 18px;
+  border-radius: var(--r-controllo);
+  background: var(--superficie-alt);
+}
+
+.in-preparazione-sottotitolo {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.in-preparazione-passi ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.in-preparazione-passi li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--testo-2);
+}
+
+.in-preparazione-passi li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 5px;
+  height: 1px;
+  background: var(--testo-3);
 }

@@ -1,0 +1,93 @@
+# Appunti di Akesis
+
+Cose decise, cose rimaste aperte, cose da fare quando sara' il momento.
+Questo file esiste perche' le conversazioni finiscono e i file restano:
+quando riprendiamo il lavoro, si riparte da qui.
+
+---
+
+## Da fare quando sara' il momento
+
+### Simulatore per il test SSM
+
+**Chiesto da Giulia il 5 settembre 2026.** La pagina segnaposto esiste
+gia' (`ssm.html`, voce "Test SSM" nel menu) ma e' ferma di proposito.
+
+L'idea: raccogliere le domande dei concorsi di specializzazione degli
+anni passati e permettere di esercitarsi con lo stesso formato della
+prova vera.
+
+Perche' e' ferma: non c'e' ancora il materiale. Giulia ha detto
+esplicitamente che le domande non ci sono e che non ha ancora in mente
+cosa metterci dentro.
+
+Da decidere prima di costruirla:
+
+- Da dove arrivano le domande e come si caricano, una alla volta o a blocchi
+- Se una simulazione rispetta tempi e punteggio del concorso, oppure serve
+  solo ad allenarsi
+- Se conservare i risultati di ogni simulazione per vedere l'andamento
+- Se le domande restano divise per anno, per materia, o per entrambe
+
+**Ricordarglielo** quando ci sara' materiale da caricare, o quando si
+cerchera' la prossima cosa da costruire.
+
+---
+
+## Aperte, in attesa di una decisione di Giulia
+
+### Frase di apertura in home
+
+Ora dice "Tutto quello che studi, in un posto solo." Giulia ha chiesto
+qualcosa di breve e d'impatto, e ha precisato che **Akesis non nasce solo
+per i casi clinici**. La frase attuale e' volutamente ampia. Se non
+convince, se ne provano altre: la spiegazione lunga di cosa sia Akesis
+andra' comunque da un'altra parte, non nel banner.
+
+### Interrogazione nelle domande d'esame
+
+Le domande arrivano una alla volta. Scelta fatta senza chiedere, per
+somiglianza con l'orale vero. Se Giulia preferisce vederle tutte in
+elenco, e' una modifica breve.
+
+### Materiale protetto da chiave
+
+Chi conosce la chiave puo' passarla a chiunque: protegge dagli sguardi
+occasionali, non da una condivisione voluta. Chi ha fatto accesso puo'
+anche provare chiavi a ripetizione: il calcolo e' lento di proposito,
+quindi tentare a caso e' impraticabile, ma un blocco dopo N tentativi
+sbagliati non c'e'. Da aggiungere se Giulia lo vuole.
+
+---
+
+## Da fare nel pannello Supabase (serve Giulia, non si puo' fare da qui)
+
+- **Site URL** ancora impostato su `http://localhost:3000`. Va portato a
+  `https://giuliaalbatiralongo.github.io/giuliaalbatiralongo-Giulia/`,
+  altrimenti i link di conferma via email puntano nel vuoto.
+- **Protezione password compromesse** disattivata. E' una spunta che
+  confronta le password scelte con quelle finite in fughe di dati note.
+
+---
+
+## Dati di prova ancora in giro
+
+Giulia ha chiesto di **non cancellare niente** finche' non lo dice lei.
+Quando lo dira', da togliere:
+
+- Account `prova.studente@akesis.test` (profilo "Prova01")
+- 14 domande d'esame inventate e le loro note
+- 4 proposte di materiale in coda di revisione, senza file vero dietro
+- Il materiale "Prova 1" e il PDF "CORSIE"
+
+---
+
+## Regole di lavoro concordate
+
+- Spiegare i concetti prima di usarli nel codice
+- Andare per passi piccoli, ognuno verificabile a schermo
+- Chiedere invece di decidere da soli, quando la scelta e' sua
+- Niente trattini lunghi, niente emoji, niente etichette colorate
+- Un solo colore d'accento, nessuna sfumatura
+- Alzare il numero di versione (`?v=`) di **ogni** riferimento a un file
+  condiviso che cambia: e' stata la fonte piu' frequente di guasti
