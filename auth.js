@@ -1,4 +1,4 @@
-import { supabase } from './db.js?v=8';
+import { supabase } from './db.js?v=9';
 
 /* Autenticazione e profilo.
    Il profilo esiste solo se l'utente ha riscattato un codice di invito:
@@ -156,7 +156,20 @@ export async function proteggiPagina() {
   }
 
   mostraProfiloInSidebar(profilo);
+  adeguaInterfacciaAlRuolo(profilo);
   return profilo;
+}
+
+/* Nasconde a chi non e' amministratrice le parti riservate. Non e' una
+   misura di sicurezza da sola: le regole vere stanno sul database, che
+   rifiuta comunque le operazioni non consentite. Serve a non mostrare
+   comandi che poi non funzionerebbero. */
+function adeguaInterfacciaAlRuolo(profilo) {
+  const admin = profilo.ruolo === 'admin';
+  document.querySelectorAll('[data-solo-admin]').forEach((elemento) => {
+    elemento.hidden = !admin;
+  });
+  document.body.dataset.ruolo = profilo.ruolo;
 }
 
 function mostraProfiloInSidebar(profilo) {

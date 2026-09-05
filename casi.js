@@ -1,6 +1,6 @@
-import { getCasiClinici } from './db.js?v=8';
+import { getCasiClinici } from './db.js?v=9';
 import { iconaPerMateria } from './materie.js?v=3';
-import { proteggiPagina } from './auth.js?v=4';
+import { proteggiPagina } from './auth.js?v=5';
 
 const ETICHETTE_STATO = {
   nuovo: 'nuovo',
@@ -48,6 +48,13 @@ function creaCaso(caso) {
 
   const lato = document.createElement('div');
   lato.className = 'caso-riga-lato';
+
+  if (caso.pubblicazione === 'in_attesa') {
+    const attesa = document.createElement('span');
+    attesa.className = 'stato stato-da_ripassare';
+    attesa.textContent = 'in attesa di revisione';
+    lato.appendChild(attesa);
+  }
 
   const stato = document.createElement('span');
   stato.className = `stato stato-${caso.stato}`;
@@ -158,7 +165,7 @@ async function avvia() {
   const contenitore = document.getElementById('casi');
 
   try {
-    const casi = await getCasiClinici();
+    const casi = await getCasiClinici(undefined, { includiInAttesa: true });
 
     if (casi.length === 0) {
       elScheletro.innerHTML = `

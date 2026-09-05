@@ -1573,3 +1573,21 @@ a.profilo-btn {
 
   .contenuto { margin-left: 0; padding: 26px 20px 60px; }
 }
+
+/* ============================================================
+   Revisione delle proposte
+   ============================================================ */
+
+.azioni-revisione {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--linea);
+}
+
+.azioni-revisione .esito-form {
+  margin: 0;
+}

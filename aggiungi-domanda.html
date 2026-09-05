@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=17">
+  <link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
   <div class="app">
@@ -21,6 +21,7 @@
         <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="domande.html" class="nav-voce attivo"><i class="ph-fill ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
+        <a href="revisione.html" class="nav-voce" data-solo-admin hidden><i class="ph ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
       </nav>
 
       <div class="sidebar-fondo">
@@ -88,6 +89,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="aggiungi-domanda.js?v=2"></script>
+  <script type="module" src="aggiungi-domanda.js?v=3"></script>
 </body>
 </html>

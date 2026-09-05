@@ -7,30 +7,88 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Z63kjtRjfEV5SC15wK4hNA_z69Pg1z0
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-export async function getCasiClinici(materia) {
+let idUtenteInCache = null;
+
+async function idUtente() {
+  if (idUtenteInCache) return idUtenteInCache;
+  const { data } = await supabase.auth.getUser();
+  idUtenteInCache = data.user?.id || null;
+  return idUtenteInCache;
+}
+
+/* I casi sono condivisi, l'avanzamento no: le due cose vivono in tabelle
+   separate e vengono unite qui. Le regole del database fanno gia' vedere
+   a ciascuno solo il proprio avanzamento. */
+export async function getCasiClinici(materia, opzioni = {}) {
+  const { includiInAttesa = false } = opzioni;
+
   let query = supabase.from('casi_clinici').select('*').order('id', { ascending: true });
+  if (materia) query = query.eq('materia', materia);
+  if (!includiInAttesa) query = query.eq('pubblicazione', 'pubblicato');
 
-  if (materia) {
-    query = query.eq('materia', materia);
-  }
-
-  const { data, error } = await query;
+  const { data: casi, error } = await query;
 
   if (error) {
     console.error('Errore nel caricamento dei casi:', error);
     return [];
   }
+
+  const { data: avanzamenti } = await supabase.from('avanzamento').select('caso_id, stato');
+  const mappa = new Map((avanzamenti || []).map((a) => [a.caso_id, a.stato]));
+
+  return casi.map((caso) => ({ ...caso, stato: mappa.get(caso.id) || 'nuovo' }));
+}
+
+/* Casi proposti dagli studenti, in attesa di revisione. Le regole del
+   database li mostrano solo all'amministratrice e a chi li ha scritti. */
+export async function getCasiInAttesa() {
+  const { data, error } = await supabase
+    .from('casi_clinici')
+    .select('*')
+    .eq('pubblicazione', 'in_attesa')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Errore nel caricamento delle proposte:', error);
+    return [];
+  }
   return data;
 }
 
-export async function aggiornaStatoCaso(id, nuovoStato) {
+export async function approvaCaso(id) {
   const { error } = await supabase
     .from('casi_clinici')
-    .update({ stato: nuovoStato })
+    .update({ pubblicazione: 'pubblicato' })
     .eq('id', id);
 
   if (error) {
-    console.error("Errore nell'aggiornamento dello stato:", error);
+    console.error('Errore nell approvazione del caso:', error);
+    return false;
+  }
+  return true;
+}
+
+export async function eliminaCaso(id) {
+  const { error } = await supabase.from('casi_clinici').delete().eq('id', id);
+
+  if (error) {
+    console.error('Errore nell eliminazione del caso:', error);
+    return false;
+  }
+  return true;
+}
+
+export async function aggiornaStatoCaso(casoId, nuovoStato) {
+  const utente = await idUtente();
+  if (!utente) return false;
+
+  const { error } = await supabase.from('avanzamento').upsert(
+    { utente, caso_id: casoId, stato: nuovoStato, aggiornato_il: new Date().toISOString() },
+    { onConflict: 'utente,caso_id' }
+  );
+
+  if (error) {
+    console.error("Errore nell'aggiornamento dell avanzamento:", error);
     return false;
   }
   return true;
@@ -78,7 +136,14 @@ export async function caricaMateriale(file, metadati) {
 
   const { error: erroreInserimento } = await supabase
     .from('materiali')
-    .insert([{ ...metadati, url: datiUrl.publicUrl }]);
+    .insert([
+      {
+        ...metadati,
+        url: datiUrl.publicUrl,
+        dimensione: file.size,
+        autore: await idUtente(),
+      },
+    ]);
 
   if (erroreInserimento) {
     console.error('Errore nel salvataggio del materiale:', erroreInserimento);
@@ -150,7 +215,7 @@ export async function aggiornaNoteDomanda(id, note) {
 export async function registraRisposta({ casoId, materia, corretta, sessione }) {
   const { error } = await supabase
     .from('risposte')
-    .insert([{ caso_id: casoId, materia, corretta, sessione }]);
+    .insert([{ caso_id: casoId, materia, corretta, sessione, utente: await idUtente() }]);
 
   if (error) {
     console.error('Errore nel salvataggio della risposta:', error);

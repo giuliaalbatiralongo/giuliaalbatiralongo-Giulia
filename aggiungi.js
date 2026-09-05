@@ -1,5 +1,7 @@
-import { inserisciCaso } from './db.js?v=8';
-import { proteggiPagina } from './auth.js?v=4';
+import { inserisciCaso } from './db.js?v=9';
+import { proteggiPagina } from './auth.js?v=5';
+
+let profiloCorrente = null;
 
 const form = document.getElementById('form-caso');
 const elEsito = document.getElementById('esito');
@@ -21,7 +23,6 @@ form.addEventListener('submit', async (e) => {
     opzione_d: dati.get('opzione_d'),
     risposta_corretta: dati.get('corretta'),
     spiegazione: dati.get('spiegazione'),
-    stato: 'nuovo',
   };
 
   elEsito.className = 'esito-form attesa';
@@ -32,7 +33,9 @@ form.addEventListener('submit', async (e) => {
   if (salvato) {
     elEsito.className = 'esito-form ok';
     elEsito.innerHTML =
-      '<i class="ph-fill ph-check-circle" aria-hidden="true"></i> Caso salvato. Lo trovi in Ripassa e nei tuoi casi.';
+      profiloCorrente && profiloCorrente.ruolo === 'admin'
+        ? '<i class="ph-fill ph-check-circle" aria-hidden="true"></i> Caso pubblicato. Lo trovi nel quiz e nei casi.'
+        : '<i class="ph-fill ph-check-circle" aria-hidden="true"></i> Proposta inviata. Comparirà nel quiz una volta approvata.';
     form.reset();
   } else {
     elEsito.className = 'esito-form ko';
@@ -41,4 +44,6 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-proteggiPagina();
+proteggiPagina().then((profilo) => {
+  profiloCorrente = profilo;
+});
