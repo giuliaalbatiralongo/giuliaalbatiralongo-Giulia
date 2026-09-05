@@ -6,6 +6,9 @@ quando riprendiamo il lavoro, si riparte da qui.
 
 ---
 
+> Gli spunti per le prossime funzioni stanno in `IDEE.md`, insieme a
+> cosa fanno le piattaforme concorrenti e a cosa sbagliano.
+
 ## Da fare quando sara' il momento
 
 ### Simulatore per il test SSM
