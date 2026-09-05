@@ -1791,11 +1791,16 @@ a.profilo-btn {
 }
 
 /* Quando il contenuto e' avvolto in un form, la colonna deve passare
-   anche attraverso di lui. */
+   anche attraverso di lui.
+
+   La base deve restare `auto`, non 0: l'altezza della finestra dipende
+   dal suo contenuto, e un form con base zero non contribuisce niente,
+   quindi la finestra si schiaccia a una striscia. Con `auto` il form
+   parte dall'altezza del contenuto e cresce solo se c'e' spazio. */
 .finestra > form {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
 }
 
