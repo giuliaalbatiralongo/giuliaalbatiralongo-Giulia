@@ -6,10 +6,12 @@ import {
   getMaterialiInAttesa,
   getRisposte,
   calcolaStatistiche,
+  casiDaRipassareOggi,
+  casiMaiVisti,
   getTempoStudio,
   sommaPerSezione,
   formattaDurata,
-} from './db.js?v=15';
+} from './db.js?v=16';
 import { proteggiPagina } from './auth.js?v=9';
 
 const elScheletro = document.getElementById('scheletro');
@@ -140,14 +142,19 @@ function mostraStato(casi, statistiche) {
   elStatoRighe.appendChild(creaRigaStato('Da vedere', conta.nuovo, casi.length));
 
   // Una riga di senso, non solo numeri: cosa conviene fare adesso.
-  if (statistiche.totale === 0) {
-    elStatoNota.textContent = 'Non hai ancora risposto a nessun caso.';
-  } else if (conta.da_ripassare > 0) {
-    elStatoNota.textContent = `${plurale(conta.da_ripassare, 'caso aspetta', 'casi aspettano')} un ripasso.`;
+  const scaduti = casiDaRipassareOggi(casi);
+
+  if (scaduti.length > 0) {
+    elStatoNota.textContent =
+      scaduti.length === 1
+        ? '1 caso e in scadenza oggi.'
+        : `${scaduti.length} casi sono in scadenza oggi.`;
   } else if (conta.nuovo > 0) {
-    elStatoNota.textContent = `Tutto ripassato. ${plurale(conta.nuovo, 'caso', 'casi')} ancora da vedere.`;
+    elStatoNota.textContent = `Niente in scadenza. ${plurale(conta.nuovo, 'caso', 'casi')} ancora da vedere.`;
+  } else if (statistiche.totale === 0) {
+    elStatoNota.textContent = 'Non hai ancora risposto a nessun caso.';
   } else {
-    elStatoNota.textContent = 'Hai consolidato tutti i casi disponibili.';
+    elStatoNota.textContent = 'Niente in scadenza oggi. Il prossimo ripasso arrivera da solo.';
   }
 
   elStato.hidden = false;
@@ -262,9 +269,21 @@ async function avvia(profilo) {
 
     const statistiche = calcolaStatistiche(risposte);
     const consolidati = casi.filter((c) => c.stato === 'consolidato').length;
+    const inScadenza = casiDaRipassareOggi(casi);
+    const maiVisti = casiMaiVisti(casi);
 
     elTessere.innerHTML = '';
     [
+      {
+        valore: inScadenza.length || (maiVisti.length ? maiVisti.length : 0),
+        etichetta: inScadenza.length
+          ? 'Da ripassare oggi'
+          : maiVisti.length
+            ? 'Casi mai visti'
+            : 'Nulla in scadenza',
+        icona: 'ph-clock-counter-clockwise',
+        indirizzo: 'sessione.html',
+      },
       {
         valore: `${consolidati}/${casi.length}`,
         etichetta: 'Casi consolidati',
@@ -282,12 +301,6 @@ async function avvia(profilo) {
         etichetta: "Domande d'esame",
         icona: 'ph-exam',
         indirizzo: 'domande.html',
-      },
-      {
-        valore: materiali.length,
-        etichetta: 'Documenti',
-        icona: 'ph-folder',
-        indirizzo: 'materiali.html',
       },
     ].forEach((t, i) => elTessere.appendChild(creaTessera(t, i)));
 

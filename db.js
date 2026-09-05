@@ -33,10 +33,21 @@ export async function getCasiClinici(materia, opzioni = {}) {
     return [];
   }
 
-  const { data: avanzamenti } = await supabase.from('avanzamento').select('caso_id, stato');
-  const mappa = new Map((avanzamenti || []).map((a) => [a.caso_id, a.stato]));
+  const { data: avanzamenti } = await supabase
+    .from('avanzamento')
+    .select('caso_id, stato, passo, prossimo_ripasso');
 
-  return casi.map((caso) => ({ ...caso, stato: mappa.get(caso.id) || 'nuovo' }));
+  const mappa = new Map((avanzamenti || []).map((a) => [a.caso_id, a]));
+
+  return casi.map((caso) => {
+    const a = mappa.get(caso.id);
+    return {
+      ...caso,
+      stato: a?.stato || 'nuovo',
+      passo: a?.passo || 0,
+      prossimoRipasso: a?.prossimo_ripasso || null,
+    };
+  });
 }
 
 /* Casi proposti dagli studenti, in attesa di revisione. Le regole del
@@ -78,20 +89,48 @@ export async function eliminaCaso(id) {
   return true;
 }
 
-export async function aggiornaStatoCaso(casoId, nuovoStato) {
-  const utente = await idUtente();
-  if (!utente) return false;
-
-  const { error } = await supabase.from('avanzamento').upsert(
-    { utente, caso_id: casoId, stato: nuovoStato, aggiornato_il: new Date().toISOString() },
-    { onConflict: 'utente,caso_id' }
-  );
+/* Registra il ripasso di un caso. La nuova data e il nuovo stato li
+   calcola il database: la scala degli intervalli non deve dipendere da
+   quello che gira nel browser. */
+export async function registraRipasso(casoId, corretta) {
+  const { data, error } = await supabase.rpc('registra_ripasso', {
+    p_caso_id: casoId,
+    p_corretta: corretta,
+  });
 
   if (error) {
-    console.error("Errore nell'aggiornamento dell avanzamento:", error);
-    return false;
+    console.error('Errore nel salvataggio del ripasso:', error);
+    return null;
   }
-  return true;
+  return data;
+}
+
+/* I casi in scadenza oggi o gia' scaduti, dal piu' arretrato.
+
+   Il tetto serve a non ritrovarsi davanti duecento casi dopo due
+   settimane di pausa: e' il motivo per cui la gente abbandona questi
+   sistemi. Meglio venti scelti bene che un numero che scoraggia. */
+export function casiDaRipassareOggi(casi, tetto = 20) {
+  const oggi = new Date().toISOString().slice(0, 10);
+
+  return casi
+    .filter((c) => c.prossimoRipasso && c.prossimoRipasso <= oggi)
+    .sort((a, b) => a.prossimoRipasso.localeCompare(b.prossimoRipasso))
+    .slice(0, tetto);
+}
+
+export function casiMaiVisti(casi) {
+  return casi.filter((c) => !c.prossimoRipasso);
+}
+
+/* "domani", "fra 3 giorni", "il 12 ottobre" */
+export function quandoTorna(giorni) {
+  if (giorni === 1) return 'domani';
+  if (giorni <= 10) return `fra ${giorni} giorni`;
+
+  const data = new Date();
+  data.setDate(data.getDate() + giorni);
+  return `il ${data.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })}`;
 }
 
 export async function inserisciCaso(caso) {

@@ -1,4 +1,4 @@
-import { caricaMateriale } from './db.js?v=15';
+import { caricaMateriale } from './db.js?v=16';
 import { proteggiPagina } from './auth.js?v=9';
 
 const form = document.getElementById('form-materiale');

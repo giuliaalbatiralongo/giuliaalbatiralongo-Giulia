@@ -1,4 +1,4 @@
-import { getCasiClinici } from './db.js?v=15';
+import { getCasiClinici } from './db.js?v=16';
 import { iconaPerMateria } from './materie.js?v=3';
 import { proteggiPagina } from './auth.js?v=9';
 
@@ -33,6 +33,22 @@ function creaOpzioni(caso) {
   return ul;
 }
 
+/* "oggi", "domani", "fra 5 giorni", "il 12 ottobre".
+   Le date arretrate si dicono "oggi": ricordare a qualcuno che e'
+   indietro di tre settimane non lo aiuta a ricominciare. */
+function etichettaScadenza(giorno) {
+  const oggi = new Date();
+  oggi.setHours(0, 0, 0, 0);
+
+  const data = new Date(giorno + 'T00:00:00');
+  const giorni = Math.round((data - oggi) / 86400000);
+
+  if (giorni <= 0) return 'oggi';
+  if (giorni === 1) return 'domani';
+  if (giorni <= 10) return `fra ${giorni} giorni`;
+  return `il ${data.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })}`;
+}
+
 function creaCaso(caso) {
   const mai = caso.stato === 'nuovo';
 
@@ -60,6 +76,15 @@ function creaCaso(caso) {
   stato.className = `stato stato-${caso.stato}`;
   stato.textContent = ETICHETTE_STATO[caso.stato] || caso.stato;
   lato.appendChild(stato);
+
+  // Quando tornera'. Senza questa riga la scala degli intervalli
+  // lavorerebbe senza che si veda.
+  if (caso.prossimoRipasso) {
+    const quando = document.createElement('span');
+    quando.className = 'caso-riga-scadenza';
+    quando.textContent = etichettaScadenza(caso.prossimoRipasso);
+    lato.appendChild(quando);
+  }
 
   const freccia = document.createElement('i');
   freccia.className = 'ph ph-caret-down caso-riga-freccia';

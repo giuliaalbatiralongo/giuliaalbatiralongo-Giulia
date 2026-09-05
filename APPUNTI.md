@@ -37,6 +37,17 @@ cerchera' la prossima cosa da costruire.
 
 ---
 
+### Ripasso a intervalli: cosa manca
+
+La scala c'e' (1, 3, 7, 16, 35, 75 giorni) e il calcolo lo fa il
+database. Restano aperte:
+
+- Il tetto giornaliero e' fisso a 20 casi. Andrebbe deciso da Giulia,
+  non da me.
+- Non c'e' modo di dire "questo caso lo so gia', non me lo riproporre".
+- Gli intervalli sono uguali per tutti. FSRS li adatterebbe alla persona,
+  ma serve molto piu' storico di quello che abbiamo.
+
 ### Tempo di studio: cosa manca
 
 Il conteggio c'e' (quiz e domande d'esame, separati, giorno per giorno) e

@@ -1,10 +1,13 @@
 import {
   getCasiClinici,
-  aggiornaStatoCaso,
+  registraRipasso,
+  casiDaRipassareOggi,
+  casiMaiVisti,
+  quandoTorna,
   getMateriali,
   linkMateriali,
   registraRisposta,
-} from './db.js?v=15';
+} from './db.js?v=16';
 import { iconaPerMateria } from './materie.js?v=3';
 import { proteggiPagina } from './auth.js?v=9';
 import { misuraTempo } from './tempo.js?v=1';
@@ -42,26 +45,52 @@ const elPannelloLista = document.getElementById('materiali-laterali-lista');
 elTitolo.textContent = materiaFiltro || 'Tutte le materie';
 
 function aggiornaRiepilogo() {
-  if (risposteDate === 0) {
-    elRiepilogo.textContent = 'Priorità ai casi non ancora consolidati.';
+  if (risposteDate > 0) {
+    elRiepilogo.textContent = `${risposteCorrette} corrette su ${risposteDate} in questa sessione.`;
     return;
   }
-  elRiepilogo.textContent = `${risposteCorrette} corrette su ${risposteDate} in questa sessione.`;
+
+  if (ripassoLibero) {
+    elRiepilogo.textContent = 'Nessun ripasso in scadenza oggi. Questo e allenamento libero.';
+    return;
+  }
+
+  const restano = coda.length - indiceCoda;
+  elRiepilogo.textContent =
+    restano === 1 ? '1 caso in programma oggi.' : `${restano} casi in programma oggi.`;
 }
 
-// Avanzamento: nuovo -> da_ripassare -> consolidato.
-// Una risposta sbagliata riporta sempre il caso a "da_ripassare".
-function calcolaProssimoStato(statoAttuale, rispostaCorretta) {
-  if (!rispostaCorretta) return 'da_ripassare';
-  if (statoAttuale === 'nuovo') return 'da_ripassare';
-  return 'consolidato';
+/* La coda del giorno, in ordine di priorita':
+     1. i casi in scadenza oggi o arretrati, dal piu' vecchio
+     2. quelli mai visti
+     3. se non c'e' altro, ripasso libero
+   La coda si costruisce una volta all'avvio e non si ricalcola dopo ogni
+   risposta: altrimenti un caso appena sbagliato, che torna in scadenza
+   domani, resterebbe a girare nella stessa sessione. */
+let coda = [];
+let indiceCoda = 0;
+let ripassoLibero = false;
+
+function preparaCoda() {
+  const scaduti = casiDaRipassareOggi(casi);
+  const maiVisti = casiMaiVisti(casi);
+
+  coda = [...scaduti, ...maiVisti];
+  indiceCoda = 0;
+  ripassoLibero = coda.length === 0;
+
+  return { scaduti: scaduti.length, maiVisti: maiVisti.length };
 }
 
-// I casi non ancora consolidati hanno priorita'.
 function scegliCaso() {
-  const daRipassare = casi.filter((c) => c.stato !== 'consolidato');
-  const pool = daRipassare.length > 0 ? daRipassare : casi;
-  return pool[Math.floor(Math.random() * pool.length)];
+  if (ripassoLibero || indiceCoda >= coda.length) {
+    ripassoLibero = true;
+    return casi[Math.floor(Math.random() * casi.length)];
+  }
+
+  const caso = coda[indiceCoda];
+  indiceCoda += 1;
+  return caso;
 }
 
 async function mostraMaterialiCorrelati(materia) {
@@ -181,11 +210,8 @@ async function rispondi(letteraScelta, bottoneCliccato) {
   if (corretto) risposteCorrette += 1;
   aggiornaRiepilogo();
 
-  const nuovoStato = calcolaProssimoStato(casoCorrente.stato, corretto);
-  casoCorrente.stato = nuovoStato;
-
-  const [salvatoStato, salvataRisposta] = await Promise.all([
-    aggiornaStatoCaso(casoCorrente.id, nuovoStato),
+  const [ripasso, salvataRisposta] = await Promise.all([
+    registraRipasso(casoCorrente.id, corretto),
     registraRisposta({
       casoId: casoCorrente.id,
       materia: casoCorrente.materia,
@@ -194,7 +220,22 @@ async function rispondi(letteraScelta, bottoneCliccato) {
     }),
   ]);
 
-  if (!salvatoStato || !salvataRisposta) {
+  if (ripasso?.ok) {
+    casoCorrente.stato = ripasso.stato;
+    casoCorrente.passo = ripasso.passo;
+    casoCorrente.prossimoRipasso = ripasso.prossimo_ripasso;
+
+    // Sapere quando tornera' e' la parte che rende utile il sistema:
+    // senza, sembra che le risposte non lascino traccia.
+    const quando = document.createElement('p');
+    quando.className = 'prossimo-ripasso';
+    quando.innerHTML =
+      '<i class="ph ph-clock-counter-clockwise" aria-hidden="true"></i> ' +
+      `Rivedrai questo caso ${quandoTorna(ripasso.giorni)}.`;
+    elRisultato.appendChild(quando);
+  }
+
+  if (!ripasso?.ok || !salvataRisposta) {
     elRisultato.innerHTML +=
       '<p class="avviso"><i class="ph ph-warning" aria-hidden="true"></i> Non sono riuscita a salvare tutto nel database.</p>';
   }
@@ -218,6 +259,9 @@ async function avvia() {
       `;
       return;
     }
+
+    preparaCoda();
+    aggiornaRiepilogo();
 
     elScheletro.remove();
     elCaso.hidden = false;

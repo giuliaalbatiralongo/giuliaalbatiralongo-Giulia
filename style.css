@@ -2410,3 +2410,26 @@ body.barra-chiusa .contenuto {
   font-size: 12.5px;
   color: var(--testo-3);
 }
+
+/* Quando tornera' il caso appena risposto. Sta sotto la spiegazione,
+   in tono minore: e' una conferma, non il messaggio principale. */
+.prossimo-ripasso {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--linea);
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+.prossimo-ripasso i { font-size: 15px; color: var(--testo-3); }
+
+/* Data del prossimo ripasso nell'archivio. Accanto allo stato, in tono
+   minore: lo stato dice cosa sai, questa dice quando ne riparliamo. */
+.caso-riga-scadenza {
+  font-size: 11.5px;
+  color: var(--testo-3);
+  white-space: nowrap;
+}
