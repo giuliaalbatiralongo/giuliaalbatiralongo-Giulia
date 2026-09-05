@@ -1,4 +1,4 @@
-import { caricaMateriale } from './db.js?v=6';
+import { caricaMateriale } from './db.js?v=7';
 
 const form = document.getElementById('form-materiale');
 const elEsito = document.getElementById('esito');
@@ -11,6 +11,7 @@ form.addEventListener('submit', async (e) => {
   const argomento = dati.get('argomento');
 
   const metadati = {
+    tipo: dati.get('tipo'),
     materia: dati.get('materia'),
     argomento: argomento ? argomento.trim() || null : null,
     titolo: dati.get('titolo'),

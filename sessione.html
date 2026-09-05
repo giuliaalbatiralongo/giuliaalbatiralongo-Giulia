@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>I miei casi - Akesis</title>
+  <title>Sessione - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
   <div class="app">
@@ -18,8 +18,7 @@
 
       <nav class="sidebar-nav">
         <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
-        <a href="ripassa.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Ripassa</span></a>
-        <a href="casi.html" class="nav-voce attivo"><i class="ph-fill ph-list-checks" aria-hidden="true"></i><span>I miei casi</span></a>
+        <a href="quiz.html" class="nav-voce attivo"><i class="ph-fill ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <a href="aggiungi.html" class="nav-voce"><i class="ph ph-plus-circle" aria-hidden="true"></i><span>Aggiungi</span></a>
       </nav>
@@ -37,15 +36,41 @@
 
     <main class="contenuto">
       <div class="contenuto-interno">
-        <h1 class="page-titolo">I tuoi casi</h1>
-        <p class="page-sub">Raggruppati per materia e argomento, con lo stato di ripasso di ciascuno.</p>
-
-        <div id="scheletro">
-          <div class="scheletro scheletro-riga" style="width: 180px"></div>
-          <div class="scheletro scheletro-card"></div>
+        <div class="testata">
+          <div>
+            <h1 class="page-titolo" id="titolo-materia">Sessione</h1>
+            <p class="page-sub" id="riepilogo-sessione">Priorità ai casi non ancora consolidati.</p>
+          </div>
+          <a href="quiz.html" class="link-testo"><i class="ph ph-arrow-left" aria-hidden="true"></i> Torna al quiz</a>
         </div>
 
-        <div id="casi"></div>
+        <div class="ripassa-layout">
+          <div class="ripassa-principale">
+            <div id="scheletro">
+              <div class="scheletro scheletro-card"></div>
+            </div>
+
+            <section id="caso" hidden>
+              <article class="card-caso">
+                <p class="caso-materia" id="caso-materia"></p>
+                <p class="caso-vignetta" id="caso-vignetta"></p>
+                <p class="caso-domanda" id="caso-domanda"></p>
+                <div id="opzioni"></div>
+              </article>
+
+              <div id="risultato" hidden></div>
+
+              <button id="prossimo" class="btn btn-largo" hidden>
+                Prossimo caso <i class="ph ph-arrow-right" aria-hidden="true"></i>
+              </button>
+            </section>
+          </div>
+
+          <aside class="pannello" id="materiali-laterali" hidden>
+            <h3>Materiali correlati</h3>
+            <ul id="materiali-laterali-lista"></ul>
+          </aside>
+        </div>
       </div>
     </main>
   </div>
@@ -56,6 +81,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="casi.js?v=6"></script>
+  <script type="module" src="sessione.js?v=1"></script>
 </body>
 </html>

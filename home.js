@@ -1,4 +1,4 @@
-import { getCasiClinici } from './db.js?v=6';
+import { getCasiClinici } from './db.js?v=7';
 import { iconaPerMateria } from './materie.js?v=3';
 
 const STATI = ['nuovo', 'da_ripassare', 'consolidato'];
@@ -19,7 +19,7 @@ function contaPerStato(casiMateria) {
 function creaCardMateria(nome, casiMateria, isTutte = false) {
   const a = document.createElement('a');
   a.className = 'materia-card' + (isTutte ? ' tutte' : '');
-  a.href = isTutte ? 'ripassa.html' : `ripassa.html?materia=${encodeURIComponent(nome)}`;
+  a.href = isTutte ? 'sessione.html' : `sessione.html?materia=${encodeURIComponent(nome)}`;
 
   const testata = document.createElement('div');
   testata.className = 'materia-testata';

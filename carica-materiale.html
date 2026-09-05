@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
   <div class="app">
@@ -18,8 +18,7 @@
 
       <nav class="sidebar-nav">
         <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
-        <a href="ripassa.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Ripassa</span></a>
-        <a href="casi.html" class="nav-voce"><i class="ph ph-list-checks" aria-hidden="true"></i><span>I miei casi</span></a>
+        <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="materiali.html" class="nav-voce attivo"><i class="ph-fill ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <a href="aggiungi.html" class="nav-voce"><i class="ph ph-plus-circle" aria-hidden="true"></i><span>Aggiungi</span></a>
       </nav>
@@ -40,12 +39,22 @@
         <div class="testata">
           <div>
             <h1 class="page-titolo">Carica un materiale</h1>
-            <p class="page-sub">Un PDF collegato a una materia: dispensa, articolo o riassunto.</p>
+            <p class="page-sub">Un PDF collegato a una materia: sbobina, dispensa, articolo o altro.</p>
           </div>
           <a href="materiali.html" class="link-testo"><i class="ph ph-arrow-left" aria-hidden="true"></i> Torna ai materiali</a>
         </div>
 
         <form id="form-materiale" class="form">
+          <div class="campo">
+            <label for="tipo">Categoria</label>
+            <select id="tipo" name="tipo" required>
+              <option value="sbobine">Sbobine</option>
+              <option value="dispense">Dispense</option>
+              <option value="letteratura">Letteratura scientifica</option>
+              <option value="altro" selected>Altro materiale</option>
+            </select>
+          </div>
+
           <div class="campo">
             <label for="materia">Materia</label>
             <input type="text" id="materia" name="materia" list="materie-suggerite" required>
@@ -89,6 +98,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="carica-materiale.js?v=3"></script>
+  <script type="module" src="carica-materiale.js?v=5"></script>
 </body>
 </html>

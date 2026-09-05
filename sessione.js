@@ -1,16 +1,32 @@
-import { getCasiClinici, aggiornaStatoCaso, getMateriali } from './db.js?v=6';
+import {
+  getCasiClinici,
+  aggiornaStatoCaso,
+  getMateriali,
+  registraRisposta,
+} from './db.js?v=7';
 import { iconaPerMateria } from './materie.js?v=3';
 
 const parametri = new URLSearchParams(window.location.search);
 const materiaFiltro = parametri.get('materia');
 
+// Un identificativo per sessione: resta lo stesso finche' la scheda
+// del browser resta aperta, cosi' le risposte date di seguito contano
+// come una sessione sola.
+const sessione =
+  sessionStorage.getItem('akesis-sessione') ||
+  `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+sessionStorage.setItem('akesis-sessione', sessione);
+
 let casi = [];
 let casoCorrente = null;
+let risposteDate = 0;
+let risposteCorrette = 0;
 const materialiPerMateria = {};
 
 const elScheletro = document.getElementById('scheletro');
 const elCaso = document.getElementById('caso');
 const elTitolo = document.getElementById('titolo-materia');
+const elRiepilogo = document.getElementById('riepilogo-sessione');
 const elCasoMateria = document.getElementById('caso-materia');
 const elVignetta = document.getElementById('caso-vignetta');
 const elDomanda = document.getElementById('caso-domanda');
@@ -21,6 +37,14 @@ const elPannello = document.getElementById('materiali-laterali');
 const elPannelloLista = document.getElementById('materiali-laterali-lista');
 
 elTitolo.textContent = materiaFiltro || 'Tutte le materie';
+
+function aggiornaRiepilogo() {
+  if (risposteDate === 0) {
+    elRiepilogo.textContent = 'Priorità ai casi non ancora consolidati.';
+    return;
+  }
+  elRiepilogo.textContent = `${risposteCorrette} corrette su ${risposteDate} in questa sessione.`;
+}
 
 // Avanzamento: nuovo -> da_ripassare -> consolidato.
 // Una risposta sbagliata riporta sempre il caso a "da_ripassare".
@@ -129,12 +153,26 @@ async function rispondi(letteraScelta, bottoneCliccato) {
   `;
   elProssimo.hidden = false;
 
+  risposteDate += 1;
+  if (corretto) risposteCorrette += 1;
+  aggiornaRiepilogo();
+
   const nuovoStato = calcolaProssimoStato(casoCorrente.stato, corretto);
   casoCorrente.stato = nuovoStato;
-  const salvato = await aggiornaStatoCaso(casoCorrente.id, nuovoStato);
-  if (!salvato) {
+
+  const [salvatoStato, salvataRisposta] = await Promise.all([
+    aggiornaStatoCaso(casoCorrente.id, nuovoStato),
+    registraRisposta({
+      casoId: casoCorrente.id,
+      materia: casoCorrente.materia,
+      corretta: corretto,
+      sessione,
+    }),
+  ]);
+
+  if (!salvatoStato || !salvataRisposta) {
     elRisultato.innerHTML +=
-      '<p class="avviso"><i class="ph ph-warning" aria-hidden="true"></i> Non sono riuscita a salvare il nuovo stato nel database.</p>';
+      '<p class="avviso"><i class="ph ph-warning" aria-hidden="true"></i> Non sono riuscita a salvare tutto nel database.</p>';
   }
 }
 

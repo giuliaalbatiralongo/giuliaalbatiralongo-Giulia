@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ripassa - Akesis</title>
+  <title>Quiz - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
   <div class="app">
@@ -18,8 +18,7 @@
 
       <nav class="sidebar-nav">
         <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
-        <a href="ripassa.html" class="nav-voce attivo"><i class="ph-fill ph-cards" aria-hidden="true"></i><span>Ripassa</span></a>
-        <a href="casi.html" class="nav-voce"><i class="ph ph-list-checks" aria-hidden="true"></i><span>I miei casi</span></a>
+        <a href="quiz.html" class="nav-voce attivo"><i class="ph-fill ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <a href="aggiungi.html" class="nav-voce"><i class="ph ph-plus-circle" aria-hidden="true"></i><span>Aggiungi</span></a>
       </nav>
@@ -37,51 +36,41 @@
 
     <main class="contenuto">
       <div class="contenuto-interno">
-      <div class="testata">
-        <div>
-          <h1 class="page-titolo" id="titolo-materia">Ripassa</h1>
-          <p class="page-sub" id="sottotitolo-materia">Caso scelto dando priorità a quelli non ancora consolidati.</p>
-        </div>
-        <a href="index.html" class="link-testo"><i class="ph ph-arrow-left" aria-hidden="true"></i> Cambia materia</a>
-      </div>
+        <h1 class="page-titolo">Quiz</h1>
+        <p class="page-sub">Scegli una materia da esercitare, oppure mettile tutte insieme.</p>
 
-      <div class="ripassa-layout">
-        <div class="ripassa-principale">
-          <div id="scheletro">
+        <div id="scheletro-materie" class="materie-grid">
+          <div class="scheletro scheletro-card"></div>
+          <div class="scheletro scheletro-card"></div>
+          <div class="scheletro scheletro-card"></div>
+        </div>
+        <div id="materie" class="materie-grid" hidden></div>
+
+        <section class="sezione">
+          <h2 class="sezione-titolo">Andamento</h2>
+          <p class="sezione-sub">Calcolato sulle risposte che dai nelle sessioni di quiz.</p>
+          <div id="tracker"></div>
+        </section>
+
+        <section class="sezione">
+          <h2 class="sezione-titolo">I miei casi</h2>
+          <p class="sezione-sub">Tutti i casi in archivio, per materia e argomento, con il loro stato.</p>
+          <div id="scheletro-casi">
+            <div class="scheletro scheletro-riga" style="width: 180px"></div>
             <div class="scheletro scheletro-card"></div>
           </div>
-
-          <section id="caso" hidden>
-            <article class="card-caso">
-              <p class="caso-materia" id="caso-materia"></p>
-              <p class="caso-vignetta" id="caso-vignetta"></p>
-              <p class="caso-domanda" id="caso-domanda"></p>
-              <div id="opzioni"></div>
-            </article>
-
-            <div id="risultato" hidden></div>
-
-            <button id="prossimo" class="btn btn-largo" hidden>
-              Prossimo caso <i class="ph ph-arrow-right" aria-hidden="true"></i>
-            </button>
-          </section>
-        </div>
-
-        <aside class="pannello" id="materiali-laterali" hidden>
-          <h3>Materiali correlati</h3>
-          <ul id="materiali-laterali-lista"></ul>
-        </aside>
-      </div>
+          <div id="casi"></div>
+        </section>
       </div>
     </main>
   </div>
 
   <script>
     window.addEventListener('error', (e) => {
-      const el = document.getElementById('scheletro');
+      const el = document.getElementById('scheletro-materie');
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="ripassa.js?v=6"></script>
+  <script type="module" src="quiz.js?v=1"></script>
 </body>
 </html>
