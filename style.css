@@ -48,6 +48,7 @@
   --pericolo: #c0392b;
   --pericolo-tenue: #fdecea;
   --consolidato-tenue: #e8f6ee;
+  --ripassare-tenue: #fdf3dd;
 
   /* Forma */
   --r-card: 20px;
@@ -85,6 +86,7 @@
     --pericolo: #e8695b;
     --pericolo-tenue: rgba(232, 105, 91, 0.12);
     --consolidato-tenue: rgba(75, 189, 128, 0.12);
+    --ripassare-tenue: rgba(217, 153, 56, 0.14);
     --ombra-1: 0 1px 2px rgba(0, 0, 0, 0.3);
     --ombra-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px -8px rgba(0, 0, 0, 0.5);
     --ombra-3: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px -10px rgba(0, 0, 0, 0.6);
@@ -1343,6 +1345,25 @@ textarea:focus {
   font-size: 11.5px;
   color: var(--testo-3);
   margin-top: 2px;
+}
+
+/* Avviso su una scelta irreversibile */
+.campo-avviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--st-ripassare);
+  background: var(--ripassare-tenue);
+  border-radius: var(--r-controllo);
+  padding: 8px 10px;
+  margin-top: 6px;
+}
+
+.campo-avviso i {
+  font-size: 14px;
+  margin-top: 1px;
 }
 
 input[type="email"],

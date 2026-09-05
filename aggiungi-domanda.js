@@ -1,5 +1,5 @@
 import { inserisciDomandaEsame } from './db.js?v=8';
-import { proteggiPagina } from './auth.js?v=1';
+import { proteggiPagina } from './auth.js?v=2';
 
 const form = document.getElementById('form-domanda');
 const elEsito = document.getElementById('esito');

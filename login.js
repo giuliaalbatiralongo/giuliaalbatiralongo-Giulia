@@ -5,7 +5,7 @@ import {
   getSessione,
   getProfilo,
   esci,
-} from './auth.js?v=1';
+} from './auth.js?v=2';
 
 const viste = {
   accedi: document.getElementById('vista-accedi'),

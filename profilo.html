@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
   <div class="app">
@@ -39,7 +39,7 @@
         <div class="testata">
           <div>
             <h1 class="page-titolo">Profilo</h1>
-            <p class="page-sub">Il tuo nome e i dati del tuo accesso.</p>
+            <p class="page-sub">I dati del tuo account e la password di accesso.</p>
           </div>
           <button type="button" class="btn btn-neutro" id="btn-esci">
             <i class="ph ph-sign-out" aria-hidden="true"></i> Esci
@@ -47,34 +47,51 @@
         </div>
 
         <div class="contenuto-stretto">
-          <form id="form-profilo" class="form">
-            <div class="campo">
-              <label for="nome">Nome</label>
-              <input type="text" id="nome" name="nome" autocomplete="name" required>
-              <p class="campo-aiuto">È il nome che compare nella barra laterale e, in futuro, accanto ai materiali che carichi.</p>
+          <dl class="scheda-dati">
+            <div>
+              <dt>Nome</dt>
+              <dd id="dato-nome">-</dd>
             </div>
-
-            <button type="submit" class="btn" style="align-self: flex-start">
-              <i class="ph ph-check" aria-hidden="true"></i> Salva nome
-            </button>
-          </form>
-
-          <p id="esito" class="esito-form"></p>
+            <div>
+              <dt>Email</dt>
+              <dd id="dato-email">-</dd>
+            </div>
+            <div>
+              <dt>Ruolo</dt>
+              <dd id="dato-ruolo">-</dd>
+            </div>
+          </dl>
+          <p class="campo-aiuto" style="margin-top: 8px">
+            Nome ed email non si modificano da qui: il nome viene scelto una volta sola alla creazione del profilo.
+          </p>
 
           <section class="sezione">
-            <h2 class="sezione-titolo">Accesso</h2>
-            <p class="sezione-sub">Dati non modificabili da questa pagina.</p>
+            <h2 class="sezione-titolo">Cambia password</h2>
+            <p class="sezione-sub">Ti chiedo prima quella attuale, per sicurezza.</p>
 
-            <dl class="scheda-dati">
-              <div>
-                <dt>Email</dt>
-                <dd id="dato-email">-</dd>
+            <form id="form-password" class="form">
+              <div class="campo">
+                <label for="password-attuale">Password attuale</label>
+                <input type="password" id="password-attuale" name="attuale" autocomplete="current-password" required>
               </div>
-              <div>
-                <dt>Ruolo</dt>
-                <dd id="dato-ruolo">-</dd>
+
+              <div class="campo">
+                <label for="password-nuova">Nuova password</label>
+                <input type="password" id="password-nuova" name="nuova" autocomplete="new-password" minlength="6" required>
+                <p class="campo-aiuto">Almeno 6 caratteri. Evita nome proprio e numeri.</p>
               </div>
-            </dl>
+
+              <div class="campo">
+                <label for="password-conferma">Ripeti la nuova password</label>
+                <input type="password" id="password-conferma" name="conferma" autocomplete="new-password" minlength="6" required>
+              </div>
+
+              <button type="submit" class="btn" style="align-self: flex-start">
+                <i class="ph ph-lock-key" aria-hidden="true"></i> Aggiorna password
+              </button>
+            </form>
+
+            <p id="esito" class="esito-form"></p>
           </section>
         </div>
       </div>
@@ -87,6 +104,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="profilo.js?v=1"></script>
+  <script type="module" src="profilo.js?v=2"></script>
 </body>
 </html>

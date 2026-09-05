@@ -1,28 +1,43 @@
-import { proteggiPagina, aggiornaNome, esci } from './auth.js?v=1';
+import { proteggiPagina, cambiaPassword, esci } from './auth.js?v=2';
 
-const elNome = document.getElementById('nome');
+const elNome = document.getElementById('dato-nome');
 const elEmail = document.getElementById('dato-email');
 const elRuolo = document.getElementById('dato-ruolo');
 const elEsito = document.getElementById('esito');
+const form = document.getElementById('form-password');
 
 document.getElementById('btn-esci').addEventListener('click', () => esci());
 
-document.getElementById('form-profilo').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  elEsito.className = 'esito-form attesa';
-  elEsito.textContent = 'Salvataggio in corso';
-
-  const salvato = await aggiornaNome(elNome.value.trim());
-
-  if (salvato) {
-    elEsito.className = 'esito-form ok';
-    elEsito.innerHTML = '<i class="ph-fill ph-check-circle" aria-hidden="true"></i> Nome aggiornato.';
-    const nomeSidebar = document.querySelector('.profilo-nome');
-    if (nomeSidebar) nomeSidebar.textContent = elNome.value.trim() || 'Profilo';
+function messaggio(testo, tipo) {
+  elEsito.className = `esito-form ${tipo}`;
+  if (tipo === 'ok') {
+    elEsito.innerHTML = `<i class="ph-fill ph-check-circle" aria-hidden="true"></i> ${testo}`;
+  } else if (tipo === 'ko') {
+    elEsito.innerHTML = `<i class="ph-fill ph-x-circle" aria-hidden="true"></i> ${testo}`;
   } else {
-    elEsito.className = 'esito-form ko';
-    elEsito.innerHTML = '<i class="ph-fill ph-x-circle" aria-hidden="true"></i> Non sono riuscita a salvare il nome.';
+    elEsito.textContent = testo;
+  }
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const dati = new FormData(form);
+  const nuova = dati.get('nuova');
+
+  if (nuova !== dati.get('conferma')) {
+    messaggio('Le due nuove password non coincidono.', 'ko');
+    return;
+  }
+
+  messaggio('Aggiornamento in corso', 'attesa');
+
+  const risultato = await cambiaPassword(dati.get('attuale'), nuova);
+
+  if (risultato.ok) {
+    messaggio('Password aggiornata. La userai al prossimo accesso.', 'ok');
+    form.reset();
+  } else {
+    messaggio(risultato.errore, 'ko');
   }
 });
 
@@ -30,7 +45,7 @@ async function avvia() {
   const profilo = await proteggiPagina();
   if (!profilo) return;
 
-  elNome.value = profilo.nome || '';
+  elNome.textContent = profilo.nome || '-';
   elEmail.textContent = profilo.email || '-';
   elRuolo.textContent = profilo.ruolo === 'admin' ? 'Amministratrice' : 'Studente';
 }

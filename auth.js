@@ -55,20 +55,31 @@ export async function riscattaInvito(codice, nome) {
   return data;
 }
 
-export async function aggiornaNome(nome) {
-  const { data: datiUtente } = await supabase.auth.getUser();
-  if (!datiUtente.user) return false;
+/* Il nome non si cambia: viene scelto una volta sola in fase di
+   attivazione ed e' bloccato anche da un trigger sul database. */
 
-  const { error } = await supabase
-    .from('profili')
-    .update({ nome })
-    .eq('id', datiUtente.user.id);
+export async function cambiaPassword(passwordAttuale, passwordNuova) {
+  const { data: datiUtente } = await supabase.auth.getUser();
+  const email = datiUtente.user?.email;
+  if (!email) return { ok: false, errore: 'Sessione non valida. Esci e rientra.' };
+
+  // Prima verifichiamo la password attuale: senza questo controllo
+  // chiunque trovasse il browser aperto potrebbe cambiarla.
+  const { error: erroreVerifica } = await supabase.auth.signInWithPassword({
+    email,
+    password: passwordAttuale,
+  });
+
+  if (erroreVerifica) {
+    return { ok: false, errore: 'La password attuale non è corretta.' };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: passwordNuova });
 
   if (error) {
-    console.error('Errore nel salvataggio del nome:', error);
-    return false;
+    return { ok: false, errore: traduciErrore(error) };
   }
-  return true;
+  return { ok: true };
 }
 
 export async function esci() {
@@ -127,6 +138,9 @@ function traduciErrore(error) {
   }
   if (messaggio.includes('password should be at least')) {
     return 'La password deve avere almeno 6 caratteri.';
+  }
+  if (messaggio.includes('should be different from the old password')) {
+    return 'La nuova password deve essere diversa da quella attuale.';
   }
   if (messaggio.includes('rate limit') || messaggio.includes('too many')) {
     return 'Troppi tentativi ravvicinati. Aspetta un minuto e riprova.';
