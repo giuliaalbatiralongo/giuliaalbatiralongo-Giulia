@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body class="pagina-accesso">
   <main class="accesso">
@@ -63,6 +63,31 @@
         </p>
       </section>
 
+      <!-- In attesa che l'utente confermi dall'email -->
+      <section id="vista-conferma" hidden>
+        <p class="conferma-icona attesa"><i class="ph ph-envelope-simple" aria-hidden="true"></i></p>
+        <h1 class="accesso-titolo">Controlla la posta</h1>
+        <p class="accesso-sub">
+          Ho mandato un link di conferma a <strong id="email-inviata"></strong>.
+          Aprilo per attivare l'account. Guarda anche nello spam.
+        </p>
+
+        <p class="campo-avviso">
+          <i class="ph ph-warning" aria-hidden="true"></i>
+          Non registrarti una seconda volta: ogni nuovo invio annulla il link precedente.
+          Se non arriva, usa il pulsante qui sotto.
+        </p>
+
+        <button type="button" class="btn btn-neutro btn-largo" id="btn-reinvia" style="margin-top: 16px">
+          <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i> Inviami di nuovo il link
+        </button>
+
+        <p class="accesso-alterna">
+          Hai già confermato?
+          <button type="button" class="link-bottone" id="conferma-vai-accedi">Accedi</button>
+        </p>
+      </section>
+
       <!-- Attivazione con codice di invito -->
       <section id="vista-attiva" hidden>
         <h1 class="accesso-titolo">Attiva il profilo</h1>
@@ -99,6 +124,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="login.js?v=2"></script>
+  <script type="module" src="login.js?v=3"></script>
 </body>
 </html>

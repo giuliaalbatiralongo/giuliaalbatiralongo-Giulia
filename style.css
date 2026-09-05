@@ -1306,6 +1306,16 @@ textarea:focus {
   margin-bottom: 4px;
 }
 
+.conferma-icona {
+  font-size: 34px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.conferma-icona.ok { color: var(--st-consolidato); }
+.conferma-icona.ko { color: var(--st-ripassare); }
+.conferma-icona.attesa { color: var(--accento); }
+
 .accesso-sub {
   font-size: 13px;
   color: var(--testo-2);

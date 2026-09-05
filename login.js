@@ -2,17 +2,20 @@ import {
   accedi,
   registrati,
   riscattaInvito,
+  reinviaConferma,
   getSessione,
   getProfilo,
   esci,
-} from './auth.js?v=2';
+} from './auth.js?v=3';
 
 const viste = {
   accedi: document.getElementById('vista-accedi'),
   registrati: document.getElementById('vista-registrati'),
+  conferma: document.getElementById('vista-conferma'),
   attiva: document.getElementById('vista-attiva'),
 };
 const elEsito = document.getElementById('esito');
+let emailInAttesa = '';
 
 function mostraVista(nome) {
   Object.entries(viste).forEach(([chiave, elemento]) => {
@@ -37,7 +40,22 @@ function messaggio(testo, tipo) {
 
 document.getElementById('vai-registrati').addEventListener('click', () => mostraVista('registrati'));
 document.getElementById('vai-accedi').addEventListener('click', () => mostraVista('accedi'));
+document.getElementById('conferma-vai-accedi').addEventListener('click', () => mostraVista('accedi'));
 document.getElementById('esci-attiva').addEventListener('click', () => esci());
+
+document.getElementById('btn-reinvia').addEventListener('click', async (e) => {
+  e.target.disabled = true;
+  messaggio('Invio in corso', 'attesa');
+
+  const risultato = await reinviaConferma(emailInAttesa);
+
+  if (risultato.ok) {
+    messaggio('Nuovo link inviato. Apri l ultima email ricevuta.', 'ok');
+  } else {
+    messaggio(risultato.errore, 'ko');
+  }
+  e.target.disabled = false;
+});
 
 /* ---------- Accedi ---------- */
 
@@ -75,11 +93,9 @@ document.getElementById('form-registrati').addEventListener('submit', async (e) 
   }
 
   if (!esitoRegistrazione.sessioneAttiva) {
-    messaggio(
-      'Account creato. Ti ho mandato una email di conferma: aprila, clicca il link e poi torna qui ad accedere.',
-      'ok'
-    );
-    mostraVista('accedi');
+    emailInAttesa = dati.get('email');
+    document.getElementById('email-inviata').textContent = emailInAttesa;
+    mostraVista('conferma');
     return;
   }
 

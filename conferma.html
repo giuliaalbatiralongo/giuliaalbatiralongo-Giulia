@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conferma - Akesis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="style.css?v=16">
+</head>
+<body class="pagina-accesso">
+  <main class="accesso">
+    <div class="accesso-riquadro">
+      <div class="logo accesso-logo">AKESIS</div>
+
+      <!-- Verifica in corso -->
+      <section id="vista-attesa">
+        <h1 class="accesso-titolo">Verifica in corso</h1>
+        <p class="accesso-sub">Sto controllando il link che hai aperto.</p>
+        <div class="scheletro scheletro-riga" style="width: 100%"></div>
+        <div class="scheletro scheletro-riga" style="width: 70%"></div>
+      </section>
+
+      <!-- Conferma riuscita -->
+      <section id="vista-ok" hidden>
+        <p class="conferma-icona ok"><i class="ph-fill ph-check-circle" aria-hidden="true"></i></p>
+        <h1 class="accesso-titolo">Email confermata</h1>
+        <p class="accesso-sub" id="testo-ok">Ti porto dentro.</p>
+        <a href="index.html" class="btn btn-largo">Vai ad Akesis</a>
+      </section>
+
+      <!-- Link non valido: si richiede un nuovo invio -->
+      <section id="vista-errore" hidden>
+        <p class="conferma-icona ko"><i class="ph-fill ph-warning-circle" aria-hidden="true"></i></p>
+        <h1 class="accesso-titolo">Link non valido</h1>
+        <p class="accesso-sub" id="testo-errore">Il link di conferma non è più utilizzabile.</p>
+
+        <form id="form-reinvia" class="form">
+          <div class="campo">
+            <label for="email-reinvia">La tua email</label>
+            <input type="email" id="email-reinvia" name="email" autocomplete="email" required>
+          </div>
+          <button type="submit" class="btn btn-largo">
+            <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i> Inviami un nuovo link
+          </button>
+        </form>
+
+        <p class="campo-avviso" style="margin-top: 14px">
+          <i class="ph ph-warning" aria-hidden="true"></i>
+          Usa sempre il link dell'ultima email ricevuta: ogni nuovo invio annulla i precedenti.
+        </p>
+
+        <p class="accesso-alterna">
+          <a href="login.html" class="link-testo">Torna all'accesso</a>
+        </p>
+      </section>
+
+      <p id="esito" class="esito-form"></p>
+    </div>
+  </main>
+
+  <script>
+    window.addEventListener('error', (e) => {
+      const el = document.getElementById('esito');
+      if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
+    });
+  </script>
+  <script type="module" src="conferma.js?v=1"></script>
+</body>
+</html>

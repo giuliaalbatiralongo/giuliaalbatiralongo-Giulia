@@ -1,5 +1,5 @@
 import { inserisciCaso } from './db.js?v=8';
-import { proteggiPagina } from './auth.js?v=2';
+import { proteggiPagina } from './auth.js?v=3';
 
 const form = document.getElementById('form-caso');
 const elEsito = document.getElementById('esito');

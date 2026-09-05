@@ -35,11 +35,35 @@ export async function accedi(email, password) {
   return error ? { ok: false, errore: traduciErrore(error) } : { ok: true };
 }
 
+// Dove deve tornare l'utente dopo aver cliccato il link nell'email.
+// Calcolato dall'indirizzo corrente, cosi' funziona sia in locale sia
+// sul sito pubblicato senza doverlo scrivere a mano.
+export function urlConferma() {
+  return new URL('conferma.html', window.location.href).href;
+}
+
 export async function registrati(email, password) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: urlConferma() },
+  });
   if (error) return { ok: false, errore: traduciErrore(error) };
   // Se la conferma via email e' attiva, qui non c'e' ancora una sessione.
   return { ok: true, sessioneAttiva: Boolean(data.session) };
+}
+
+// Ogni nuovo invio invalida il link precedente: e' il motivo per cui
+// registrarsi due volte fa fallire il primo link ricevuto.
+export async function reinviaConferma(email) {
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: urlConferma() },
+  });
+
+  if (error) return { ok: false, errore: traduciErrore(error) };
+  return { ok: true };
 }
 
 export async function riscattaInvito(codice, nome) {
@@ -145,5 +169,27 @@ function traduciErrore(error) {
   if (messaggio.includes('rate limit') || messaggio.includes('too many')) {
     return 'Troppi tentativi ravvicinati. Aspetta un minuto e riprova.';
   }
+  if (messaggio.includes('after') && messaggio.includes('seconds')) {
+    return 'Hai chiesto un invio da poco. Aspetta un minuto e riprova.';
+  }
+  if (messaggio.includes('otp_expired') || messaggio.includes('expired')) {
+    return 'Il link è scaduto o è stato sostituito da uno più recente.';
+  }
   return error.message;
+}
+
+/* Traduce gli errori che Supabase mette nell'indirizzo quando il link
+   di conferma non va a buon fine. */
+export function leggiErroreDaUrl() {
+  const parametri = new URLSearchParams(window.location.hash.slice(1));
+  const codice = parametri.get('error_code') || parametri.get('error');
+  if (!codice) return null;
+
+  if (codice.includes('expired')) {
+    return 'Il link di conferma è scaduto, oppure ne è stato inviato uno più recente che ha sostituito questo.';
+  }
+  if (codice.includes('access_denied')) {
+    return 'Il link non è più valido. Di solito succede quando se ne riceve un altro dopo.';
+  }
+  return parametri.get('error_description') || 'Il link di conferma non è valido.';
 }
