@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accedi - Akesis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="style.css?v=14">
+</head>
+<body class="pagina-accesso">
+  <main class="accesso">
+    <div class="accesso-riquadro">
+      <div class="logo accesso-logo">AKESIS</div>
+
+      <!-- Accedi -->
+      <section id="vista-accedi">
+        <h1 class="accesso-titolo">Accedi</h1>
+        <p class="accesso-sub">Entra con la tua email e la tua password.</p>
+
+        <form id="form-accedi" class="form">
+          <div class="campo">
+            <label for="accedi-email">Email</label>
+            <input type="email" id="accedi-email" name="email" autocomplete="email" required>
+          </div>
+          <div class="campo">
+            <label for="accedi-password">Password</label>
+            <input type="password" id="accedi-password" name="password" autocomplete="current-password" required>
+          </div>
+          <button type="submit" class="btn btn-largo">Accedi</button>
+        </form>
+
+        <p class="accesso-alterna">
+          Non hai ancora un account?
+          <button type="button" class="link-bottone" id="vai-registrati">Registrati con un invito</button>
+        </p>
+      </section>
+
+      <!-- Registrati -->
+      <section id="vista-registrati" hidden>
+        <h1 class="accesso-titolo">Crea il tuo account</h1>
+        <p class="accesso-sub">Serve un codice di invito. Dopo la registrazione ti chiederò il codice e il nome.</p>
+
+        <form id="form-registrati" class="form">
+          <div class="campo">
+            <label for="registra-email">Email</label>
+            <input type="email" id="registra-email" name="email" autocomplete="email" required>
+          </div>
+          <div class="campo">
+            <label for="registra-password">Password</label>
+            <input type="password" id="registra-password" name="password" autocomplete="new-password" minlength="6" required>
+            <p class="campo-aiuto">Almeno 6 caratteri.</p>
+          </div>
+          <button type="submit" class="btn btn-largo">Registrati</button>
+        </form>
+
+        <p class="accesso-alterna">
+          Hai già un account?
+          <button type="button" class="link-bottone" id="vai-accedi">Torna all'accesso</button>
+        </p>
+      </section>
+
+      <!-- Attivazione con codice di invito -->
+      <section id="vista-attiva" hidden>
+        <h1 class="accesso-titolo">Attiva il profilo</h1>
+        <p class="accesso-sub">Inserisci il codice di invito che hai ricevuto e come vuoi essere chiamata.</p>
+
+        <form id="form-attiva" class="form">
+          <div class="campo">
+            <label for="attiva-nome">Nome</label>
+            <input type="text" id="attiva-nome" name="nome" autocomplete="name" required>
+          </div>
+          <div class="campo">
+            <label for="attiva-codice">Codice di invito</label>
+            <input type="text" id="attiva-codice" name="codice" required>
+          </div>
+          <button type="submit" class="btn btn-largo">Attiva</button>
+        </form>
+
+        <p class="accesso-alterna">
+          <button type="button" class="link-bottone" id="esci-attiva">Esci e usa un altro account</button>
+        </p>
+      </section>
+
+      <p id="esito" class="esito-form"></p>
+    </div>
+  </main>
+
+  <script>
+    window.addEventListener('error', (e) => {
+      const el = document.getElementById('esito');
+      if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
+    });
+  </script>
+  <script type="module" src="login.js?v=1"></script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 import { getMateriali } from './db.js?v=8';
 import { iconaPerMateria } from './materie.js?v=3';
 import { TIPI_MATERIALE, tipoPerChiave } from './tipi.js?v=1';
+import { proteggiPagina } from './auth.js?v=1';
 
 const parametri = new URLSearchParams(window.location.search);
 const tipoScelto = parametri.get('tipo');
@@ -178,4 +179,6 @@ async function avvia() {
   }
 }
 
-avvia();
+proteggiPagina().then((profilo) => {
+  if (profilo) avvia();
+});

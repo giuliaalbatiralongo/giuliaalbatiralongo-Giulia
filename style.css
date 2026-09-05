@@ -1267,6 +1267,152 @@ textarea:focus {
 .esito-form.attesa { color: var(--testo-2); }
 
 /* ============================================================
+   Schermata di accesso
+   ============================================================ */
+
+.pagina-accesso {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 24px;
+}
+
+.accesso {
+  width: 100%;
+  max-width: 400px;
+}
+
+.accesso-riquadro {
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  box-shadow: var(--ombra-2);
+  padding: 30px 28px 26px;
+}
+
+.accesso-logo {
+  margin: 0 0 26px;
+  padding: 0;
+  font-size: 17px;
+  text-align: center;
+  color: var(--accento);
+}
+
+.accesso-titolo {
+  font-size: 19px;
+  margin-bottom: 4px;
+}
+
+.accesso-sub {
+  font-size: 13px;
+  color: var(--testo-2);
+  margin-bottom: 18px;
+}
+
+.accesso .form button[type="submit"] {
+  margin-top: 20px;
+  align-self: stretch;
+}
+
+.accesso-alterna {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--linea);
+  font-size: 12.5px;
+  color: var(--testo-2);
+  text-align: center;
+}
+
+.link-bottone {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accento);
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link-bottone:hover { color: var(--accento-hover); text-decoration: underline; }
+}
+
+.campo-aiuto {
+  font-size: 11.5px;
+  color: var(--testo-3);
+  margin-top: 2px;
+}
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--linea-forte);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+  color: var(--testo);
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.5;
+  transition: border-color 160ms var(--curva), box-shadow 160ms var(--curva);
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: var(--accento);
+  box-shadow: 0 0 0 3px var(--accento-tenue);
+}
+
+/* Dati in sola lettura nella pagina profilo */
+.scheda-dati {
+  margin: 0;
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  box-shadow: var(--ombra-1);
+  overflow: hidden;
+}
+
+.scheda-dati > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 13px 18px;
+  border-top: 1px solid var(--linea);
+}
+
+.scheda-dati > div:first-child { border-top: none; }
+
+.scheda-dati dt {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--testo-3);
+}
+
+.scheda-dati dd {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--testo);
+  text-align: right;
+  word-break: break-all;
+}
+
+/* Il blocco profilo diventa cliccabile una volta fatto l'accesso */
+a.profilo-btn {
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 160ms var(--curva);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a.profilo-btn:hover { background: var(--accento-tenue); }
+}
+
+/* ============================================================
    Caricamento, stato vuoto, errore
    ============================================================ */
 

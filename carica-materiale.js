@@ -1,4 +1,5 @@
 import { caricaMateriale } from './db.js?v=8';
+import { proteggiPagina } from './auth.js?v=1';
 
 const form = document.getElementById('form-materiale');
 const elEsito = document.getElementById('esito');
@@ -33,3 +34,5 @@ form.addEventListener('submit', async (e) => {
       '<i class="ph-fill ph-x-circle" aria-hidden="true"></i> Non sono riuscita a caricare il materiale. Riprova.';
   }
 });
+
+proteggiPagina();

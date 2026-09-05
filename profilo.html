@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Domande esami - Akesis</title>
+  <title>Profilo - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
       <nav class="sidebar-nav">
         <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
         <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
-        <a href="domande.html" class="nav-voce attivo"><i class="ph-fill ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
+        <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
       </nav>
 
@@ -28,7 +28,7 @@
           <span class="profilo-avatar"><i class="ph ph-user" aria-hidden="true"></i></span>
           <span class="profilo-testo">
             <span class="profilo-nome">Profilo</span>
-            <span class="profilo-nota">Presto disponibile</span>
+            <span class="profilo-nota">Caricamento</span>
           </span>
         </button>
       </div>
@@ -38,28 +38,55 @@
       <div class="contenuto-interno">
         <div class="testata">
           <div>
-            <h1 class="page-titolo">Domande esami</h1>
-            <p class="page-sub">Le domande che ricorrono agli orali, ordinate dalla più chiesta. Il pulsante più aggiunge una segnalazione.</p>
+            <h1 class="page-titolo">Profilo</h1>
+            <p class="page-sub">Il tuo nome e i dati del tuo accesso.</p>
           </div>
-          <a href="aggiungi-domanda.html" class="btn"><i class="ph ph-plus" aria-hidden="true"></i> Aggiungi domanda</a>
+          <button type="button" class="btn btn-neutro" id="btn-esci">
+            <i class="ph ph-sign-out" aria-hidden="true"></i> Esci
+          </button>
         </div>
 
-        <div id="scheletro">
-          <div class="scheletro scheletro-riga" style="width: 180px"></div>
-          <div class="scheletro scheletro-card"></div>
-        </div>
+        <div class="contenuto-stretto">
+          <form id="form-profilo" class="form">
+            <div class="campo">
+              <label for="nome">Nome</label>
+              <input type="text" id="nome" name="nome" autocomplete="name" required>
+              <p class="campo-aiuto">È il nome che compare nella barra laterale e, in futuro, accanto ai materiali che carichi.</p>
+            </div>
 
-        <div id="domande"></div>
+            <button type="submit" class="btn" style="align-self: flex-start">
+              <i class="ph ph-check" aria-hidden="true"></i> Salva nome
+            </button>
+          </form>
+
+          <p id="esito" class="esito-form"></p>
+
+          <section class="sezione">
+            <h2 class="sezione-titolo">Accesso</h2>
+            <p class="sezione-sub">Dati non modificabili da questa pagina.</p>
+
+            <dl class="scheda-dati">
+              <div>
+                <dt>Email</dt>
+                <dd id="dato-email">-</dd>
+              </div>
+              <div>
+                <dt>Ruolo</dt>
+                <dd id="dato-ruolo">-</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
       </div>
     </main>
   </div>
 
   <script>
     window.addEventListener('error', (e) => {
-      const el = document.getElementById('scheletro');
-      if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
+      const el = document.getElementById('esito');
+      if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="domande.js?v=2"></script>
+  <script type="module" src="profilo.js?v=1"></script>
 </body>
 </html>

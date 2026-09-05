@@ -1,5 +1,6 @@
 import { getDomandeEsame, incrementaVolte, aggiornaNoteDomanda } from './db.js?v=8';
 import { iconaPerMateria } from './materie.js?v=3';
+import { proteggiPagina } from './auth.js?v=1';
 
 function etichettaVolte(n) {
   return n === 1 ? 'chiesta 1 volta' : `chiesta ${n} volte`;
@@ -147,4 +148,6 @@ async function avvia() {
   }
 }
 
-avvia();
+proteggiPagina().then((profilo) => {
+  if (profilo) avvia();
+});
