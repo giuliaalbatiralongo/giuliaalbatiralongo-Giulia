@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=32">
+  <link rel="stylesheet" href="style.css?v=33">
 </head>
 <body>
   <div class="app">
@@ -145,15 +145,9 @@
 
         <div class="campo">
           <label for="data-materia">Titolo <span class="campo-nota">facoltativo</span></label>
-          <input type="text" id="data-materia" name="materia" list="materie-suggerite"
-                 placeholder="Materia, reparto, o cosa vuoi">
-          <datalist id="materie-suggerite">
-            <option value="Farmacologia 2">
-            <option value="Gastroenterologia">
-            <option value="Malattie Infettive">
-            <option value="Anatomia Patologica">
-            <option value="Organi di Senso">
-          </datalist>
+          <input type="text" id="data-materia" name="materia"
+                 autocomplete="off" placeholder="Materia, reparto, o quello che vuoi">
+          <p class="campo-aiuto">Scrivi quello che ti serve. Se lo lasci vuoto, al suo posto compare il tipo.</p>
         </div>
 
         <div class="campo-doppio">

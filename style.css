@@ -1778,9 +1778,29 @@ a.profilo-btn {
   .finestra::backdrop { backdrop-filter: none; background: rgba(17, 17, 26, 0.5); }
 }
 
+/* La finestra e' una colonna: testata e fondo restano fermi, scorre
+   solo il corpo. Senza questo il corpo non riceve mai un'altezza entro
+   cui scorrere, cresce oltre il bordo e il pulsante di salvataggio
+   finisce fuori dalla finestra, irraggiungibile.
+   Il display sta su [open] perche' una dialog chiusa deve restare
+   nascosta: metterlo su .finestra la mostrerebbe sempre. */
 .finestra[open] {
+  display: flex;
+  flex-direction: column;
   animation: finestra-entra 180ms var(--curva);
 }
+
+/* Quando il contenuto e' avvolto in un form, la colonna deve passare
+   anche attraverso di lui. */
+.finestra > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.finestra-testata,
+.finestra-fondo { flex-shrink: 0; }
 
 @keyframes finestra-entra {
   from { opacity: 0; transform: translateY(6px) scale(0.99); }
@@ -1836,6 +1856,11 @@ a.profilo-btn {
 
 .finestra-corpo {
   padding: 16px 20px;
+  /* min-height: 0 e' quello che permette davvero lo scorrimento dentro
+     un contenitore flessibile: senza, l'altezza minima resta quella del
+     contenuto e overflow-y non ha effetto. */
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
