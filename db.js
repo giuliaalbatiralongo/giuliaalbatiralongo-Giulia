@@ -528,6 +528,231 @@ export function contoAllaRovescia(giorno) {
   return `il ${data.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })}`;
 }
 
+/* ---------- Esportazione del calendario ---------- */
+
+/* Un file .ics e' una fotografia: se aggiungi una data domani, il
+   calendario del telefono non lo sa. Per una sincronizzazione vera
+   servirebbe un indirizzo a cui abbonarsi, e quell'indirizzo sarebbe
+   una chiave permanente sul proprio calendario. */
+function scappaIcs(testo) {
+  return String(testo || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\r?\n/g, '\\n');
+}
+
+// Lo standard vuole righe di massimo 75 ottetti, spezzate con uno spazio.
+function piegaRiga(riga) {
+  if (riga.length <= 73) return riga;
+  const pezzi = [riga.slice(0, 73)];
+  let resto = riga.slice(73);
+  while (resto.length > 72) {
+    pezzi.push(' ' + resto.slice(0, 72));
+    resto = resto.slice(72);
+  }
+  pezzi.push(' ' + resto);
+  return pezzi.join('\r\n');
+}
+
+function timbroUtc(data) {
+  return data.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+export function creaIcs(date) {
+  const righe = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Akesis//Calendario//IT',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Akesis',
+  ];
+
+  const adesso = timbroUtc(new Date());
+
+  date.forEach((voce) => {
+    const senzaTrattini = voce.giorno.replace(/-/g, '');
+    righe.push('BEGIN:VEVENT');
+    righe.push(`UID:akesis-${voce.id}@akesis`);
+    righe.push(`DTSTAMP:${adesso}`);
+
+    if (voce.ora) {
+      // Senza fuso orario dichiarato l'ora vale come locale, che e'
+      // quello che serve: un esame alle 9 e' alle 9 dove sei tu.
+      const ora = voce.ora.slice(0, 5).replace(':', '');
+      righe.push(`DTSTART:${senzaTrattini}T${ora}00`);
+      const fine = new Date(`${voce.giorno}T${voce.ora}`);
+      fine.setHours(fine.getHours() + 2);
+      const oraFine = `${String(fine.getHours()).padStart(2, '0')}${String(
+        fine.getMinutes()
+      ).padStart(2, '0')}`;
+      righe.push(`DTEND:${senzaTrattini}T${oraFine}00`);
+    } else {
+      // Evento di giornata intera: la fine e' il giorno dopo.
+      const dopo = new Date(voce.giorno + 'T00:00:00');
+      dopo.setDate(dopo.getDate() + 1);
+      const m = String(dopo.getMonth() + 1).padStart(2, '0');
+      const g = String(dopo.getDate()).padStart(2, '0');
+      righe.push(`DTSTART;VALUE=DATE:${senzaTrattini}`);
+      righe.push(`DTEND;VALUE=DATE:${dopo.getFullYear()}${m}${g}`);
+    }
+
+    // Senza titolo, titoloData restituisce gia' il nome del tipo: ripeterlo
+    // fra parentesi darebbe "Tirocinio (Tirocinio)".
+    const titolo = titoloData(voce);
+    const tipo = nomeTipoData(voce.tipo);
+    const riepilogo = titolo === tipo ? titolo : `${titolo} (${tipo})`;
+    righe.push(piegaRiga(`SUMMARY:${scappaIcs(riepilogo)}`));
+    if (voce.luogo) righe.push(piegaRiga(`LOCATION:${scappaIcs(voce.luogo)}`));
+    if (voce.note) righe.push(piegaRiga(`DESCRIPTION:${scappaIcs(voce.note)}`));
+    righe.push('END:VEVENT');
+  });
+
+  righe.push('END:VCALENDAR');
+  return righe.join('\r\n');
+}
+
+/* ---------- Piani di studio ---------- */
+
+export async function getPianiStudio() {
+  const { data, error } = await supabase
+    .from('piani_studio')
+    .select('*')
+    .order('fine', { ascending: true });
+
+  if (error) {
+    console.error('Errore nel caricamento dei piani:', error);
+    return [];
+  }
+  return data;
+}
+
+export async function inserisciPiano(piano) {
+  const { data, error } = await supabase.from('piani_studio').insert([piano]).select('*').single();
+
+  if (error) {
+    console.error('Errore nel salvataggio del piano:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function aggiornaFattePiano(id, fatte) {
+  const { error } = await supabase.from('piani_studio').update({ fatte }).eq('id', id);
+
+  if (error) {
+    console.error('Errore nell aggiornamento del piano:', error);
+    return false;
+  }
+  return true;
+}
+
+export async function eliminaPiano(id) {
+  const { error } = await supabase.from('piani_studio').delete().eq('id', id);
+
+  if (error) {
+    console.error('Errore nell eliminazione del piano:', error);
+    return false;
+  }
+  return true;
+}
+
+/* Il piano di marcia, ricalcolato da oggi in avanti.
+
+   Non e' un elenco fisso deciso il primo giorno: le lezioni che restano
+   si ridistribuiscono sui giorni che restano. Se un giorno salti, il
+   giorno dopo ne hai una in piu', non un arretrato che cresce. */
+export function calcolaPiano(piano, oggiIso) {
+  const oggi = oggiIso || new Date().toISOString().slice(0, 10);
+  const partenza = piano.inizio > oggi ? piano.inizio : oggi;
+
+  const giorniUtili = [];
+  const cursore = new Date(partenza + 'T00:00:00');
+  const fine = new Date(piano.fine + 'T00:00:00');
+  const liberi = new Set((piano.giorni_liberi || []).map(Number));
+
+  // Il giorno dell'esame non e' un giorno di studio.
+  while (cursore < fine) {
+    // getDay() da' 0 per domenica: lo portiamo a 1 lunedi ... 7 domenica.
+    const settimana = cursore.getDay() === 0 ? 7 : cursore.getDay();
+    if (!liberi.has(settimana)) {
+      const m = String(cursore.getMonth() + 1).padStart(2, '0');
+      const g = String(cursore.getDate()).padStart(2, '0');
+      giorniUtili.push(`${cursore.getFullYear()}-${m}-${g}`);
+    }
+    cursore.setDate(cursore.getDate() + 1);
+  }
+
+  const restano = Math.max(piano.totale_lezioni - piano.fatte, 0);
+
+  if (restano === 0) {
+    return { giorni: [], restano: 0, giorniUtili: giorniUtili.length, alGiorno: 0, fattibile: true };
+  }
+
+  if (giorniUtili.length === 0) {
+    return { giorni: [], restano, giorniUtili: 0, alGiorno: restano, fattibile: false };
+  }
+
+  // Distribuzione a resto: i giorni iniziali prendono una lezione in piu'
+  // invece di arrotondare tutto per eccesso.
+  const base = Math.floor(restano / giorniUtili.length);
+  const avanzo = restano % giorniUtili.length;
+
+  let numero = piano.fatte;
+  const giorni = giorniUtili.map((giorno, i) => {
+    const quante = base + (i < avanzo ? 1 : 0);
+    const da = numero + 1;
+    numero += quante;
+    return { giorno, quante, da, a: numero };
+  });
+
+  return {
+    giorni: giorni.filter((g) => g.quante > 0),
+    restano,
+    giorniUtili: giorniUtili.length,
+    alGiorno: restano / giorniUtili.length,
+    fattibile: restano / giorniUtili.length <= 8,
+  };
+}
+
+/* ---------- Interesse per i servizi non ancora attivi ---------- */
+
+export async function getMioInteresse() {
+  const { data, error } = await supabase.from('interesse_servizi').select('servizio, nota');
+
+  if (error) {
+    console.error('Errore nel caricamento degli interessi:', error);
+    return [];
+  }
+  return data;
+}
+
+export async function lasciaInteresse(servizio, nota) {
+  const utente = await idUtente();
+  if (!utente) return false;
+
+  const { error } = await supabase
+    .from('interesse_servizi')
+    .insert([{ utente, servizio, nota: nota || null }]);
+
+  if (error) {
+    console.error('Errore nel salvataggio dell interesse:', error);
+    return false;
+  }
+  return true;
+}
+
+export async function ritiraInteresse(servizio) {
+  const { error } = await supabase.from('interesse_servizi').delete().eq('servizio', servizio);
+
+  if (error) {
+    console.error('Errore nel ritiro dell interesse:', error);
+    return false;
+  }
+  return true;
+}
+
 /* ---------- Tempo di studio ---------- */
 
 /* Quanto tempo per sezione, dal giorno indicato a oggi. Le regole del

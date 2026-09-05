@@ -7,7 +7,7 @@ import {
   getMateriali,
   linkMateriali,
   registraRisposta,
-} from './db.js?v=20';
+} from './db.js?v=21';
 import { iconaPerMateria } from './materie.js?v=3';
 import { proteggiPagina } from './auth.js?v=10';
 import { misuraTempo } from './tempo.js?v=2';

@@ -3078,3 +3078,276 @@ input[type="time"]:focus {
   .calendario-sotto { grid-template-columns: 1fr; }
   .legenda { margin-left: 0; width: 100%; }
 }
+
+/* ============================================================
+   Piano di studio
+   ============================================================ */
+
+.azioni-testata {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.piano-card {
+  padding: 20px 22px 22px;
+  margin-bottom: 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+  box-shadow: var(--ombra-1);
+}
+
+.piano-testa {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.piano-nome {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.014em;
+  margin-bottom: 2px;
+}
+
+.piano-quando {
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+.piano-avanzamento {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.piano-conto {
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Cosa fare oggi: e' la riga per cui si apre questa pagina, quindi
+   sta in un riquadro suo invece che dentro il testo. */
+.piano-oggi {
+  padding: 14px 16px;
+  border-radius: var(--r-controllo);
+  background: var(--accento-tenue);
+  font-size: 13px;
+  color: var(--testo);
+}
+
+.piano-oggi.spento {
+  background: var(--superficie-alt);
+  color: var(--testo-2);
+}
+
+.piano-oggi.allarme {
+  background: var(--superficie-alt);
+  border-left: 3px solid var(--st-ripassare);
+  color: var(--testo-2);
+}
+
+.piano-oggi-titolo {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+  color: var(--accento);
+}
+
+.piano-oggi-quali {
+  font-size: 12.5px;
+  color: var(--testo-2);
+  margin-top: 2px;
+}
+
+.piano-azioni {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* I prossimi giorni: una striscia, non una tabella. Serve a capire il
+   ritmo, non a leggere ogni numero. */
+.piano-giorni {
+  display: flex;
+  gap: 6px;
+  margin-top: 18px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.piano-giorno {
+  flex: 1 0 auto;
+  min-width: 74px;
+  padding: 8px 10px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  text-align: center;
+}
+
+.piano-giorno.oggi {
+  border-color: var(--accento);
+  background: var(--accento-tenue);
+}
+
+.piano-giorno-data {
+  display: block;
+  font-size: 10.5px;
+  color: var(--testo-3);
+  text-transform: capitalize;
+}
+
+.piano-giorno-quante {
+  display: block;
+  margin-top: 2px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scelta dei giorni liberi */
+.giorni-scelta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+label.giorno-scelta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border: 1px solid var(--linea-forte);
+  border-radius: var(--r-controllo);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: border-color 160ms var(--curva);
+}
+
+label.giorno-scelta input { accent-color: var(--accento); }
+
+label.giorno-scelta:has(input:checked) {
+  border-color: var(--accento);
+  background: var(--accento-tenue);
+}
+
+/* ============================================================
+   Servizi
+   ============================================================ */
+
+.avviso-riquadro {
+  display: flex;
+  gap: 12px;
+  max-width: 68ch;
+  padding: 16px 18px;
+  margin-bottom: 24px;
+  border: 1px solid var(--linea);
+  border-left: 3px solid var(--accento);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+}
+
+.avviso-riquadro i { font-size: 18px; color: var(--accento); flex-shrink: 0; }
+.avviso-riquadro p { font-size: 13px; line-height: 1.6; color: var(--testo-2); }
+.avviso-riquadro p + p { margin-top: 8px; }
+.avviso-riquadro strong { color: var(--testo); }
+
+.servizi-griglia {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.servizio-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  /* Tratteggiato come la pagina del test SSM: si deve capire che e' un
+     cantiere prima di leggere. */
+  border: 1px dashed var(--linea-forte);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+}
+
+.servizio-testa {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.servizio-nome {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.014em;
+}
+
+.servizio-stato {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--testo-3);
+  margin-bottom: 12px;
+}
+
+.servizio-descrizione {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--testo-2);
+  margin-bottom: 14px;
+}
+
+.servizio-elenco {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.servizio-elenco li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+.servizio-elenco li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 1px;
+  background: var(--testo-3);
+}
+
+.servizio-fondo {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--linea);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.servizio-nota { width: 100%; font-size: 13px; }
+
+.servizio-segnato {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--testo-2);
+}
+
+.servizio-segnato i { font-size: 16px; color: var(--st-consolidato); }

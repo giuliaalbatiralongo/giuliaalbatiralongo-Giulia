@@ -8,7 +8,7 @@ import {
   titoloData,
   tipoData,
   TIPI_DATA,
-} from './db.js?v=20';
+} from './db.js?v=21';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -412,6 +412,30 @@ document.getElementById('torna-oggi').addEventListener('click', () => {
   meseMostrato = new Date();
   meseMostrato.setDate(1);
   disegnaMese();
+});
+
+/* ---------- Esportazione ---------- */
+
+document.getElementById('esporta').addEventListener('click', () => {
+  if (date.length === 0) {
+    window.alert('Non c e ancora niente da esportare.');
+    return;
+  }
+
+  const contenuto = creaIcs(date);
+  const blob = new Blob([contenuto], { type: 'text/calendar;charset=utf-8' });
+  const indirizzo = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = indirizzo;
+  link.download = 'akesis.ics';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  // L'indirizzo temporaneo va liberato, altrimenti resta in memoria
+  // finche' la pagina e' aperta.
+  setTimeout(() => URL.revokeObjectURL(indirizzo), 1000);
 });
 
 /* ---------- Avvio ---------- */

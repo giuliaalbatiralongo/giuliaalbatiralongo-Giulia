@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Revisione - Akesis</title>
+  <title>Piano di studio - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -26,14 +26,14 @@
         <p class="nav-gruppo">Studio</p>
         <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
         <a href="calendario.html" class="nav-voce"><i class="ph ph-calendar-dots" aria-hidden="true"></i><span>Calendario</span></a>
-        <a href="piano.html" class="nav-voce"><i class="ph ph-path" aria-hidden="true"></i><span>Piano di studio</span></a>
+        <a href="piano.html" class="nav-voce attivo"><i class="ph-fill ph-path" aria-hidden="true"></i><span>Piano di studio</span></a>
         <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
         <a href="ssm.html" class="nav-voce"><i class="ph ph-target" aria-hidden="true"></i><span>Test SSM</span></a>
         <a href="statistiche.html" class="nav-voce"><i class="ph ph-chart-line" aria-hidden="true"></i><span>Statistiche</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <p class="nav-gruppo" data-solo-admin hidden>Gestione</p>
-        <a href="revisione.html" class="nav-voce attivo" data-solo-admin hidden><i class="ph-fill ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
+        <a href="revisione.html" class="nav-voce" data-solo-admin hidden><i class="ph ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
 
         <p class="nav-gruppo">Altro</p>
         <a href="servizi.html" class="nav-voce"><i class="ph ph-handshake" aria-hidden="true"></i><span>Servizi</span></a>
@@ -44,7 +44,7 @@
           <span class="profilo-avatar"><i class="ph ph-user" aria-hidden="true"></i></span>
           <span class="profilo-testo">
             <span class="profilo-nome">Profilo</span>
-            <span class="profilo-nota">Caricamento</span>
+            <span class="profilo-nota">Presto disponibile</span>
           </span>
         </button>
       </div>
@@ -56,39 +56,83 @@
     </button>
 
     <main class="contenuto">
-      <div class="contenuto-interno">
-        <h1 class="page-titolo">Da revisionare</h1>
-        <p class="page-sub">Proposte arrivate dagli studenti. Restano invisibili agli altri finché non le approvi.</p>
+      <div class="contenuto-interno largo">
+        <div class="testata">
+          <div>
+            <h1 class="page-titolo">Piano di studio</h1>
+            <p class="page-sub">Dici quante lezioni ci sono ed entro quando. Il resto lo divide lui, e lo rifa ogni giorno.</p>
+          </div>
+          <button type="button" class="btn" id="apri-nuovo">
+            <i class="ph ph-plus" aria-hidden="true"></i> Nuovo piano
+          </button>
+        </div>
 
         <div id="scheletro">
           <div class="scheletro scheletro-card"></div>
         </div>
 
-        <section id="sezione-casi" hidden>
-          <h2 class="sezione-titolo">
-            <i class="ph ph-cards" aria-hidden="true"></i>
-            Casi clinici <span class="sezione-conteggio" id="conteggio-casi"></span>
-          </h2>
-          <div id="proposte"></div>
-        </section>
-
-        <section id="sezione-materiali" hidden>
-          <h2 class="sezione-titolo">
-            <i class="ph ph-folder" aria-hidden="true"></i>
-            Materiali <span class="sezione-conteggio" id="conteggio-materiali"></span>
-          </h2>
-          <div id="proposte-materiali"></div>
-        </section>
-
-        <div id="tutto-fatto" hidden>
-          <div class="stato-vuoto">
-            <i class="ph ph-seal-check" aria-hidden="true"></i>
-            <p>Nessuna proposta in attesa. Tutto revisionato.</p>
-          </div>
-        </div>
+        <div id="piani" hidden></div>
       </div>
     </main>
   </div>
+
+  <dialog id="finestra-piano" class="finestra">
+    <form id="form-piano" method="dialog">
+      <div class="finestra-testata">
+        <div>
+          <p class="finestra-occhiello">Piano di studio</p>
+          <p class="finestra-titolo">Verso quale esame</p>
+        </div>
+        <button type="button" class="btn-chiudi" id="chiudi-finestra" aria-label="Chiudi">
+          <i class="ph ph-x" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="finestra-corpo">
+        <div class="campo">
+          <label for="piano-data">Esame in calendario <span class="campo-nota">se c'e' gia'</span></label>
+          <select id="piano-data" name="data_esame_id">
+            <option value="">Non collegarlo a nessuna data</option>
+          </select>
+          <p class="campo-aiuto">Collegandolo, la data dell'esame si compila da sola.</p>
+        </div>
+
+        <div class="campo">
+          <label for="piano-titolo">Materia</label>
+          <input type="text" id="piano-titolo" name="titolo" required
+                 placeholder="Es. Farmacologia 2">
+        </div>
+
+        <div class="campo-doppio">
+          <div class="campo">
+            <label for="piano-lezioni">Quante lezioni</label>
+            <input type="number" id="piano-lezioni" name="totale_lezioni" min="1" max="2000" required
+                   placeholder="34">
+            <p class="campo-aiuto">Sbobine, registrazioni, o come le chiami tu.</p>
+          </div>
+          <div class="campo">
+            <label for="piano-fine">Giorno dell'esame</label>
+            <input type="date" id="piano-fine" name="fine" required>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Giorni che ti lasci liberi</label>
+          <div class="giorni-scelta" id="giorni-liberi"></div>
+          <p class="campo-aiuto">Il piano non ci mette lezioni sopra. Puoi lasciarne uno solo, o nessuno.</p>
+        </div>
+      </div>
+
+      <div class="finestra-fondo">
+        <div class="finestra-azioni">
+          <span class="esito-form" id="piano-esito"></span>
+          <button type="submit" class="btn">
+            <i class="ph ph-check" aria-hidden="true"></i> Crea il piano
+          </button>
+        </div>
+      </div>
+    </form>
+  </dialog>
 
   <script>
     window.addEventListener('error', (e) => {
@@ -96,6 +140,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="revisione.js?v=6"></script>
+  <script type="module" src="piano.js?v=1"></script>
 </body>
 </html>

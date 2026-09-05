@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Revisione - Akesis</title>
+  <title>Servizi - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -33,10 +33,10 @@
         <a href="statistiche.html" class="nav-voce"><i class="ph ph-chart-line" aria-hidden="true"></i><span>Statistiche</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <p class="nav-gruppo" data-solo-admin hidden>Gestione</p>
-        <a href="revisione.html" class="nav-voce attivo" data-solo-admin hidden><i class="ph-fill ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
+        <a href="revisione.html" class="nav-voce" data-solo-admin hidden><i class="ph ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
 
         <p class="nav-gruppo">Altro</p>
-        <a href="servizi.html" class="nav-voce"><i class="ph ph-handshake" aria-hidden="true"></i><span>Servizi</span></a>
+        <a href="servizi.html" class="nav-voce attivo"><i class="ph-fill ph-handshake" aria-hidden="true"></i><span>Servizi</span></a>
       </nav>
 
       <div class="sidebar-fondo">
@@ -44,7 +44,7 @@
           <span class="profilo-avatar"><i class="ph ph-user" aria-hidden="true"></i></span>
           <span class="profilo-testo">
             <span class="profilo-nome">Profilo</span>
-            <span class="profilo-nota">Caricamento</span>
+            <span class="profilo-nota">Presto disponibile</span>
           </span>
         </button>
       </div>
@@ -57,35 +57,25 @@
 
     <main class="contenuto">
       <div class="contenuto-interno">
-        <h1 class="page-titolo">Da revisionare</h1>
-        <p class="page-sub">Proposte arrivate dagli studenti. Restano invisibili agli altri finché non le approvi.</p>
+        <h1 class="page-titolo">Servizi</h1>
+        <p class="page-sub">Due idee di servizio a pagamento. Nessuna delle due e ancora attiva.</p>
+
+        <div class="avviso-riquadro">
+          <i class="ph ph-info" aria-hidden="true"></i>
+          <div>
+            <p><strong>Questa pagina non vende niente.</strong> Serve a capire se questi
+            servizi interessano davvero, prima di costruirli.</p>
+            <p>Se lasci il tuo interesse, resta segnato che il tuo account lo ha chiesto,
+            insieme alla nota che scrivi. Nient'altro: non serve una email in piu', ce l'hai
+            gia' nel profilo. Puoi ritirarlo quando vuoi, e sparisce.</p>
+          </div>
+        </div>
 
         <div id="scheletro">
           <div class="scheletro scheletro-card"></div>
         </div>
 
-        <section id="sezione-casi" hidden>
-          <h2 class="sezione-titolo">
-            <i class="ph ph-cards" aria-hidden="true"></i>
-            Casi clinici <span class="sezione-conteggio" id="conteggio-casi"></span>
-          </h2>
-          <div id="proposte"></div>
-        </section>
-
-        <section id="sezione-materiali" hidden>
-          <h2 class="sezione-titolo">
-            <i class="ph ph-folder" aria-hidden="true"></i>
-            Materiali <span class="sezione-conteggio" id="conteggio-materiali"></span>
-          </h2>
-          <div id="proposte-materiali"></div>
-        </section>
-
-        <div id="tutto-fatto" hidden>
-          <div class="stato-vuoto">
-            <i class="ph ph-seal-check" aria-hidden="true"></i>
-            <p>Nessuna proposta in attesa. Tutto revisionato.</p>
-          </div>
-        </div>
+        <div class="servizi-griglia" id="servizi" hidden></div>
       </div>
     </main>
   </div>
@@ -96,6 +86,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="revisione.js?v=6"></script>
+  <script type="module" src="servizi.js?v=1"></script>
 </body>
 </html>

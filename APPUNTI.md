@@ -49,6 +49,31 @@ database. Restano aperte:
 - Gli intervalli sono uguali per tutti. FSRS li adatterebbe alla persona,
   ma serve molto piu' storico di quello che abbiamo.
 
+### Ripasso pre-esame: SOSPESO per decisione di Giulia
+
+Gemini aveva proposto: nei 14 giorni prima di un esame, dare priorita' ai
+casi di quella materia dove si sbaglia di piu'. Giulia ha risposto
+"lascia in sospeso che ci torniamo dopo, e da approfondire".
+
+**Non e' stato costruito.** Il nodo da sciogliere: quel meccanismo
+combatte con il ripasso a intervalli, che calcola quando rivedere un
+caso. Scavalcarlo proprio prima dell'esame fa saltare il calcolo nel
+momento in cui conta di piu', e dopo l'esame lascia tutto il resto
+arretrato. Le tre strade erano: modalita' separata, coda scavalcata,
+oppure mista.
+
+Serve anche un campo materia vero sulle date del calendario: oggi il
+titolo e' testo libero, quindi "Farma 2" non si lega a "Farmacologia 2".
+
+### Sincronizzazione vera del calendario
+
+L'esportazione `.ics` c'e' ma e' una fotografia: aggiungendo una data,
+il calendario del telefono non lo sa. Per la sincronizzazione vera
+servirebbe un indirizzo a cui Google e Apple si abbonano, cioe' una
+funzione lato server e un indirizzo segreto che vale come chiave
+permanente sul calendario di quella persona. Da valutare se ne vale la
+pena.
+
 ### Calendario: cosa resta da decidere
 
 Il calendario c'e' (griglia del mese, prossime date con conto alla
