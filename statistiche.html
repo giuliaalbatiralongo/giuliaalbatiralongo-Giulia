@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profilo - Akesis</title>
+  <title>Statistiche - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
         <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
         <a href="ssm.html" class="nav-voce"><i class="ph ph-target" aria-hidden="true"></i><span>Test SSM</span></a>
-        <a href="statistiche.html" class="nav-voce"><i class="ph ph-chart-line" aria-hidden="true"></i><span>Statistiche</span></a>
+        <a href="statistiche.html" class="nav-voce attivo"><i class="ph-fill ph-chart-line" aria-hidden="true"></i><span>Statistiche</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <p class="nav-gruppo" data-solo-admin hidden>Gestione</p>
         <a href="revisione.html" class="nav-voce" data-solo-admin hidden><i class="ph ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
@@ -39,7 +39,7 @@
           <span class="profilo-avatar"><i class="ph ph-user" aria-hidden="true"></i></span>
           <span class="profilo-testo">
             <span class="profilo-nome">Profilo</span>
-            <span class="profilo-nota">Caricamento</span>
+            <span class="profilo-nota">Presto disponibile</span>
           </span>
         </button>
       </div>
@@ -51,64 +51,66 @@
     </button>
 
     <main class="contenuto">
-      <div class="contenuto-interno">
-        <div class="testata">
-          <div>
-            <h1 class="page-titolo">Profilo</h1>
-            <p class="page-sub">I dati del tuo account e la password di accesso.</p>
-          </div>
-          <button type="button" class="btn btn-neutro" id="btn-esci">
-            <i class="ph ph-sign-out" aria-hidden="true"></i> Esci
-          </button>
+      <div class="contenuto-interno largo">
+        <h1 class="page-titolo">Statistiche</h1>
+        <p class="page-sub">Quanto studi, cosa ricordi, e su cosa vai peggio. Sono dati tuoi: nessun altro li vede.</p>
+
+        <div id="scheletro">
+          <div class="scheletro scheletro-riga" style="width: 220px"></div>
+          <div class="scheletro scheletro-card"></div>
         </div>
 
-        <div class="contenuto-stretto">
-          <dl class="scheda-dati">
-            <div>
-              <dt>Nome</dt>
-              <dd id="dato-nome">-</dd>
+        <div id="statistiche" hidden>
+
+          <div class="tessere" id="tessere"></div>
+
+          <section class="blocco-stat">
+            <div class="sezione-testa">
+              <h2 class="sezione-titolo">Tempo di studio</h2>
+              <span class="sezione-nota" id="tempo-periodo"></span>
             </div>
-            <div>
-              <dt>Email</dt>
-              <dd id="dato-email">-</dd>
+            <div class="piccoli-grafici" id="grafici-tempo"></div>
+            <div class="tabella-scorre">
+              <table class="tabella-stat" id="tabella-tempo"></table>
             </div>
-            <div>
-              <dt>Ruolo</dt>
-              <dd id="dato-ruolo">-</dd>
-            </div>
-          </dl>
-          <p class="campo-aiuto" style="margin-top: 8px">
-            Nome ed email non si modificano da qui: il nome viene scelto una volta sola alla creazione del profilo.
-          </p>
-
-          <section class="sezione">
-            <h2 class="sezione-titolo">Cambia password</h2>
-            <p class="sezione-sub">Ti chiedo prima quella attuale, per sicurezza.</p>
-
-            <form id="form-password" class="form">
-              <div class="campo">
-                <label for="password-attuale">Password attuale</label>
-                <input type="password" id="password-attuale" name="attuale" autocomplete="current-password" required>
-              </div>
-
-              <div class="campo">
-                <label for="password-nuova">Nuova password</label>
-                <input type="password" id="password-nuova" name="nuova" autocomplete="new-password" minlength="6" required>
-                <p class="campo-aiuto">Almeno 6 caratteri. Evita nome proprio e numeri.</p>
-              </div>
-
-              <div class="campo">
-                <label for="password-conferma">Ripeti la nuova password</label>
-                <input type="password" id="password-conferma" name="conferma" autocomplete="new-password" minlength="6" required>
-              </div>
-
-              <button type="submit" class="btn" style="align-self: flex-start">
-                <i class="ph ph-lock-key" aria-hidden="true"></i> Aggiorna password
-              </button>
-            </form>
-
-            <p id="esito" class="esito-form"></p>
           </section>
+
+          <div class="due-colonne">
+            <section class="blocco-stat">
+              <div class="sezione-testa">
+                <h2 class="sezione-titolo">A che punto sono i casi</h2>
+              </div>
+              <div id="grafico-scala"></div>
+              <p class="blocco-nota" id="nota-scala"></p>
+            </section>
+
+            <section class="blocco-stat">
+              <div class="sezione-testa">
+                <h2 class="sezione-titolo">Ripassi in arrivo</h2>
+              </div>
+              <div id="grafico-arrivo"></div>
+              <p class="blocco-nota" id="nota-arrivo"></p>
+            </section>
+          </div>
+
+          <section class="blocco-stat">
+            <div class="sezione-testa">
+              <h2 class="sezione-titolo">Dove vai peggio</h2>
+              <span class="sezione-nota">Dalla materia meno solida</span>
+            </div>
+            <div id="grafico-materie"></div>
+            <p class="blocco-nota" id="nota-materie"></p>
+          </section>
+
+          <section class="blocco-stat">
+            <div class="sezione-testa">
+              <h2 class="sezione-titolo">Quanto hai messo dentro</h2>
+            </div>
+            <div class="tabella-scorre">
+              <table class="tabella-stat" id="tabella-contributi"></table>
+            </div>
+          </section>
+
         </div>
       </div>
     </main>
@@ -116,10 +118,10 @@
 
   <script>
     window.addEventListener('error', (e) => {
-      const el = document.getElementById('esito');
-      if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
+      const el = document.getElementById('scheletro');
+      if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="profilo.js?v=4"></script>
+  <script type="module" src="statistiche.js?v=2"></script>
 </body>
 </html>

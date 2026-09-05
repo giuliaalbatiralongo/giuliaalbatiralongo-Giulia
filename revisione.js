@@ -6,7 +6,7 @@ import {
   approvaMateriale,
   eliminaMateriale,
   linkMateriali,
-} from './db.js?v=16';
+} from './db.js?v=17';
 import { proteggiPagina } from './auth.js?v=9';
 import { iconaPerMateria } from './materie.js?v=3';
 

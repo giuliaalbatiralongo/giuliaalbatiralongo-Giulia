@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=25">
+  <link rel="stylesheet" href="style.css?v=27">
 </head>
 <body>
   <div class="app">
@@ -28,6 +28,7 @@
         <a href="quiz.html" class="nav-voce attivo"><i class="ph-fill ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
         <a href="ssm.html" class="nav-voce"><i class="ph ph-target" aria-hidden="true"></i><span>Test SSM</span></a>
+        <a href="statistiche.html" class="nav-voce"><i class="ph ph-chart-line" aria-hidden="true"></i><span>Statistiche</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <p class="nav-gruppo" data-solo-admin hidden>Gestione</p>
         <a href="revisione.html" class="nav-voce" data-solo-admin hidden><i class="ph ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
@@ -62,7 +63,10 @@
         <div id="materie" class="materie-grid" hidden></div>
 
         <section class="sezione">
-          <h2 class="sezione-titolo">Andamento</h2>
+          <div class="sezione-testa">
+            <h2 class="sezione-titolo">Andamento</h2>
+            <a href="statistiche.html" class="link-testo">Tutte le statistiche <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
+          </div>
           <p class="sezione-sub">Calcolato sulle risposte che dai nelle sessioni di quiz.</p>
           <div id="tracker"></div>
         </section>

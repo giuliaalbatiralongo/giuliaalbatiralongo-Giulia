@@ -496,7 +496,7 @@ export async function registraRisposta({ casoId, materia, corretta, sessione }) 
 export async function getRisposte() {
   const { data, error } = await supabase
     .from('risposte')
-    .select('corretta, sessione, created_at')
+    .select('materia, corretta, sessione, created_at')
     .order('created_at', { ascending: true });
 
   if (error) {
@@ -509,6 +509,79 @@ export async function getRisposte() {
 // Riassume le risposte in numeri pronti da mostrare. L'andamento
 // confronta le ultime 20 risposte con le 20 precedenti: e' una misura
 // grezza ma onesta, e non richiede una finestra temporale fissa.
+/* Quanto ha messo dentro questa persona. I conteggi arrivano dal
+   database senza scaricare le righe: servono solo i numeri. */
+export async function getMieiContributi() {
+  const utente = await idUtente();
+  if (!utente) return { casi: 0, domande: 0, note: 0, materiali: 0 };
+
+  const conta = async (tabella) => {
+    const { count, error } = await supabase
+      .from(tabella)
+      .select('*', { count: 'exact', head: true })
+      .eq('autore', utente);
+    if (error) {
+      console.error(`Errore nel conteggio di ${tabella}:`, error);
+      return 0;
+    }
+    return count || 0;
+  };
+
+  const [casi, domande, note, materiali] = await Promise.all([
+    conta('casi_clinici'),
+    conta('domande_esame'),
+    conta('note_domanda'),
+    conta('materiali'),
+  ]);
+
+  return { casi, domande, note, materiali };
+}
+
+/* Accuratezza per materia, dalla piu' debole. Sotto le cinque risposte
+   la percentuale non dice niente, quindi la materia resta fuori. */
+export function accuratezzaPerMateria(risposte, minimo = 5) {
+  const per = new Map();
+
+  risposte.forEach((r) => {
+    const nome = r.materia || 'Senza materia';
+    const voce = per.get(nome) || { materia: nome, totale: 0, corrette: 0 };
+    voce.totale += 1;
+    if (r.corretta) voce.corrette += 1;
+    per.set(nome, voce);
+  });
+
+  return [...per.values()]
+    .filter((v) => v.totale >= minimo)
+    .map((v) => ({ ...v, accuratezza: Math.round((v.corrette / v.totale) * 100) }))
+    .sort((a, b) => a.accuratezza - b.accuratezza);
+}
+
+/* Il tempo per giorno e per sezione, in una mappa comoda da disegnare:
+   giorno -> { quiz, domande, materiali }. */
+export function tempoPerGiorno(righe, giorni = 14) {
+  const oggi = new Date();
+  oggi.setHours(0, 0, 0, 0);
+
+  const elenco = [];
+  for (let i = giorni - 1; i >= 0; i -= 1) {
+    const d = new Date(oggi);
+    d.setDate(d.getDate() - i);
+    const chiave = d.toISOString().slice(0, 10);
+    elenco.push({ giorno: chiave, data: d, quiz: 0, domande: 0, materiali: 0, totale: 0 });
+  }
+
+  const indice = new Map(elenco.map((v) => [v.giorno, v]));
+
+  righe.forEach((r) => {
+    const voce = indice.get(r.giorno);
+    if (!voce) return;
+    if (voce[r.sezione] !== undefined) voce[r.sezione] += r.secondi;
+    voce.totale += r.secondi;
+  });
+
+  return elenco;
+}
+
 export function calcolaStatistiche(risposte) {
   const totale = risposte.length;
 

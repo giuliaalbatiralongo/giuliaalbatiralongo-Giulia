@@ -48,16 +48,17 @@ database. Restano aperte:
 - Gli intervalli sono uguali per tutti. FSRS li adatterebbe alla persona,
   ma serve molto piu' storico di quello che abbiamo.
 
-### Tempo di studio: cosa manca
+### Statistiche: cosa manca
 
-Il conteggio c'e' (quiz e domande d'esame, separati, giorno per giorno) e
-in home si vede il tempo di oggi piu' il totale dei sette giorni. Restano
-aperte:
+La sezione Statistiche c'e' (tempo per sezione su 14 giorni, scala dei
+ripassi, ripassi in arrivo, accuratezza per materia, contributi).
+Restano aperte:
 
-- Una pagina con lo storico giorno per giorno, invece del solo riepilogo
-- Il conteggio sui Materiali: la sezione e' gia' prevista dal database,
-  ma nessuna pagina la usa ancora
-- Un obiettivo giornaliero, se Giulia lo vuole
+- Il conteggio del tempo sui **Materiali**: il database lo prevede gia'
+  e la tabella lo mostra, ma nessuna pagina lo registra ancora. Va
+  aggiunto a `materiali.js` se Giulia lo vuole
+- Un obiettivo giornaliero, se lo vuole
+- Un confronto fra periodi (questa settimana contro la scorsa)
 
 ## Aperte, in attesa di una decisione di Giulia
 

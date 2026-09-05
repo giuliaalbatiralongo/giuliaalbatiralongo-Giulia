@@ -2433,3 +2433,244 @@ body.barra-chiusa .contenuto {
   color: var(--testo-3);
   white-space: nowrap;
 }
+
+/* ============================================================
+   Statistiche
+   ============================================================ */
+
+.blocco-stat {
+  padding: 20px 22px 22px;
+  margin-bottom: 20px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+  box-shadow: var(--ombra-1);
+}
+
+.sezione-nota {
+  font-size: 12px;
+  color: var(--testo-3);
+}
+
+.blocco-nota {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--linea);
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+.blocco-vuoto {
+  font-size: 13px;
+  color: var(--testo-3);
+  padding: 8px 0;
+}
+
+.due-colonne {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.due-colonne .blocco-stat { margin-bottom: 20px; }
+
+/* ---------- Piccoli grafici affiancati ----------
+   Una sezione per grafico, una serie per grafico: cosi' basta un colore
+   solo e non serve nessuna legenda. La scala e' condivisa, altrimenti il
+   confronto fra le sezioni non varrebbe niente. */
+
+.piccoli-grafici {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.piccolo-grafico-titolo {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--testo-2);
+}
+
+.piccolo-grafico-somma {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  font-variant-numeric: tabular-nums;
+  margin: 2px 0 12px;
+}
+
+/* ---------- Barre verticali ---------- */
+
+.grafico-barre {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 96px;
+}
+
+.barra-colonna {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  border-radius: 4px;
+  cursor: default;
+}
+
+.barra-colonna:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 2px;
+}
+
+/* La pista tiene l'altezza anche quando la barra e' a zero, cosi' le
+   colonne restano allineate sulla stessa base. */
+.barra-pista {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  min-height: 0;
+}
+
+.barra-piena {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--accento);
+  transition: opacity 160ms var(--curva);
+}
+
+/* Un giorno senza studio non e' un buco: si vede una traccia. */
+.barra-piena.vuota {
+  height: 2px !important;
+  background: var(--linea-forte);
+  border-radius: 1px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .barra-colonna:hover .barra-piena { opacity: 0.72; }
+}
+
+.barra-etichetta {
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: var(--testo-3);
+  text-align: center;
+  white-space: nowrap;
+  min-height: 13px;
+}
+
+/* Prima e ultima data, sotto il grafico. Fuori dalle colonne hanno
+   spazio per stare intere invece di essere tagliate a meta'. */
+.grafico-asse {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  font-size: 10.5px;
+  color: var(--testo-3);
+  white-space: nowrap;
+}
+
+/* ---------- Barre orizzontali ---------- */
+
+.barre-orizzontali {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.barra-riga {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 42px 58px;
+  align-items: center;
+  gap: 12px;
+}
+
+.barra-riga-nome {
+  font-size: 13px;
+  color: var(--testo-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barra-riga-pista {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--linea);
+  overflow: hidden;
+}
+
+.barra-riga-piena {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: var(--accento);
+}
+
+.barra-riga-valore {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.barra-riga-dettaglio {
+  font-size: 11.5px;
+  color: var(--testo-3);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Tabelle ---------- */
+
+.tabella-scorre { overflow-x: auto; }
+
+.tabella-stat {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabella-stat th {
+  padding: 0 12px 10px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--testo-3);
+  border-bottom: 1px solid var(--linea);
+  white-space: nowrap;
+}
+
+.tabella-stat td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--linea);
+  white-space: nowrap;
+}
+
+.tabella-stat tbody tr:last-child td { border-bottom: none; }
+
+.tabella-stat tbody tr:last-child td:first-child { font-weight: 600; }
+
+.tabella-stat th:first-child,
+.tabella-stat td:first-child { padding-left: 0; }
+
+.tabella-stat th:last-child,
+.tabella-stat td:last-child { padding-right: 0; }
+
+.tabella-stat .a-destra { text-align: right; }
+.tabella-stat .cifra { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 1000px) {
+  .due-colonne { grid-template-columns: 1fr; }
+  .piccoli-grafici { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .barra-riga { grid-template-columns: 110px minmax(0, 1fr) 38px; }
+  .barra-riga-dettaglio { display: none; }
+}
