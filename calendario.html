@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario - Akesis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="style.css?v=29">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="barra">
+      <div class="sidebar-testa">
+        <div class="logo">AKESIS</div>
+        <button type="button" class="btn-barra" id="chiudi-barra"
+                aria-label="Nascondi il menu" aria-controls="barra" aria-expanded="true">
+          <i class="ph ph-sidebar-simple" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <p class="nav-gruppo">Studio</p>
+        <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
+        <a href="calendario.html" class="nav-voce attivo"><i class="ph-fill ph-calendar-dots" aria-hidden="true"></i><span>Calendario</span></a>
+        <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
+        <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
+        <a href="ssm.html" class="nav-voce"><i class="ph ph-target" aria-hidden="true"></i><span>Test SSM</span></a>
+        <a href="statistiche.html" class="nav-voce"><i class="ph ph-chart-line" aria-hidden="true"></i><span>Statistiche</span></a>
+        <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
+        <p class="nav-gruppo" data-solo-admin hidden>Gestione</p>
+        <a href="revisione.html" class="nav-voce" data-solo-admin hidden><i class="ph ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
+      </nav>
+
+      <div class="sidebar-fondo">
+        <button class="profilo-btn" type="button" disabled aria-disabled="true">
+          <span class="profilo-avatar"><i class="ph ph-user" aria-hidden="true"></i></span>
+          <span class="profilo-testo">
+            <span class="profilo-nome">Profilo</span>
+            <span class="profilo-nota">Presto disponibile</span>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <button type="button" class="btn-barra btn-barra-fuori" id="apri-barra" hidden
+            aria-label="Mostra il menu" aria-controls="barra" aria-expanded="false">
+      <i class="ph ph-sidebar-simple" aria-hidden="true"></i>
+    </button>
+
+    <main class="contenuto">
+      <div class="contenuto-interno largo">
+        <div class="testata">
+          <div>
+            <h1 class="page-titolo">Calendario</h1>
+            <p class="page-sub">Appelli, esami a cui ti sei iscritta e scadenze da non mancare.</p>
+          </div>
+          <button type="button" class="btn" id="apri-aggiunta">
+            <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi una data
+          </button>
+        </div>
+
+        <div id="scheletro">
+          <div class="scheletro scheletro-card"></div>
+        </div>
+
+        <div class="calendario-impianto" id="calendario" hidden>
+
+          <section class="pannello mese">
+            <div class="mese-testa">
+              <button type="button" class="btn-mese" id="mese-prima" aria-label="Mese precedente">
+                <i class="ph ph-caret-left" aria-hidden="true"></i>
+              </button>
+              <h2 class="mese-nome" id="mese-nome"></h2>
+              <button type="button" class="btn-mese" id="mese-dopo" aria-label="Mese successivo">
+                <i class="ph ph-caret-right" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="link-bottone" id="torna-oggi">Oggi</button>
+            </div>
+
+            <div class="griglia-giorni" id="intestazione-giorni" aria-hidden="true"></div>
+            <div class="griglia-mese" id="griglia-mese"></div>
+          </section>
+
+          <aside class="calendario-lato">
+            <section class="pannello">
+              <div class="sezione-testa">
+                <h2 class="sezione-titolo">In arrivo</h2>
+              </div>
+              <div id="prossime"></div>
+            </section>
+
+            <section class="pannello" id="pannello-giorno" hidden>
+              <div class="sezione-testa">
+                <h2 class="sezione-titolo" id="giorno-scelto"></h2>
+                <button type="button" class="link-bottone" id="chiudi-giorno">Chiudi</button>
+              </div>
+              <div id="dettaglio-giorno"></div>
+            </section>
+          </aside>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="finestra-data" class="finestra">
+    <form id="form-data" method="dialog">
+      <div class="finestra-testata">
+        <div>
+          <p class="finestra-occhiello">Calendario</p>
+          <p class="finestra-titolo">Aggiungi una data</p>
+        </div>
+        <button type="button" class="btn-chiudi" id="chiudi-finestra" aria-label="Chiudi">
+          <i class="ph ph-x" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="finestra-corpo">
+        <div class="campo">
+          <label for="data-tipo">Che cos'e'</label>
+          <select id="data-tipo" name="tipo" required>
+            <option value="iscritta">Sono iscritta</option>
+            <option value="appello" selected>Appello</option>
+            <option value="scadenza">Scadenza</option>
+            <option value="altro">Altro</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="data-materia">Materia</label>
+          <input type="text" id="data-materia" name="materia" list="materie-suggerite" required>
+          <datalist id="materie-suggerite">
+            <option value="Farmacologia 2">
+            <option value="Gastroenterologia">
+            <option value="Malattie Infettive">
+            <option value="Anatomia Patologica">
+            <option value="Organi di Senso">
+          </datalist>
+        </div>
+
+        <div class="campo-doppio">
+          <div class="campo">
+            <label for="data-giorno">Giorno</label>
+            <input type="date" id="data-giorno" name="giorno" required>
+          </div>
+          <div class="campo">
+            <label for="data-ora">Ora <span class="campo-nota">facoltativa</span></label>
+            <input type="time" id="data-ora" name="ora">
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="data-luogo">Luogo <span class="campo-nota">facoltativo</span></label>
+          <input type="text" id="data-luogo" name="luogo" placeholder="Es. Aula Magna, San Martino">
+        </div>
+
+        <div class="campo">
+          <label for="data-note">Note <span class="campo-nota">facoltative</span></label>
+          <textarea id="data-note" name="note" rows="2" placeholder="Cosa portare, chi e' in commissione"></textarea>
+        </div>
+
+        <label class="spunta">
+          <input type="checkbox" id="data-condivisa" name="condivisa">
+          <span>
+            Visibile agli altri studenti
+            <span class="spunta-nota">Gli appelli sono uguali per tutti: condividerli evita che ognuno li ricopi.</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="finestra-fondo">
+        <div class="finestra-azioni">
+          <span class="esito-form" id="data-esito"></span>
+          <button type="submit" class="btn">
+            <i class="ph ph-check" aria-hidden="true"></i> Salva
+          </button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    window.addEventListener('error', (e) => {
+      const el = document.getElementById('scheletro');
+      if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
+    });
+  </script>
+  <script type="module" src="calendario.js?v=1"></script>
+</body>
+</html>

@@ -8,6 +8,7 @@ quando riprendiamo il lavoro, si riparte da qui.
 
 > Gli spunti per le prossime funzioni stanno in `IDEE.md`, insieme a
 > cosa fanno le piattaforme concorrenti e a cosa sbagliano.
+> L'ordine di lavoro delle sette idee scelte sta in `PIANO.md`.
 
 ## Da fare quando sara' il momento
 
@@ -47,6 +48,19 @@ database. Restano aperte:
 - Non c'e' modo di dire "questo caso lo so gia', non me lo riproporre".
 - Gli intervalli sono uguali per tutti. FSRS li adatterebbe alla persona,
   ma serve molto piu' storico di quello che abbiamo.
+
+### Calendario: cosa resta da decidere
+
+Il calendario c'e' (griglia del mese, prossime date con conto alla
+rovescia, appelli, esami a cui si e' iscritti, scadenze). Le date nascono
+private, con una spunta per renderle visibili a tutti.
+
+Aperte:
+
+- Non si puo' ancora **modificare** una data: si elimina e si riscrive
+- Nessun promemoria: la data si vede solo aprendo Akesis
+- Le date condivise le puo' aggiungere chiunque. Se un giorno saranno
+  tante, servira' capire chi puo' condividere e chi corregge gli errori
 
 ### Statistiche: cosa manca
 

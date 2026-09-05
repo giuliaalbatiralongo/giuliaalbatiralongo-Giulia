@@ -8,11 +8,14 @@ import {
   calcolaStatistiche,
   casiDaRipassareOggi,
   casiMaiVisti,
+  getDateEsame,
+  giorniMancanti,
+  nomeTipoData,
   getTempoStudio,
   sommaPerSezione,
   formattaDurata,
-} from './db.js?v=17';
-import { proteggiPagina } from './auth.js?v=9';
+} from './db.js?v=19';
+import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
 const elSezioni = document.getElementById('sezioni');
@@ -23,6 +26,8 @@ const elStatoNota = document.getElementById('stato-nota');
 const elTempo = document.getElementById('tempo');
 const elTempoRighe = document.getElementById('tempo-righe');
 const elTempoNota = document.getElementById('tempo-nota');
+const elProssimeDate = document.getElementById('prossime-date');
+const elProssimeElenco = document.getElementById('prossime-elenco');
 const elAttesa = document.getElementById('attesa');
 const elAttesaElenco = document.getElementById('attesa-elenco');
 
@@ -160,6 +165,48 @@ function mostraStato(casi, statistiche) {
   elStato.hidden = false;
 }
 
+/* ---------- Colonna destra: prossime date ---------- */
+
+function mostraProssimeDate(date) {
+  const future = date.filter((d) => giorniMancanti(d.giorno) >= 0).slice(0, 3);
+  if (future.length === 0) return;
+
+  future.forEach((voce) => {
+    const riga = document.createElement('a');
+    riga.className = 'prossima';
+    riga.href = 'calendario.html';
+
+    const quando = document.createElement('span');
+    quando.className = 'prossima-quando';
+    const g = giorniMancanti(voce.giorno);
+    quando.textContent = g === 0 ? 'oggi' : g;
+    if (g > 0) quando.classList.add('numero');
+    riga.appendChild(quando);
+
+    const testo = document.createElement('span');
+    testo.className = 'prossima-testo';
+
+    const materia = document.createElement('span');
+    materia.className = 'prossima-materia';
+    materia.textContent = voce.materia;
+    testo.appendChild(materia);
+
+    const meta = document.createElement('span');
+    meta.className = 'prossima-meta';
+    const data = new Date(voce.giorno + 'T00:00:00');
+    meta.textContent = `${nomeTipoData(voce.tipo)} · ${data.toLocaleDateString('it-IT', {
+      day: 'numeric',
+      month: 'long',
+    })}`;
+    testo.appendChild(meta);
+
+    riga.appendChild(testo);
+    elProssimeElenco.appendChild(riga);
+  });
+
+  elProssimeDate.hidden = false;
+}
+
 /* ---------- Colonna destra: tempo di studio ---------- */
 
 const NOMI_SEZIONE = {
@@ -259,12 +306,13 @@ function mostraAttesa(casiAttesa, materialiAttesa) {
 
 async function avvia(profilo) {
   try {
-    const [casi, domande, materiali, risposte, tempo] = await Promise.all([
+    const [casi, domande, materiali, risposte, tempo, date] = await Promise.all([
       getCasiClinici(),
       getDomandeEsame(),
       getMateriali(),
       getRisposte(),
       getTempoStudio(),
+      getDateEsame(),
     ]);
 
     const statistiche = calcolaStatistiche(risposte);
@@ -336,6 +384,7 @@ async function avvia(profilo) {
     elSezioni.hidden = false;
 
     mostraStato(casi, statistiche);
+    mostraProssimeDate(date);
     mostraTempo(tempo);
 
     if (profilo.ruolo === 'admin') {

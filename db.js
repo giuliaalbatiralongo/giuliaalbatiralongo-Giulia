@@ -433,6 +433,82 @@ export async function eliminaNota(id) {
   return true;
 }
 
+/* ---------- Calendario ---------- */
+
+export const TIPI_DATA = [
+  { chiave: 'iscritta', nome: 'Sono iscritta', icona: 'ph-seal-check' },
+  { chiave: 'appello', nome: 'Appello', icona: 'ph-calendar-blank' },
+  { chiave: 'scadenza', nome: 'Scadenza', icona: 'ph-hourglass-medium' },
+  { chiave: 'altro', nome: 'Altro', icona: 'ph-dot-outline' },
+];
+
+export function nomeTipoData(chiave) {
+  return (TIPI_DATA.find((t) => t.chiave === chiave) || TIPI_DATA[3]).nome;
+}
+
+export async function getDateEsame() {
+  const { data, error } = await supabase
+    .from('date_esame')
+    .select('*')
+    .order('giorno', { ascending: true })
+    .order('ora', { ascending: true, nullsFirst: true });
+
+  if (error) {
+    console.error('Errore nel caricamento delle date:', error);
+    return [];
+  }
+
+  const [nomi, mio] = await Promise.all([nomiAutori(data.map((d) => d.autore)), idUtente()]);
+
+  return data.map((d) => ({
+    ...d,
+    autoreNome: nomi.get(d.autore) || 'Sconosciuto',
+    mia: d.autore === mio,
+  }));
+}
+
+export async function inserisciDataEsame(voce) {
+  const { data, error } = await supabase.from('date_esame').insert([voce]).select('*').single();
+
+  if (error) {
+    console.error('Errore nel salvataggio della data:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function eliminaDataEsame(id) {
+  const { error } = await supabase.from('date_esame').delete().eq('id', id);
+
+  if (error) {
+    console.error('Errore nell eliminazione della data:', error);
+    return false;
+  }
+  return true;
+}
+
+/* Quanti giorni mancano. I numeri negativi vogliono dire che e' passata. */
+export function giorniMancanti(giorno) {
+  const oggi = new Date();
+  oggi.setHours(0, 0, 0, 0);
+  const data = new Date(giorno + 'T00:00:00');
+  return Math.round((data - oggi) / 86400000);
+}
+
+/* "oggi", "domani", "fra 12 giorni", "il 4 novembre", "3 giorni fa" */
+export function contoAllaRovescia(giorno) {
+  const g = giorniMancanti(giorno);
+
+  if (g === 0) return 'oggi';
+  if (g === 1) return 'domani';
+  if (g === -1) return 'ieri';
+  if (g < 0) return `${Math.abs(g)} giorni fa`;
+  if (g <= 30) return `fra ${g} giorni`;
+
+  const data = new Date(giorno + 'T00:00:00');
+  return `il ${data.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })}`;
+}
+
 /* ---------- Tempo di studio ---------- */
 
 /* Quanto tempo per sezione, dal giorno indicato a oggi. Le regole del

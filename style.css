@@ -2674,3 +2674,307 @@ body.barra-chiusa .contenuto {
   .barra-riga { grid-template-columns: 110px minmax(0, 1fr) 38px; }
   .barra-riga-dettaglio { display: none; }
 }
+
+/* ============================================================
+   Calendario
+   ============================================================ */
+
+.calendario-impianto {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+.calendario-lato {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mese { padding: 18px 20px 20px; }
+
+.mese-testa {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.mese-nome {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  text-transform: capitalize;
+}
+
+.btn-mese {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+  color: var(--testo-2);
+  cursor: pointer;
+  transition: border-color 160ms var(--curva), color 160ms var(--curva),
+    transform 160ms var(--curva);
+}
+
+.btn-mese i { font-size: 15px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-mese:hover { border-color: var(--accento); color: var(--accento); }
+}
+
+.btn-mese:active { transform: scale(0.94); }
+
+/* ---------- Griglia ---------- */
+
+.griglia-giorni,
+.griglia-mese {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.giorno-nome {
+  padding-bottom: 8px;
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--testo-3);
+}
+
+.cella-giorno {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  /* Altezza fissa, non quadrata: su un contenitore largo una cella
+     quadrata diventa alta duecento pixel e il numero galleggia nel vuoto. */
+  height: 52px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--r-controllo);
+  background: transparent;
+  color: var(--testo);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 160ms var(--curva), border-color 160ms var(--curva);
+}
+
+.cella-numero { font-variant-numeric: tabular-nums; }
+
+/* I giorni degli altri mesi restano, ma spenti: togliendoli la griglia
+   avrebbe buchi e si perderebbe il senso della settimana. */
+.cella-giorno.fuori { color: var(--testo-3); opacity: 0.5; }
+
+.cella-giorno.oggi {
+  border-color: var(--accento);
+  font-weight: 700;
+}
+
+.cella-giorno.con-date { background: var(--superficie-alt); }
+
+.cella-giorno.scelto {
+  background: var(--accento-tenue);
+  border-color: var(--accento);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cella-giorno:hover { background: var(--accento-tenue); }
+}
+
+.cella-giorno:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 1px;
+}
+
+.cella-segni {
+  display: flex;
+  gap: 3px;
+  height: 5px;
+}
+
+.cella-punto {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accento);
+}
+
+/* ---------- Prossime date ---------- */
+
+.prossima {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 8px;
+  border: none;
+  border-radius: var(--r-controllo);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms var(--curva);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .prossima:hover { background: var(--superficie-alt); }
+}
+
+.prossima:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 1px;
+}
+
+/* Il numero di giorni che mancano e' la cosa che si cerca guardando
+   qui: porta tutto il peso, il resto sta in tono minore. */
+.prossima-quando {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 6px;
+  border-radius: var(--r-controllo);
+  background: var(--accento-tenue);
+  color: var(--accento);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.prossima-quando.numero { font-size: 17px; }
+
+.prossima-testo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.prossima-materia {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prossima-meta {
+  font-size: 11.5px;
+  color: var(--testo-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Voce di una data ---------- */
+
+.data-voce {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.data-voce:first-child { padding-top: 0; }
+
+.data-voce-testa {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.data-voce-testa i { font-size: 16px; color: var(--testo-2); }
+
+.data-voce-materia {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.data-voce-meta {
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+.data-voce-note {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--testo-2);
+  white-space: pre-wrap;
+}
+
+.data-voce .link-bottone { margin-top: 8px; }
+
+/* ---------- Campi affiancati e spunta ---------- */
+
+.campo-doppio {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+input[type="date"],
+input[type="time"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--linea-forte);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+  color: var(--testo);
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+input[type="date"]:focus,
+input[type="time"]:focus {
+  outline: none;
+  border-color: var(--accento);
+  box-shadow: 0 0 0 3px var(--accento-tenue);
+}
+
+.spunta {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.spunta input {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--accento);
+}
+
+.spunta-nota {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+@media (max-width: 1000px) {
+  .calendario-impianto { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .campo-doppio { grid-template-columns: 1fr; }
+  .cella-giorno { height: 44px; font-size: 12px; }
+}
