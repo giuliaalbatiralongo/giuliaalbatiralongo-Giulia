@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Revisione - Akesis</title>
+  <title>Suggerimenti - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -33,11 +33,11 @@
         <a href="statistiche.html" class="nav-voce"><i class="ph ph-chart-line" aria-hidden="true"></i><span>Statistiche</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <p class="nav-gruppo" data-solo-admin hidden>Gestione</p>
-        <a href="revisione.html" class="nav-voce attivo" data-solo-admin hidden><i class="ph-fill ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
+        <a href="revisione.html" class="nav-voce" data-solo-admin hidden><i class="ph ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
 
         <p class="nav-gruppo">Altro</p>
         <a href="servizi.html" class="nav-voce"><i class="ph ph-handshake" aria-hidden="true"></i><span>Servizi</span></a>
-        <a href="suggerimenti.html" class="nav-voce"><i class="ph ph-lightbulb" aria-hidden="true"></i><span>Suggerimenti</span></a>
+        <a href="suggerimenti.html" class="nav-voce attivo"><i class="ph-fill ph-lightbulb" aria-hidden="true"></i><span>Suggerimenti</span></a>
       </nav>
 
       <div class="sidebar-fondo">
@@ -45,7 +45,7 @@
           <span class="profilo-avatar"><i class="ph ph-user" aria-hidden="true"></i></span>
           <span class="profilo-testo">
             <span class="profilo-nome">Profilo</span>
-            <span class="profilo-nota">Caricamento</span>
+            <span class="profilo-nota">Presto disponibile</span>
           </span>
         </button>
       </div>
@@ -57,39 +57,63 @@
     </button>
 
     <main class="contenuto">
-      <div class="contenuto-interno">
-        <h1 class="page-titolo">Da revisionare</h1>
-        <p class="page-sub">Proposte arrivate dagli studenti. Restano invisibili agli altri finché non le approvi.</p>
+      <div class="contenuto-interno largo">
+        <div class="testata">
+          <div>
+            <h1 class="page-titolo">Suggerimenti</h1>
+            <p class="page-sub">Tutto quello che vorremmo che Akesis facesse e ancora non fa. Se ti viene un'idea mentre studi, scrivila qui invece di perderla.</p>
+          </div>
+          <button type="button" class="btn" id="apri-nuovo">
+            <i class="ph ph-plus" aria-hidden="true"></i> Proponi qualcosa
+          </button>
+        </div>
 
         <div id="scheletro">
           <div class="scheletro scheletro-card"></div>
         </div>
 
-        <section id="sezione-casi" hidden>
-          <h2 class="sezione-titolo">
-            <i class="ph ph-cards" aria-hidden="true"></i>
-            Casi clinici <span class="sezione-conteggio" id="conteggio-casi"></span>
-          </h2>
-          <div id="proposte"></div>
-        </section>
-
-        <section id="sezione-materiali" hidden>
-          <h2 class="sezione-titolo">
-            <i class="ph ph-folder" aria-hidden="true"></i>
-            Materiali <span class="sezione-conteggio" id="conteggio-materiali"></span>
-          </h2>
-          <div id="proposte-materiali"></div>
-        </section>
-
-        <div id="tutto-fatto" hidden>
-          <div class="stato-vuoto">
-            <i class="ph ph-seal-check" aria-hidden="true"></i>
-            <p>Nessuna proposta in attesa. Tutto revisionato.</p>
-          </div>
-        </div>
+        <div id="suggerimenti" hidden></div>
       </div>
     </main>
   </div>
+
+  <dialog id="finestra-suggerimento" class="finestra">
+    <form id="form-suggerimento" method="dialog">
+      <div class="finestra-testata">
+        <div>
+          <p class="finestra-occhiello">Suggerimenti</p>
+          <p class="finestra-titolo">Una cosa che vorresti</p>
+        </div>
+        <button type="button" class="btn-chiudi" id="chiudi-finestra" aria-label="Chiudi">
+          <i class="ph ph-x" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="finestra-corpo">
+        <div class="campo">
+          <label for="sugg-titolo">In una riga</label>
+          <input type="text" id="sugg-titolo" name="titolo" required maxlength="120"
+                 autocomplete="off" placeholder="Es. Poter cercare dentro le domande d'esame">
+        </div>
+
+        <div class="campo">
+          <label for="sugg-dettaglio">Spiegala meglio, se serve</label>
+          <textarea id="sugg-dettaglio" name="dettaglio" rows="5" maxlength="2000"
+                    placeholder="A cosa ti servirebbe, e quando ti e mancata."></textarea>
+          <p class="campo-aiuto">Facoltativo. Anche una riga sola va benissimo: e una lista di idee, non un modulo.</p>
+        </div>
+      </div>
+
+      <div class="finestra-fondo">
+        <div class="finestra-azioni">
+          <span class="esito-form" id="sugg-esito"></span>
+          <button type="submit" class="btn">
+            <i class="ph ph-check" aria-hidden="true"></i> Aggiungi
+          </button>
+        </div>
+      </div>
+    </form>
+  </dialog>
 
   <script>
     window.addEventListener('error', (e) => {
@@ -97,6 +121,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="revisione.js?v=6"></script>
+  <script type="module" src="suggerimenti.js?v=1"></script>
 </body>
 </html>

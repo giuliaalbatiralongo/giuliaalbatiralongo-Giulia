@@ -51,6 +51,22 @@ la stessa persona. Ognuno puo' togliere solo i nomi che ha messo lui
 (l'admin puo' togliere tutto). Il resto del contesto va nelle note, che
 restano libere.
 
+### La lista delle cose da fare vive dentro Akesis
+
+C'e' una pagina **Suggerimenti** (voce nel menu, sotto "Altro"). Dentro
+c'e' tutto quello che vorremmo che Akesis facesse e non fa ancora,
+diviso in quattro stati: da fare, in lavorazione, fatto, messo da parte.
+
+La tabella `suggerimenti` la scrivono tutti e la leggono tutti: un'idea
+gia' proposta si vede, e non la si riscrive daccapo. Ognuno cambia lo
+stato o cancella solo i propri (l'admin tutti). L'autore lo scrive il
+database con un trigger, quindi nessuno puo' firmare un'idea col nome di
+un altro: verificato impersonando l'account di prova.
+
+E' stata riempita con le voci che stavano qui e in `PIANO.md`. **Questo
+file resta il posto dove sta il perche'**: le pagine di Akesis dicono
+cosa manca, gli appunti dicono cosa va deciso prima di costruirlo.
+
 ## Da fare quando sara' il momento
 
 ### Simulatore per il test SSM
@@ -105,9 +121,15 @@ prima e 64 in ciascuna delle altre.
 Con l'unita' "giorni" non si calcola nessuna quantita' giornaliera: quel
 modo di contare serve proprio a chi non conta.
 
+**Modificare un piano si puo'** (bottone "Modifica" sulla scheda). Le
+passate gia' salvate si aggiornano invece di essere rifatte da zero,
+quindi quello che si e' gia' segnato come fatto resta. Se il materiale si
+accorcia, il fatto viene limitato al nuovo totale. Aprendo la finestra si
+vede la data vera di fine: scegliendo "fra tot giorni" la finestra
+riparte da oggi, ed e' scritto nella finestra stessa.
+
 Aperte:
 
-- Non si puo' **modificare** un piano: si elimina e si rifa
 - Le passate non si possono riordinare dopo
 - La conversione dal modello precedente ha portato un piano solo
   ("Farmaco 2", 32 lezioni, 7 gennaio): era quello che c'era nel

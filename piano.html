@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=38">
+  <link rel="stylesheet" href="style.css?v=39">
 </head>
 <body>
   <div class="app">
@@ -37,6 +37,7 @@
 
         <p class="nav-gruppo">Altro</p>
         <a href="servizi.html" class="nav-voce"><i class="ph ph-handshake" aria-hidden="true"></i><span>Servizi</span></a>
+        <a href="suggerimenti.html" class="nav-voce"><i class="ph ph-lightbulb" aria-hidden="true"></i><span>Suggerimenti</span></a>
       </nav>
 
       <div class="sidebar-fondo">
@@ -88,7 +89,7 @@
       <div class="finestra-testata">
         <div>
           <p class="finestra-occhiello">Organizzazione studio</p>
-          <p class="finestra-titolo">Una materia</p>
+          <p class="finestra-titolo" id="finestra-titolo-piano">Una materia</p>
         </div>
         <button type="button" class="btn-chiudi" id="chiudi-finestra" aria-label="Chiudi">
           <i class="ph ph-x" aria-hidden="true"></i>
@@ -96,6 +97,12 @@
       </div>
 
       <div class="finestra-corpo">
+        <p class="blocco-nota" id="nota-modifica" hidden>
+          Stai correggendo una materia gia' avviata. Quello che hai gia' segnato
+          come fatto resta dov'e'. Se scegli "fra tot giorni" la finestra
+          riparte da oggi.
+        </p>
+
         <div class="campo">
           <label for="piano-materia">Materia</label>
           <input type="text" id="piano-materia" name="materia" required
@@ -167,7 +174,7 @@
       <div class="finestra-fondo">
         <div class="finestra-azioni">
           <span class="esito-form" id="piano-esito"></span>
-          <button type="submit" class="btn">
+          <button type="submit" class="btn" id="piano-salva">
             <i class="ph ph-check" aria-hidden="true"></i> Crea
           </button>
         </div>
@@ -181,6 +188,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="piano.js?v=4"></script>
+  <script type="module" src="piano.js?v=5"></script>
 </body>
 </html>

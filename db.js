@@ -722,6 +722,76 @@ export async function inserisciPiano(piano, fasi) {
   return { ...data, fasi: salvate.sort((a, b) => a.ordine - b.ordine) };
 }
 
+/* Modifica di un piano gia' esistente.
+
+   Le passate non si buttano e si rifanno: chi ha gia' segnato dieci
+   giorni di prima lettura non deve ritrovarsi a zero solo perche' ha
+   corretto il numero di pagine. Quindi le righe che hanno gia' un id si
+   aggiornano, quelle nuove si aggiungono, e si cancellano solo quelle
+   che Giulia ha davvero tolto dalla finestra. */
+export async function aggiornaPiano(id, piano, fasi) {
+  const { error } = await supabase.from('piani').update(piano).eq('id', id);
+
+  if (error) {
+    console.error('Errore nella modifica del piano:', error);
+    return null;
+  }
+
+  const restano = fasi.map((f) => f.id).filter(Boolean);
+
+  if (restano.length > 0) {
+    const { error: erroreTagli } = await supabase
+      .from('piano_fasi')
+      .delete()
+      .eq('piano_id', id)
+      .not('id', 'in', `(${restano.join(',')})`);
+    if (erroreTagli) console.error('Errore nel togliere le passate:', erroreTagli);
+  } else {
+    const { error: erroreTagli } = await supabase.from('piano_fasi').delete().eq('piano_id', id);
+    if (erroreTagli) console.error('Errore nel togliere le passate:', erroreTagli);
+  }
+
+  for (let i = 0; i < fasi.length; i += 1) {
+    const fase = fasi[i];
+    // Se il materiale si accorcia, il fatto non puo' restare piu' alto
+    // del totale: la barra andrebbe oltre il suo binario.
+    const totale = piano.unita === 'giorni' ? fase.giorni : piano.quantita;
+    const fatte = Math.min(Math.max(fase.fatte || 0, 0), totale);
+
+    if (fase.id) {
+      const { error: e } = await supabase
+        .from('piano_fasi')
+        .update({ nome: fase.nome, giorni: fase.giorni, ordine: i + 1, fatte })
+        .eq('id', fase.id);
+      if (e) {
+        console.error('Errore nella modifica di una passata:', e);
+        return null;
+      }
+    } else {
+      const { error: e } = await supabase
+        .from('piano_fasi')
+        .insert([{ piano_id: id, nome: fase.nome, giorni: fase.giorni, ordine: i + 1, fatte }]);
+      if (e) {
+        console.error('Errore nell aggiunta di una passata:', e);
+        return null;
+      }
+    }
+  }
+
+  const { data: rilette, error: erroreRilettura } = await supabase
+    .from('piani')
+    .select('*, fasi:piano_fasi(*)')
+    .eq('id', id)
+    .single();
+
+  if (erroreRilettura) {
+    console.error('Errore nella rilettura del piano:', erroreRilettura);
+    return null;
+  }
+
+  return { ...rilette, fasi: (rilette.fasi || []).sort((a, b) => a.ordine - b.ordine) };
+}
+
 export async function aggiornaFatteFase(id, fatte) {
   const { error } = await supabase.from('piano_fasi').update({ fatte }).eq('id', id);
 
@@ -831,6 +901,70 @@ export function studioDiOggi(piani, oggiIso) {
 }
 
 /* ---------- Interesse per i servizi non ancora attivi ---------- */
+
+/* ---------- Suggerimenti ----------
+   La lista di cosa vorremmo che Akesis facesse e non fa ancora. La
+   scrivono tutti, la lettura e' aperta a tutti: un'idea gia' proposta si
+   vede, e non la si riscrive daccapo. */
+
+export const STATI_SUGGERIMENTO = [
+  { chiave: 'idea', nome: 'Da fare', icona: 'ph-lightbulb' },
+  { chiave: 'in corso', nome: 'In lavorazione', icona: 'ph-hammer' },
+  { chiave: 'fatto', nome: 'Fatto', icona: 'ph-check-circle' },
+  { chiave: 'no', nome: 'Messo da parte', icona: 'ph-archive' },
+];
+
+export function nomeStatoSuggerimento(chiave) {
+  return (STATI_SUGGERIMENTO.find((s) => s.chiave === chiave) || STATI_SUGGERIMENTO[0]).nome;
+}
+
+export async function getSuggerimenti() {
+  const { data, error } = await supabase
+    .from('suggerimenti')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Errore nel caricamento dei suggerimenti:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function inserisciSuggerimento(titolo, dettaglio) {
+  // L'autore non si manda: lo scrive il database da solo.
+  const { data, error } = await supabase
+    .from('suggerimenti')
+    .insert([{ titolo, dettaglio: dettaglio || null }])
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error('Errore nel salvataggio del suggerimento:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function cambiaStatoSuggerimento(id, stato) {
+  const { error } = await supabase.from('suggerimenti').update({ stato }).eq('id', id);
+
+  if (error) {
+    console.error('Errore nel cambio di stato:', error);
+    return false;
+  }
+  return true;
+}
+
+export async function eliminaSuggerimento(id) {
+  const { error } = await supabase.from('suggerimenti').delete().eq('id', id);
+
+  if (error) {
+    console.error('Errore nell eliminazione del suggerimento:', error);
+    return false;
+  }
+  return true;
+}
 
 export async function getMioInteresse() {
   const { data, error } = await supabase.from('interesse_servizi').select('servizio, nota');

@@ -1,4 +1,4 @@
-import { getMateriali, linkMateriali, linkMateriale, sbloccaMateriale } from './db.js?v=24';
+import { getMateriali, linkMateriali, linkMateriale, sbloccaMateriale } from './db.js?v=25';
 import { iconaPerMateria } from './materie.js?v=3';
 import { TIPI_MATERIALE, tipoPerChiave } from './tipi.js?v=1';
 import { proteggiPagina } from './auth.js?v=10';

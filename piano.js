@@ -1,6 +1,7 @@
 import {
   getPiani,
   inserisciPiano,
+  aggiornaPiano,
   aggiornaFatteFase,
   eliminaPiano,
   calcolaPiano,
@@ -9,7 +10,7 @@ import {
   FASI_PROPOSTE,
   getDateEsame,
   titoloData,
-} from './db.js?v=24';
+} from './db.js?v=25';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -25,6 +26,8 @@ const NOMI_GIORNI = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 
 let piani = [];
 let date = [];
+// null quando si sta creando, il piano quando lo si sta correggendo.
+let inModifica = null;
 
 function oggiIso() {
   const d = new Date();
@@ -121,6 +124,16 @@ function creaScheda(piano) {
   titolo.appendChild(sotto);
   testa.appendChild(titolo);
 
+  const azioniPiano = document.createElement('div');
+  azioniPiano.className = 'piano-azioni';
+
+  const modifica = document.createElement('button');
+  modifica.type = 'button';
+  modifica.className = 'link-bottone';
+  modifica.textContent = 'Modifica';
+  modifica.addEventListener('click', () => apriFinestra(piano));
+  azioniPiano.appendChild(modifica);
+
   const togli = document.createElement('button');
   togli.type = 'button';
   togli.className = 'link-bottone';
@@ -135,7 +148,8 @@ function creaScheda(piano) {
       togli.disabled = false;
     }
   });
-  testa.appendChild(togli);
+  azioniPiano.appendChild(togli);
+  testa.appendChild(azioniPiano);
   card.appendChild(testa);
 
   /* Il riquadro di oggi per questa materia */
@@ -302,6 +316,10 @@ function disegna() {
 function aggiungiRigaFase(preimpostata) {
   const riga = document.createElement('div');
   riga.className = 'riga-fase';
+  // La riga si porta dietro l'id della passata gia' salvata e quanto e'
+  // stato fatto, cosi' correggere il piano non azzera il lavoro.
+  if (preimpostata?.id) riga.dataset.faseId = preimpostata.id;
+  riga.dataset.fatte = preimpostata?.fatte ?? 0;
 
   const nome = document.createElement('input');
   nome.type = 'text';
@@ -432,26 +450,78 @@ function preparaFinestra() {
 
 document.getElementById('aggiungi-fase').addEventListener('click', () => aggiungiRigaFase());
 
-document.getElementById('apri-nuovo').addEventListener('click', () => {
+function scegliModo(quale) {
+  form.querySelectorAll('input[name="modo"]').forEach((r) => {
+    r.checked = r.value === quale;
+  });
+  document.getElementById('campo-durata').hidden = quale !== 'durata';
+  document.getElementById('campo-data').hidden = quale !== 'data';
+}
+
+/* Una sola finestra per creare e per correggere: cambiano il titolo, il
+   bottone e cosa c'e' scritto dentro. */
+function apriFinestra(piano) {
+  inModifica = piano || null;
   form.reset();
   esito.textContent = '';
   esito.className = 'esito-form';
   elRighe.innerHTML = '';
-  FASI_PROPOSTE.forEach((f) => aggiungiRigaFase(f));
-  document.querySelectorAll('#giorni-liberi input').forEach((c) => {
-    c.checked = Number(c.value) === 7;
-  });
-  document.getElementById('etichetta-unita').textContent = 'pagine';
-  document.getElementById('aiuto-unita').hidden = true;
-  document.getElementById('campo-durata').hidden = false;
-  document.getElementById('campo-data').hidden = true;
+
+  const titolo = document.getElementById('finestra-titolo-piano');
+  const bottone = document.getElementById('piano-salva');
+
+  if (piano) {
+    titolo.textContent = piano.materia;
+    bottone.innerHTML = '<i class="ph ph-check" aria-hidden="true"></i> Salva le modifiche';
+
+    document.getElementById('piano-materia').value = piano.materia;
+    document.getElementById('piano-unita').value = piano.unita;
+    document.getElementById('piano-quantita').value = piano.quantita;
+    document.getElementById('etichetta-unita').textContent = piano.unita;
+    document.getElementById('aiuto-unita').hidden = piano.unita !== 'giorni';
+
+    // Di una materia gia' avviata si mostra la data vera di fine: e' il
+    // dato che lei riconosce. "Fra tot giorni" resta disponibile, ma li
+    // conta da oggi e quindi fa ripartire la finestra.
+    scegliModo('data');
+    document.getElementById('piano-data').value = piano.fine;
+
+    const liberi = piano.giorni_liberi || [];
+    document.querySelectorAll('#giorni-liberi input').forEach((c) => {
+      c.checked = liberi.includes(Number(c.value));
+    });
+
+    (piano.fasi || []).forEach((f) => aggiungiRigaFase(f));
+    if (!elRighe.querySelector('.riga-fase')) aggiungiRigaFase();
+  } else {
+    titolo.textContent = 'Una materia';
+    bottone.innerHTML = '<i class="ph ph-check" aria-hidden="true"></i> Crea';
+
+    FASI_PROPOSTE.forEach((f) => aggiungiRigaFase(f));
+    document.querySelectorAll('#giorni-liberi input').forEach((c) => {
+      c.checked = Number(c.value) === 7;
+    });
+    document.getElementById('etichetta-unita').textContent = 'pagine';
+    document.getElementById('aiuto-unita').hidden = true;
+    scegliModo('durata');
+  }
+
+  document.getElementById('nota-modifica').hidden = !piano;
+
   aggiornaConto();
   finestra.showModal();
-});
+}
+
+document.getElementById('apri-nuovo').addEventListener('click', () => apriFinestra(null));
 
 document.getElementById('chiudi-finestra').addEventListener('click', () => finestra.close());
 finestra.addEventListener('click', (e) => {
   if (e.target === finestra) finestra.close();
+});
+// Chiudere senza salvare non deve lasciare la finestra "agganciata" al
+// piano di prima: la volta dopo si tornerebbe a correggere quello.
+finestra.addEventListener('close', () => {
+  inModifica = null;
 });
 
 form.addEventListener('submit', async (e) => {
@@ -491,7 +561,12 @@ form.addEventListener('submit', async (e) => {
 
   const fasi = [...elRighe.querySelectorAll('.riga-fase')].map((riga) => {
     const campi = riga.querySelectorAll('input');
-    return { nome: campi[0].value.trim(), giorni: Number(campi[1].value) };
+    return {
+      id: riga.dataset.faseId ? Number(riga.dataset.faseId) : null,
+      nome: campi[0].value.trim(),
+      giorni: Number(campi[1].value),
+      fatte: Number(riga.dataset.fatte) || 0,
+    };
   });
 
   if (fasi.some((f) => !f.nome || !f.giorni)) {
@@ -500,20 +575,43 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
+  const dati = {
+    materia: document.getElementById('piano-materia').value.trim(),
+    unita: document.getElementById('piano-unita').value,
+    quantita: Number(document.getElementById('piano-quantita').value),
+    fine,
+    giorni_liberi: liberi,
+  };
+
+  if (inModifica) {
+    esito.className = 'esito-form attesa';
+    esito.textContent = 'Salvataggio';
+
+    // Con "fra tot giorni" la finestra riparte da oggi: i giorni te li
+    // dai adesso, non a partire da quando avevi creato il piano.
+    dati.inizio = modo === 'durata' ? oggiIso() : inModifica.inizio;
+
+    const salvato = await aggiornaPiano(inModifica.id, dati, fasi);
+
+    if (!salvato) {
+      esito.className = 'esito-form ko';
+      esito.textContent = 'Non sono riuscita a salvare le modifiche.';
+      return;
+    }
+
+    piani = piani.map((p) => (p.id === salvato.id ? salvato : p));
+    piani.sort((a, b) => a.fine.localeCompare(b.fine));
+    inModifica = null;
+    finestra.close();
+    disegna();
+    return;
+  }
+
   esito.className = 'esito-form attesa';
   esito.textContent = 'Creazione';
 
-  const salvato = await inserisciPiano(
-    {
-      materia: document.getElementById('piano-materia').value.trim(),
-      unita: document.getElementById('piano-unita').value,
-      quantita: Number(document.getElementById('piano-quantita').value),
-      inizio: oggiIso(),
-      fine,
-      giorni_liberi: liberi,
-    },
-    fasi
-  );
+  dati.inizio = oggiIso();
+  const salvato = await inserisciPiano(dati, fasi);
 
   if (!salvato) {
     esito.className = 'esito-form ko';
