@@ -3594,3 +3594,88 @@ a.oggi-riga {
 @media (hover: hover) and (pointer: fine) {
   a.oggi-riga:hover { background: var(--superficie-alt); }
 }
+
+/* ---------- Home: saluto e riga di quello che c'e' dentro ---------- */
+
+.banner-saluto {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 10px;
+}
+
+/* Conta quello che hai messo insieme, non quello che ti manca:
+   aprire l'app non deve essere un rimprovero. */
+.riga-raccolta {
+  max-width: 68ch;
+  margin: 18px 0 28px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--testo-2);
+}
+
+/* ---------- Professori che hanno fatto una domanda ---------- */
+
+.professori {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.professore {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 6px 4px 8px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie-alt);
+  font-size: 12px;
+  color: var(--testo-2);
+}
+
+.professore i { font-size: 13px; color: var(--testo-3); }
+
+.professore-togli {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--testo-3);
+  cursor: pointer;
+  transition: color 160ms var(--curva), background-color 160ms var(--curva);
+}
+
+.professore-togli i { font-size: 11px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .professore-togli:hover { background: var(--pericolo-tenue); color: var(--pericolo); }
+}
+
+.professore-aggiungi {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px dashed var(--linea-forte);
+  border-radius: var(--r-controllo);
+  background: transparent;
+  color: var(--testo-3);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 160ms var(--curva), color 160ms var(--curva);
+}
+
+.professore-aggiungi i { font-size: 12px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .professore-aggiungi:hover { border-color: var(--accento); color: var(--accento); }
+}

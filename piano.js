@@ -9,7 +9,7 @@ import {
   FASI_PROPOSTE,
   getDateEsame,
   titoloData,
-} from './db.js?v=23';
+} from './db.js?v=24';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');

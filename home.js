@@ -4,31 +4,19 @@ import {
   getMateriali,
   getCasiInAttesa,
   getMaterialiInAttesa,
-  getRisposte,
-  calcolaStatistiche,
-  casiDaRipassareOggi,
-  casiMaiVisti,
+  getDateEsame,
   getPiani,
   studioDiOggi,
   nomeUnita,
-  getDateEsame,
   giorniMancanti,
   nomeTipoData,
-  getTempoStudio,
-  sommaPerSezione,
-  formattaDurata,
-} from './db.js?v=23';
+} from './db.js?v=24';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
 const elSezioni = document.getElementById('sezioni');
-const elTessere = document.getElementById('tessere');
-const elStato = document.getElementById('stato');
-const elStatoRighe = document.getElementById('stato-righe');
-const elStatoNota = document.getElementById('stato-nota');
-const elTempo = document.getElementById('tempo');
-const elTempoRighe = document.getElementById('tempo-righe');
-const elTempoNota = document.getElementById('tempo-nota');
+const elSaluto = document.getElementById('saluto');
+const elRaccolta = document.getElementById('raccolta');
 const elStudioOggi = document.getElementById('studio-oggi');
 const elStudioOggiElenco = document.getElementById('studio-oggi-elenco');
 const elProssimeDate = document.getElementById('prossime-date');
@@ -40,38 +28,42 @@ function plurale(n, uno, molti) {
   return `${n} ${n === 1 ? uno : molti}`;
 }
 
-/* ---------- Tessere in cima: numero grande, etichetta piccola ---------- */
-
-function creaTessera(tessera, posizione) {
-  const el = document.createElement(tessera.indirizzo ? 'a' : 'div');
-  el.className = 'tessera';
-  if (tessera.indirizzo) el.href = tessera.indirizzo;
-
-  // Le tessere entrano una dopo l'altra, non tutte insieme.
-  el.style.setProperty('--ritardo', `${posizione * 40}ms`);
-
-  const icona = document.createElement('span');
-  icona.className = 'tessera-icona';
-  const i = document.createElement('i');
-  i.className = `ph ${tessera.icona}`;
-  i.setAttribute('aria-hidden', 'true');
-  icona.appendChild(i);
-  el.appendChild(icona);
-
-  const valore = document.createElement('p');
-  valore.className = 'tessera-valore';
-  valore.textContent = tessera.valore;
-  el.appendChild(valore);
-
-  const etichetta = document.createElement('p');
-  etichetta.className = 'tessera-etichetta';
-  etichetta.textContent = tessera.etichetta;
-  el.appendChild(etichetta);
-
-  return el;
+function arrotonda(n) {
+  return Math.ceil(n - 1e-9);
 }
 
-/* ---------- Card delle sezioni ---------- */
+/* Il saluto cambia con l'ora. Non e' decorazione: aprire l'app alle
+   sette di sera e leggere "buongiorno" fa sembrare che nessuno stia
+   guardando. */
+function saluto(nome) {
+  const ora = new Date().getHours();
+  const parte = ora < 13 ? 'Buongiorno' : ora < 19 ? 'Buon pomeriggio' : 'Buonasera';
+  return nome ? `${parte}, ${nome}` : parte;
+}
+
+/* ---------- Cosa c'e' dentro ----------
+   Una riga che conta quello che hai messo insieme, non quello che ti
+   manca. Aprire l'app non deve essere un rimprovero. */
+
+function scriviRaccolta(casi, domande, materiali, date) {
+  const pezzi = [];
+  if (materiali.length) pezzi.push(plurale(materiali.length, 'documento', 'documenti'));
+  if (domande.length) pezzi.push(plurale(domande.length, "domanda d'esame", "domande d'esame"));
+  if (casi.length) pezzi.push(plurale(casi.length, 'caso clinico', 'casi clinici'));
+  if (date.length) pezzi.push(plurale(date.length, 'data segnata', 'date segnate'));
+
+  if (pezzi.length === 0) {
+    elRaccolta.textContent =
+      'Non c e ancora niente dentro. Comincia da dove ti fa piu comodo: un documento, una data, una domanda.';
+    return;
+  }
+
+  const ultimo = pezzi.pop();
+  const elenco = pezzi.length ? `${pezzi.join(', ')} e ${ultimo}` : ultimo;
+  elRaccolta.textContent = `Qui dentro ci sono ${elenco}. Tutto roba che ti sei costruita.`;
+}
+
+/* ---------- Le sezioni ---------- */
 
 function creaCardSezione(sezione) {
   const a = document.createElement('a');
@@ -112,65 +104,7 @@ function creaCardSezione(sezione) {
   return a;
 }
 
-/* ---------- Colonna destra: avanzamento ---------- */
-
-function creaRigaStato(etichetta, quanti, totale) {
-  const riga = document.createElement('div');
-  riga.className = 'stato-riga';
-
-  const nome = document.createElement('span');
-  nome.className = 'stato-riga-nome';
-  nome.textContent = etichetta;
-  riga.appendChild(nome);
-
-  const barra = document.createElement('span');
-  barra.className = 'stato-barra';
-  const pieno = document.createElement('span');
-  pieno.className = 'stato-barra-pieno';
-  pieno.style.width = totale > 0 ? `${(quanti / totale) * 100}%` : '0%';
-  barra.appendChild(pieno);
-  riga.appendChild(barra);
-
-  const valore = document.createElement('span');
-  valore.className = 'stato-riga-valore';
-  valore.textContent = quanti;
-  riga.appendChild(valore);
-
-  return riga;
-}
-
-function mostraStato(casi, statistiche) {
-  if (casi.length === 0) return;
-
-  const conta = { consolidato: 0, da_ripassare: 0, nuovo: 0 };
-  casi.forEach((c) => {
-    if (conta[c.stato] !== undefined) conta[c.stato] += 1;
-  });
-
-  elStatoRighe.appendChild(creaRigaStato('Consolidati', conta.consolidato, casi.length));
-  elStatoRighe.appendChild(creaRigaStato('Da ripassare', conta.da_ripassare, casi.length));
-  elStatoRighe.appendChild(creaRigaStato('Da vedere', conta.nuovo, casi.length));
-
-  // Una riga di senso, non solo numeri: cosa conviene fare adesso.
-  const scaduti = casiDaRipassareOggi(casi);
-
-  if (scaduti.length > 0) {
-    elStatoNota.textContent =
-      scaduti.length === 1
-        ? '1 caso e in scadenza oggi.'
-        : `${scaduti.length} casi sono in scadenza oggi.`;
-  } else if (conta.nuovo > 0) {
-    elStatoNota.textContent = `Niente in scadenza. ${plurale(conta.nuovo, 'caso', 'casi')} ancora da vedere.`;
-  } else if (statistiche.totale === 0) {
-    elStatoNota.textContent = 'Non hai ancora risposto a nessun caso.';
-  } else {
-    elStatoNota.textContent = 'Niente in scadenza oggi. Il prossimo ripasso arrivera da solo.';
-  }
-
-  elStato.hidden = false;
-}
-
-/* ---------- Colonna destra: studio di oggi ---------- */
+/* ---------- Colonna destra ---------- */
 
 function mostraStudioDiOggi(piani) {
   const voci = studioDiOggi(piani);
@@ -183,9 +117,7 @@ function mostraStudioDiOggi(piani) {
 
     const quanto = document.createElement('span');
     quanto.className = 'oggi-quanto';
-    // Mezza pagina non esiste: si arrotonda per eccesso, altrimenti
-    // seguendo il piano alla lettera si resta sempre un po' indietro.
-    quanto.textContent = voce.quantita === null ? '-' : Math.ceil(voce.quantita - 1e-9);
+    quanto.textContent = voce.quantita === null ? '-' : arrotonda(voce.quantita);
     riga.appendChild(quanto);
 
     const testo = document.createElement('span');
@@ -198,9 +130,8 @@ function mostraStudioDiOggi(piani) {
 
     const dettaglio = document.createElement('span');
     dettaglio.className = 'oggi-dettaglio';
-    const arrotondata = voce.quantita === null ? null : Math.ceil(voce.quantita - 1e-9);
-    dettaglio.textContent =
-      arrotondata === null ? voce.fase : `${nomeUnita(voce.unita, arrotondata)} · ${voce.fase}`;
+    const q = voce.quantita === null ? null : arrotonda(voce.quantita);
+    dettaglio.textContent = q === null ? voce.fase : `${nomeUnita(voce.unita, q)} · ${voce.fase}`;
     testo.appendChild(dettaglio);
 
     riga.appendChild(testo);
@@ -209,8 +140,6 @@ function mostraStudioDiOggi(piani) {
 
   elStudioOggi.hidden = false;
 }
-
-/* ---------- Colonna destra: prossime date ---------- */
 
 function mostraProssimeDate(date) {
   const future = date.filter((d) => giorniMancanti(d.giorno) >= 0).slice(0, 3);
@@ -233,7 +162,7 @@ function mostraProssimeDate(date) {
 
     const materia = document.createElement('span');
     materia.className = 'prossima-materia';
-    materia.textContent = voce.materia;
+    materia.textContent = voce.materia || nomeTipoData(voce.tipo);
     testo.appendChild(materia);
 
     const meta = document.createElement('span');
@@ -251,67 +180,6 @@ function mostraProssimeDate(date) {
 
   elProssimeDate.hidden = false;
 }
-
-/* ---------- Colonna destra: tempo di studio ---------- */
-
-const NOMI_SEZIONE = {
-  quiz: 'Quiz',
-  domande: "Domande d'esame",
-  materiali: 'Materiali',
-};
-
-function creaRigaTempo(sezione, secondi) {
-  const riga = document.createElement('div');
-  riga.className = 'tempo-riga';
-
-  const nome = document.createElement('span');
-  nome.className = 'tempo-riga-nome';
-  nome.textContent = NOMI_SEZIONE[sezione] || sezione;
-  riga.appendChild(nome);
-
-  const valore = document.createElement('span');
-  valore.className = 'tempo-riga-valore';
-  valore.textContent = formattaDurata(secondi);
-  riga.appendChild(valore);
-
-  return riga;
-}
-
-function mostraTempo(righe) {
-  const oggi = new Date().toISOString().slice(0, 10);
-  const diOggi = righe.filter((r) => r.giorno === oggi);
-
-  const totaliOggi = sommaPerSezione(diOggi);
-  const sezioni = Object.keys(totaliOggi).filter((s) => totaliOggi[s] > 0);
-
-  if (sezioni.length === 0) {
-    elTempoRighe.innerHTML =
-      '<p class="tempo-vuoto">Oggi non hai ancora studiato qui dentro.</p>';
-  } else {
-    sezioni
-      .sort((a, b) => totaliOggi[b] - totaliOggi[a])
-      .forEach((s) => elTempoRighe.appendChild(creaRigaTempo(s, totaliOggi[s])));
-  }
-
-  // Il totale della settimana da' la misura vera: una giornata storta
-  // da sola non dice niente.
-  const settimana = new Date();
-  settimana.setDate(settimana.getDate() - 6);
-  const limite = settimana.toISOString().slice(0, 10);
-
-  const secondiSettimana = righe
-    .filter((r) => r.giorno >= limite)
-    .reduce((somma, r) => somma + r.secondi, 0);
-
-  elTempoNota.textContent =
-    secondiSettimana > 0
-      ? `Negli ultimi sette giorni: ${formattaDurata(secondiSettimana)}.`
-      : 'Il conteggio si ferma da solo quando lasci la pagina.';
-
-  elTempo.hidden = false;
-}
-
-/* ---------- Colonna destra: coda di revisione ---------- */
 
 function mostraAttesa(casiAttesa, materialiAttesa) {
   const voci = [
@@ -350,78 +218,67 @@ function mostraAttesa(casiAttesa, materialiAttesa) {
 /* ---------- Avvio ---------- */
 
 async function avvia(profilo) {
+  elSaluto.textContent = saluto(profilo.nome);
+
   try {
-    const [casi, domande, materiali, risposte, tempo, date, piani] = await Promise.all([
+    const [casi, domande, materiali, date, piani] = await Promise.all([
       getCasiClinici(),
       getDomandeEsame(),
       getMateriali(),
-      getRisposte(),
-      getTempoStudio(),
       getDateEsame(),
       getPiani(),
     ]);
 
-    const statistiche = calcolaStatistiche(risposte);
-    const consolidati = casi.filter((c) => c.stato === 'consolidato').length;
-    const inScadenza = casiDaRipassareOggi(casi);
-    const maiVisti = casiMaiVisti(casi);
-
-    elTessere.innerHTML = '';
-    [
-      {
-        valore: inScadenza.length || (maiVisti.length ? maiVisti.length : 0),
-        etichetta: inScadenza.length
-          ? 'Da ripassare oggi'
-          : maiVisti.length
-            ? 'Casi mai visti'
-            : 'Nulla in scadenza',
-        icona: 'ph-clock-counter-clockwise',
-        indirizzo: 'sessione.html',
-      },
-      {
-        valore: `${consolidati}/${casi.length}`,
-        etichetta: 'Casi consolidati',
-        icona: 'ph-check-circle',
-        indirizzo: 'casi.html',
-      },
-      {
-        valore: statistiche.accuratezza === null ? '0' : `${statistiche.accuratezza}%`,
-        etichetta: statistiche.accuratezza === null ? 'Risposte date' : 'Risposte esatte',
-        icona: 'ph-target',
-        indirizzo: 'quiz.html',
-      },
-      {
-        valore: domande.length,
-        etichetta: "Domande d'esame",
-        icona: 'ph-exam',
-        indirizzo: 'domande.html',
-      },
-    ].forEach((t, i) => elTessere.appendChild(creaTessera(t, i)));
+    scriviRaccolta(casi, domande, materiali, date);
 
     const sezioni = [
       {
-        nome: 'Quiz',
-        indirizzo: 'quiz.html',
-        icona: 'ph-cards',
-        conteggio: plurale(casi.length, 'caso clinico', 'casi clinici'),
+        nome: 'Calendario',
+        indirizzo: 'calendario.html',
+        icona: 'ph-calendar-dots',
+        conteggio: date.length ? plurale(date.length, 'data', 'date') : 'ancora vuoto',
         descrizione:
-          'Vignette con quattro risposte e la spiegazione. Chi risponde bene consolida il caso, chi sbaglia se lo ritrova davanti.',
+          'Appelli, esami, tirocini, lezioni e scadenze. Con quanti giorni mancano, e i colori per capirlo a colpo d occhio.',
       },
       {
-        nome: 'Domande esami',
-        indirizzo: 'domande.html',
-        icona: 'ph-exam',
-        conteggio: plurale(domande.length, 'domanda', 'domande'),
+        nome: 'Organizzazione studio',
+        indirizzo: 'piano.html',
+        icona: 'ph-path',
+        conteggio: piani.length ? plurale(piani.length, 'materia', 'materie') : 'ancora vuoto',
         descrizione:
-          'Le domande che tornano agli orali, con quante volte sono state chieste e le note di chi le ha sostenute.',
+          'Quanto materiale c e, in quanto tempo, e in quante passate. Lui calcola quanto fare al giorno, e rifa il conto se cambi ritmo.',
       },
       {
         nome: 'Materiali',
         indirizzo: 'materiali.html',
         icona: 'ph-folder',
-        conteggio: plurale(materiali.length, 'documento', 'documenti'),
+        conteggio: materiali.length ? plurale(materiali.length, 'documento', 'documenti') : 'ancora vuoto',
         descrizione:
-          'Sbobine, dispense, letteratura e appunti. Alcuni documenti sono protetti da una chiave di accesso.',
+          'Sbobine, dispense, letteratura e appunti, divisi per materia. Alcuni documenti si aprono solo con una chiave.',
+      },
+      {
+        nome: 'Domande esami',
+        indirizzo: 'domande.html',
+        icona: 'ph-exam',
+        conteggio: domande.length ? plurale(domande.length, 'domanda', 'domande') : 'ancora vuoto',
+        descrizione:
+          'Cosa hanno chiesto davvero i professori, con chi l ha chiesto e le note di chi c e passato. Ci si puo anche farsi interrogare.',
+      },
+      {
+        nome: 'Quiz',
+        indirizzo: 'quiz.html',
+        icona: 'ph-cards',
+        conteggio: casi.length ? plurale(casi.length, 'caso', 'casi') : 'ancora vuoto',
+        descrizione:
+          'Casi clinici per tenere la mente allenata quando hai un ritaglio di tempo, e capire se una cosa la sai davvero.',
+      },
+      {
+        nome: 'Test SSM',
+        indirizzo: 'ssm.html',
+        icona: 'ph-target',
+        conteggio: 'in preparazione',
+        descrizione:
+          'Le domande dei concorsi di specializzazione. La sezione resta chiusa finche non ci sono le domande.',
       },
     ];
 
@@ -429,10 +286,8 @@ async function avvia(profilo) {
     sezioni.forEach((s) => elSezioni.appendChild(creaCardSezione(s)));
     elSezioni.hidden = false;
 
-    mostraStato(casi, statistiche);
     mostraStudioDiOggi(piani);
     mostraProssimeDate(date);
-    mostraTempo(tempo);
 
     if (profilo.ruolo === 'admin') {
       const [casiAttesa, materialiAttesa] = await Promise.all([

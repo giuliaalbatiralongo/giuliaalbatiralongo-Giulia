@@ -10,6 +10,47 @@ quando riprendiamo il lavoro, si riparte da qui.
 > cosa fanno le piattaforme concorrenti e a cosa sbagliano.
 > L'ordine di lavoro delle sette idee scelte sta in `PIANO.md`.
 
+## Che cosa e' Akesis (deciso il 5 settembre)
+
+Akesis **non e' un sito di quiz**. E' lo strumento che ti accompagna
+all'universita': ci carichi il materiale, ci progetti lo studio, ci
+organizzi la sessione, ci vedi le date e gli impegni. L'amico
+universitario, non il registro dei voti.
+
+Da questa decisione discende come e' fatta la home:
+
+- Niente pulsante "Inizia una sessione" in evidenza: la sessione di quiz
+  e' una delle sei cose che si possono fare, non *la* cosa
+- Via le tessere con i numeri, via "A che punto sei", via "Tempo di
+  studio". Aprire l'app non deve mettere ansia
+- Al loro posto un saluto che cambia con l'ora e una riga che conta cosa
+  ci si e' costruiti dentro ("Qui dentro ci sono 3 documenti, 14 domande
+  d'esame e 10 casi clinici. Tutto roba che ti sei costruita.")
+- Sei schede di sezione: Calendario, Organizzazione studio, Materiali,
+  Domande esami, Quiz, Test SSM
+- A lato le sole cose utili adesso: lo studio di oggi, gli impegni in
+  arrivo, e per l'admin la coda di revisione
+
+I numeri non sono spariti: stanno nelle Statistiche, dove uno ci va
+quando li vuole vedere, invece di trovarseli in faccia all'apertura.
+
+### I quiz, a che servono
+
+Gli esami di medicina qui sono orali. I quiz quindi non sono una prova:
+servono a tenere la mente allenata in un ritaglio di tempo e a capire se
+una cosa la si sa davvero. Il sottotitolo della pagina lo dice.
+
+### Domande d'esame: chi ha fatto la domanda
+
+Le domande sono quelle uscite davvero agli esami, chieste dai professori.
+Da oggi si puo' segnare **quale professore** ha fatto una certa domanda,
+e possono essere piu' d'uno: la tabella `domanda_professori` tiene una
+riga per coppia domanda-professore, con un indice unico su
+`(domanda_id, lower(trim(professore)))` perche' "Rossi" e " rossi " sono
+la stessa persona. Ognuno puo' togliere solo i nomi che ha messo lui
+(l'admin puo' togliere tutto). Il resto del contesto va nelle note, che
+restano libere.
+
 ## Da fare quando sara' il momento
 
 ### Simulatore per il test SSM
@@ -171,13 +212,15 @@ Restano aperte:
 
 ## Aperte, in attesa di una decisione di Giulia
 
-### Frase di apertura in home
+### Quanto semplificare le statistiche
 
-Ora dice "Tutto quello che studi, in un posto solo." Giulia ha chiesto
-qualcosa di breve e d'impatto, e ha precisato che **Akesis non nasce solo
-per i casi clinici**. La frase attuale e' volutamente ampia. Se non
-convince, se ne provano altre: la spiegazione lunga di cosa sia Akesis
-andra' comunque da un'altra parte, non nel banner.
+Giulia ha detto che le statistiche vanno bene, ma che le farebbe "molto
+meno articolate": tempo di utilizzo dell'app, tempo sui quiz, e basta.
+Poi pero' ha lasciato "Dove vai peggio" e si e' ricreduta sul conteggio
+del materiale caricato ("come non detto"). Restano cinque grafici. Da
+chiederle quali tenere davvero prima di togliere qualcosa: una volta
+tolto un grafico, il dato smette di accumularsi solo se si toglie anche
+la registrazione, e quella conviene lasciarla comunque.
 
 ### Interrogazione nelle domande d'esame
 

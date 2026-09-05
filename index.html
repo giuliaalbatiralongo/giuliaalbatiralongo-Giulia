@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=37">
+  <link rel="stylesheet" href="style.css?v=38">
 </head>
 <body>
   <div class="app">
@@ -58,25 +58,19 @@
     <main class="contenuto">
       <div class="contenuto-interno largo">
 
-        <!-- Apertura. Il blocco pieno d'accento e' l'unico della pagina:
-             se ce ne fosse un secondo smetterebbe di essere un'apertura. -->
         <section class="banner">
           <div class="banner-testo">
+            <p class="banner-saluto" id="saluto"></p>
             <h1 class="banner-titolo">Akesis</h1>
-            <p class="banner-riga">Tutto quello che studi, in un posto solo.</p>
-            <a class="btn btn-chiaro" href="quiz.html">
-              <i class="ph ph-play" aria-hidden="true"></i> Inizia una sessione
-            </a>
+            <p class="banner-riga">
+              Il posto dove tieni insieme l'universita': il materiale, le date,
+              lo studio da organizzare e le domande che escono agli esami.
+            </p>
           </div>
           <i class="ph ph-sparkle banner-segno" aria-hidden="true"></i>
         </section>
 
-        <div class="tessere" id="tessere">
-          <div class="scheletro scheletro-tessera"></div>
-          <div class="scheletro scheletro-tessera"></div>
-          <div class="scheletro scheletro-tessera"></div>
-          <div class="scheletro scheletro-tessera"></div>
-        </div>
+        <p class="riga-raccolta" id="raccolta"></p>
 
         <div class="home-colonne">
           <div class="home-principale">
@@ -93,14 +87,6 @@
           </div>
 
           <aside class="home-lato">
-            <section class="pannello" id="stato" hidden>
-              <div class="sezione-testa">
-                <h2 class="sezione-titolo">A che punto sei</h2>
-              </div>
-              <div class="stato-righe" id="stato-righe"></div>
-              <p class="pannello-nota" id="stato-nota"></p>
-            </section>
-
             <section class="pannello" id="studio-oggi" hidden>
               <div class="sezione-testa">
                 <h2 class="sezione-titolo">Studio di oggi</h2>
@@ -115,15 +101,6 @@
                 <a href="calendario.html" class="link-testo">Calendario</a>
               </div>
               <div id="prossime-elenco"></div>
-            </section>
-
-            <section class="pannello" id="tempo" hidden>
-              <div class="sezione-testa">
-                <h2 class="sezione-titolo">Tempo di studio</h2>
-                <a href="statistiche.html" class="link-testo">Dettagli</a>
-              </div>
-              <div class="tempo-righe" id="tempo-righe"></div>
-              <p class="pannello-nota" id="tempo-nota"></p>
             </section>
 
             <section class="pannello" id="attesa" hidden>
@@ -152,6 +129,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="home.js?v=18"></script>
+  <script type="module" src="home.js?v=20"></script>
 </body>
 </html>

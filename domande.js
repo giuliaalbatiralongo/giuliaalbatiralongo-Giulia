@@ -4,7 +4,9 @@ import {
   getNoteDomanda,
   aggiungiNota,
   eliminaNota,
-} from './db.js?v=23';
+  aggiungiProfessore,
+  togliProfessore,
+} from './db.js?v=24';
 import { iconaPerMateria } from './materie.js?v=3';
 import { proteggiPagina } from './auth.js?v=10';
 import { misuraTempo } from './tempo.js?v=2';
@@ -205,6 +207,74 @@ function creaCardDomanda(domanda) {
   testata.appendChild(conteggio);
   card.appendChild(testata);
 
+  /* Chi ha fatto questa domanda. Piu' di un professore puo' averla
+     fatta, e ognuno aggiunge il proprio senza toccare quelli altrui. */
+  const prof = document.createElement('div');
+  prof.className = 'professori';
+
+  function disegnaProfessori() {
+    prof.innerHTML = '';
+
+    domanda.professori.forEach((voce) => {
+      const segno = document.createElement('span');
+      segno.className = 'professore';
+
+      const icona = document.createElement('i');
+      icona.className = 'ph ph-user';
+      icona.setAttribute('aria-hidden', 'true');
+      segno.appendChild(icona);
+
+      segno.appendChild(document.createTextNode(voce.professore));
+
+      if (voce.mio) {
+        const togli = document.createElement('button');
+        togli.type = 'button';
+        togli.className = 'professore-togli';
+        togli.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
+        togli.setAttribute('aria-label', `Togli ${voce.professore}`);
+        togli.addEventListener('click', async () => {
+          togli.disabled = true;
+          if (await togliProfessore(voce.id)) {
+            domanda.professori = domanda.professori.filter((v) => v.id !== voce.id);
+            disegnaProfessori();
+          } else {
+            togli.disabled = false;
+          }
+        });
+        segno.appendChild(togli);
+      }
+
+      prof.appendChild(segno);
+    });
+
+    const aggiungi = document.createElement('button');
+    aggiungi.type = 'button';
+    aggiungi.className = 'professore-aggiungi';
+    aggiungi.innerHTML =
+      '<i class="ph ph-plus" aria-hidden="true"></i> ' +
+      (domanda.professori.length === 0 ? 'Chi l ha chiesta' : 'Anche');
+
+    aggiungi.addEventListener('click', () => {
+      const nome = window.prompt('Quale professore ha fatto questa domanda?');
+      if (!nome || !nome.trim()) return;
+
+      aggiungiProfessore(domanda.id, nome).then((esito) => {
+        if (!esito.ok) {
+          window.alert(esito.errore);
+          return;
+        }
+        domanda.professori.push(esito.voce);
+        domanda.professori.sort((a, b) => a.professore.localeCompare(b.professore));
+        disegnaProfessori();
+      });
+    });
+
+    prof.appendChild(aggiungi);
+  }
+
+  disegnaProfessori();
+  card.appendChild(prof);
+
   /* Le note non stanno sulla card: si aprono a parte. */
   const piede = document.createElement('div');
   piede.className = 'domanda-piede';
@@ -399,7 +469,7 @@ function mostraMateria(domande) {
   elSottotitolo.textContent =
     domande.length === 1
       ? '1 domanda raccolta, dalla piu chiesta.'
-      : `${domande.length} domande raccolte, dalla piu chiesta.`;
+      : `${domande.length} domande raccolte, dalla piu chiesta. Il pulsante piu segnala che e tornata.`;
 
   elAzioni.innerHTML =
     '<a href="domande.html" class="link-testo"><i class="ph ph-arrow-left" aria-hidden="true"></i> Tutte le materie</a>';

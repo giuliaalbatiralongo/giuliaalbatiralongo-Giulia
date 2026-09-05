@@ -343,13 +343,31 @@ export async function getDomandeEsame(materia) {
 
   // Quante note ha ciascuna domanda: serve a scrivere "2 note" sul
   // pulsante senza dover caricare il testo di tutte in anticipo.
-  const { data: note } = await supabase.from('note_domanda').select('domanda_id');
+  const [{ data: note }, { data: professori }] = await Promise.all([
+    supabase.from('note_domanda').select('domanda_id'),
+    supabase.from('domanda_professori').select('id, domanda_id, professore, autore'),
+  ]);
+
   const conteggio = new Map();
   (note || []).forEach((n) => {
     conteggio.set(n.domanda_id, (conteggio.get(n.domanda_id) || 0) + 1);
   });
 
-  return data.map((domanda) => ({ ...domanda, quanteNote: conteggio.get(domanda.id) || 0 }));
+  const mio = await idUtente();
+  const perDomanda = new Map();
+  (professori || []).forEach((p) => {
+    const elenco = perDomanda.get(p.domanda_id) || [];
+    elenco.push({ ...p, mio: p.autore === mio });
+    perDomanda.set(p.domanda_id, elenco);
+  });
+
+  return data.map((domanda) => ({
+    ...domanda,
+    quanteNote: conteggio.get(domanda.id) || 0,
+    professori: (perDomanda.get(domanda.id) || []).sort((a, b) =>
+      a.professore.localeCompare(b.professore)
+    ),
+  }));
 }
 
 export async function inserisciDomandaEsame(domanda) {
@@ -421,6 +439,37 @@ export async function aggiungiNota(domandaId, testo) {
     return null;
   }
   return data;
+}
+
+/* ---------- Professori che hanno fatto una domanda ---------- */
+
+export async function aggiungiProfessore(domandaId, professore) {
+  const { data, error } = await supabase
+    .from('domanda_professori')
+    .insert([{ domanda_id: domandaId, professore: professore.trim() }])
+    .select('id, professore, autore')
+    .single();
+
+  if (error) {
+    // Il vincolo di unicita' scatta se quel professore c'e' gia'.
+    if (error.code === '23505') {
+      return { ok: false, errore: 'Questo professore e gia segnato su questa domanda.' };
+    }
+    console.error('Errore nel salvataggio del professore:', error);
+    return { ok: false, errore: 'Non sono riuscita a salvare.' };
+  }
+
+  return { ok: true, voce: { ...data, mio: true } };
+}
+
+export async function togliProfessore(id) {
+  const { error } = await supabase.from('domanda_professori').delete().eq('id', id);
+
+  if (error) {
+    console.error('Errore nella rimozione del professore:', error);
+    return false;
+  }
+  return true;
 }
 
 export async function eliminaNota(id) {
