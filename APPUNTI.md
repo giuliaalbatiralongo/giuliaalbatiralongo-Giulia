@@ -233,10 +233,29 @@ Dettagli:
 che non compare sembra un anno che non esiste, e la casella vuota e' il
 posto dove mettere le materie quando si sanno.
 
-Un anno ancora vuoto pero' sta in **una riga sola**, non in due semestri
-con due pulsanti uguali: quattro anni vuoti aperti facevano dodici righe
-identiche, e gli anni che contano qualcosa si perdevano in mezzo.
-Cliccando la riga si apre la finestra gia' su quell'anno.
+**Ogni anno e' una cartella che si apre** (7 settembre, richiesta di
+Giulia: "metti tutti gli anni a scomparsa, unicamente selezionabili per
+aprirli"). Chiusi, la pagina e' sei righe: si vede tutto il corso in un
+colpo, con accanto quanti esami ci sono e quanti hanno gia' una data.
+Aperto, c'e' l'anno che stai guardando e basta. Prima, con quattro anni
+vuoti spalancati, erano dodici caselle identiche e gli anni che
+contavano si perdevano in mezzo.
+
+Sono `<details>`/`<summary>` veri, non finti: si aprono anche senza
+JavaScript, la tastiera ci arriva da sola e il browser sa che sono
+sezioni richiudibili. Quali anni erano aperti se lo ricorda il browser
+(`localStorage`, chiave `akesis-anni-aperti`): se ogni volta si
+richiudesse tutto, riaprire il proprio anno trenta volte al giorno
+stanca. Se il browser non lascia salvare (finestra anonima, dati
+bloccati) vale solo per la visita: e' un fastidio, non un errore.
+
+**Trappola trovata qui.** Dentro un `<details>` chiuso Chrome non mette
+`display: none`: usa `content-visibility`, cosi' l'apertura si puo'
+animare. Vuol dire che `offsetParent`, `getBoundingClientRect()` e le
+altre misure restano quelle dell'ultima volta e giurano che si vede
+tutto. Il collaudo ci era cascato e segnalava un guasto che non
+esisteva. Per chiedere "si vede davvero?" si usa
+`elemento.checkVisibility()`, che risponde bene in tutti e due i casi.
 
 Riempiti dal dettato di Giulia:
 

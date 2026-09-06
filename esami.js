@@ -137,81 +137,104 @@ function disegna() {
   }
 
   strutturaAnni(esami).forEach((gruppo) => {
-    const sezione = document.createElement('section');
-    sezione.className = 'anno';
-
     const quanti = gruppo.semestri.reduce((s, x) => s + x.esami.length, 0);
+    elElenco.appendChild(creaAnno(gruppo, quanti));
+  });
+}
 
-    // Un anno ancora vuoto sta in una riga sola. Aprirlo in due
-    // semestri con due pulsanti uguali, per quattro anni di fila, fa
-    // dodici righe identiche: la pagina diventa un muro e gli anni che
-    // contano qualcosa si perdono in mezzo.
-    if (quanti === 0 && gruppo.anno > 0) {
-      sezione.classList.add('vuoto');
+/* Ogni anno e' una cartella che si apre. Chiusa, la pagina e' sei righe
+   e si vede tutto il corso in un colpo; aperta, c'e' l'anno che stai
+   guardando e basta. */
+function creaAnno(gruppo, quanti) {
+  const box = document.createElement('details');
+  box.className = 'anno' + (quanti === 0 ? ' vuoto' : '');
+  box.open = anniAperti().includes(gruppo.anno);
 
-      const riga = document.createElement('button');
-      riga.type = 'button';
-      riga.className = 'anno-vuoto';
-      riga.addEventListener('click', () => apriFinestra(null, { anno: gruppo.anno, semestre: null }));
+  box.addEventListener('toggle', () => ricordaAnno(gruppo.anno, box.open));
 
-      const nome = document.createElement('span');
-      nome.className = 'anno-vuoto-nome';
-      nome.textContent = nomeAnno(gruppo.anno);
-      riga.appendChild(nome);
+  const testa = document.createElement('summary');
+  testa.className = 'anno-testa';
 
-      const invito = document.createElement('span');
-      invito.className = 'anno-vuoto-invito';
-      invito.innerHTML = '<i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un esame';
-      riga.appendChild(invito);
+  const freccia = document.createElement('i');
+  freccia.className = 'ph ph-caret-right anno-freccia';
+  freccia.setAttribute('aria-hidden', 'true');
+  testa.appendChild(freccia);
 
-      sezione.appendChild(riga);
-      elElenco.appendChild(sezione);
-      return;
+  const nome = document.createElement('span');
+  nome.className = 'anno-nome';
+  nome.textContent = nomeAnno(gruppo.anno);
+  testa.appendChild(nome);
+
+  const conto = document.createElement('span');
+  conto.className = 'anno-conto';
+  if (quanti === 0) {
+    conto.classList.add('da-riempire');
+    conto.textContent = 'da riempire';
+  } else {
+    const conData = gruppo.semestri
+      .flatMap((s) => s.esami)
+      .filter((e) => !e.sostenuto && e.scelto).length;
+    conto.textContent =
+      `${quanti} ${quanti === 1 ? 'esame' : 'esami'}` + (conData > 0 ? ` · ${conData} con una data` : '');
+  }
+  testa.appendChild(conto);
+
+  box.appendChild(testa);
+
+  const dentro = document.createElement('div');
+  dentro.className = 'anno-dentro';
+
+  gruppo.semestri.forEach((s) => {
+    const blocco = document.createElement('div');
+    blocco.className = 'semestre';
+
+    const nomeSem = document.createElement('p');
+    nomeSem.className = 'semestre-nome';
+    nomeSem.textContent = nomeSemestre(s.semestre);
+    blocco.appendChild(nomeSem);
+
+    s.esami.forEach((e) => blocco.appendChild(creaRiga(e)));
+
+    if (gruppo.anno > 0) {
+      const aggiungi = document.createElement('button');
+      aggiungi.type = 'button';
+      aggiungi.className = 'aggiungi-qui';
+      aggiungi.innerHTML = '<i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un esame';
+      aggiungi.addEventListener('click', () =>
+        apriFinestra(null, { anno: gruppo.anno, semestre: s.semestre || null })
+      );
+      blocco.appendChild(aggiungi);
     }
 
-    const testa = document.createElement('div');
-    testa.className = 'sezione-testa';
-
-    const titolo = document.createElement('h2');
-    titolo.className = 'sezione-titolo';
-    titolo.textContent = nomeAnno(gruppo.anno);
-    testa.appendChild(titolo);
-
-    const conto = document.createElement('span');
-    conto.className = 'anno-conto';
-    conto.textContent = `${quanti} ${quanti === 1 ? 'esame' : 'esami'}`;
-    testa.appendChild(conto);
-
-    sezione.appendChild(testa);
-
-    gruppo.semestri.forEach((s) => {
-      const blocco = document.createElement('div');
-      blocco.className = 'semestre';
-
-      const nome = document.createElement('p');
-      nome.className = 'semestre-nome';
-      nome.textContent = nomeSemestre(s.semestre);
-      blocco.appendChild(nome);
-
-      s.esami.forEach((e) => blocco.appendChild(creaRiga(e)));
-
-      if (gruppo.anno > 0) {
-        const aggiungi = document.createElement('button');
-        aggiungi.type = 'button';
-        aggiungi.className = 'aggiungi-qui';
-        aggiungi.innerHTML =
-          '<i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un esame';
-        aggiungi.addEventListener('click', () =>
-          apriFinestra(null, { anno: gruppo.anno, semestre: s.semestre || null })
-        );
-        blocco.appendChild(aggiungi);
-      }
-
-      sezione.appendChild(blocco);
-    });
-
-    elElenco.appendChild(sezione);
+    dentro.appendChild(blocco);
   });
+
+  box.appendChild(dentro);
+  return box;
+}
+
+/* Quali anni erano aperti l'ultima volta. Se il browser non lascia
+   salvare (finestra anonima, dati bloccati) valgono solo per questa
+   visita: e' un fastidio, non un errore. */
+const CHIAVE_ANNI = 'akesis-anni-aperti';
+
+function anniAperti() {
+  try {
+    return JSON.parse(localStorage.getItem(CHIAVE_ANNI) || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function ricordaAnno(anno, aperto) {
+  try {
+    const adesso = new Set(anniAperti());
+    if (aperto) adesso.add(anno);
+    else adesso.delete(anno);
+    localStorage.setItem(CHIAVE_ANNI, JSON.stringify([...adesso]));
+  } catch (e) {
+    /* niente da fare */
+  }
 }
 
 /* ---------- La finestra ---------- */

@@ -4798,14 +4798,6 @@ a.oggi-riga {
 
 /* ---------- Esami: anni e semestri ---------- */
 
-.anno { margin-bottom: 30px; }
-
-.anno-conto {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--testo-3);
-}
-
 .semestre { margin-bottom: 18px; }
 
 .semestre-nome {
@@ -4917,10 +4909,6 @@ a.oggi-riga {
    Un anno senza esami resta scritto: e' il posto dove metterli quando
    si sanno, e un anno che non compare sembra un anno che non esiste. */
 
-.anno.vuoto { opacity: 0.72; }
-
-.anno.vuoto .anno-conto { font-weight: 500; }
-
 .aggiungi-qui {
   display: flex;
   align-items: center;
@@ -4952,53 +4940,78 @@ a.oggi-riga {
   outline-offset: 2px;
 }
 
-/* Un anno ancora vuoto sta in una riga sola: aprirlo in due semestri
-   con due pulsanti uguali, per quattro anni di fila, fa un muro. */
-.anno-vuoto {
+
+
+/* ---------- Esami: gli anni a scomparsa ----------
+   Chiusi, la pagina e' sei righe e si vede tutto il corso in un colpo.
+   Aperti, c'e' l'anno che stai guardando e basta. */
+
+.anno {
+  margin-bottom: 8px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+  overflow: hidden;
+}
+
+.anno.vuoto { background: transparent; border-style: dashed; }
+
+.anno-testa {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  width: 100%;
+  gap: 12px;
   padding: 14px 16px;
-  margin-bottom: 10px;
-  border: 1px dashed var(--linea-forte);
-  border-radius: var(--r-controllo);
-  background: transparent;
-  font: inherit;
-  text-align: left;
-  color: inherit;
   cursor: pointer;
-  transition: border-color 160ms var(--curva), background 160ms var(--curva);
+  list-style: none;
+  transition: background 160ms var(--curva);
 }
 
-.anno-vuoto-nome {
-  font-size: 14.5px;
+/* La freccina predefinita cambia da browser a browser: si toglie e si
+   mette la nostra, che gira quando la cartella si apre. */
+.anno-testa::-webkit-details-marker { display: none; }
+.anno-testa::marker { content: ''; }
+
+.anno-freccia {
+  flex: 0 0 auto;
+  font-size: 14px;
+  color: var(--testo-3);
+  transition: transform 200ms var(--curva);
+}
+
+.anno[open] .anno-freccia { transform: rotate(90deg); }
+
+.anno-nome {
+  flex: 1 1 auto;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: -0.012em;
-  color: var(--testo-2);
+  letter-spacing: -0.014em;
 }
 
-.anno-vuoto-invito {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
+.anno.vuoto .anno-nome { color: var(--testo-2); font-weight: 500; }
+
+.anno-conto {
+  flex: 0 0 auto;
+  font-size: 12px;
   font-weight: 600;
   color: var(--testo-3);
 }
 
+.anno-conto.da-riempire { font-weight: 500; }
+
 @media (hover: hover) and (pointer: fine) {
-  .anno-vuoto:hover {
-    border-color: var(--accento);
-    background: var(--accento-tenue);
-  }
-  .anno-vuoto:hover .anno-vuoto-invito { color: var(--accento-su-tenue); }
+  .anno-testa:hover { background: var(--superficie-alt); }
 }
 
-.anno-vuoto:focus-visible {
+.anno-testa:focus-visible {
   outline: 2px solid var(--accento);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
-.anno.vuoto { margin-bottom: 0; opacity: 1; }
+.anno-dentro {
+  padding: 4px 16px 16px;
+  border-top: 1px solid var(--linea);
+}
+
+.anno-dentro .semestre:last-child { margin-bottom: 0; }
+
+.anno-dentro .semestre-nome { margin-top: 14px; }
