@@ -294,9 +294,31 @@ In Akesis va **il corso integrato**: e' quello che si prepara e che
 prende un voto. I moduli finiscono nella nota, quando aiutano a capire
 cosa c'e' dentro.
 
-**Il PDF copre solo dal terzo al sesto anno** (le coorti gia' iscritte:
-3° = coorte 2024/2025, 4° = 2023/2024, e cosi' via). Primo e secondo
-anno non ci sono proprio, e non me li sono inventati: li manda Giulia.
+Il primo PDF copriva **solo dal terzo al sesto anno** (le coorti gia'
+iscritte: 3° = coorte 2024/2025, 4° = 2023/2024, e cosi' via). Primo e
+secondo anno non c'erano, e non me li sono inventati: Giulia ha
+scaricato il **secondo PDF** (manifesto 11887) e ci sono anche quelli.
+
+Adesso il corso c'e' tutto: **47 esami, 362 crediti**. Medicina ne fa
+360, quindi il conto torna: e' la prova migliore che l'estrazione dal
+PDF non ha perso pezzi per strada.
+
+**Un avvertimento che va detto a Giulia.** Il primo anno del PDF e' la
+**coorte 2026/2027**, cioe' l'ordinamento nuovo: si vede dai codici di
+settore, che sono quelli nuovi (BIOS-, PHYS-, MEDS-, ANGL-) invece dei
+vecchi MED/ e BIO/. Giulia e' al quarto anno, coorte 2023/2024: il
+primo e il secondo anno lei li ha fatti con un ordinamento diverso, e
+qualche nome puo' non corrispondere a quello che ha davvero dato.
+
+Due cose da tenere a mente in quel PDF:
+
+- **"A | B" dopo il nome sono i canali**, non parte del titolo: Chimica,
+  Fisica e Biologia si fanno in due canali paralleli
+- **Scienze umane e' un esame solo a cavallo di due anni**: antropologia,
+  storia della medicina, informatica e inglese al primo; psicologia
+  generale e clinica al secondo. Sta scritto una volta sola, al primo
+  anno, con la nota che lo dice. Come Farmacologia I e II, che invece il
+  manifesto separa per nome e quindi restano due righe
 
 Scelte fatte con lei (domande poste prima di toccare i dati):
 
