@@ -1,4 +1,4 @@
-import { getCasiClinici, getRisposte, calcolaStatistiche } from './db.js?v=29';
+import { getCasiClinici, getRisposte, calcolaStatistiche } from './db.js?v=30';
 import { iconaPerMateria } from './materie.js?v=3';
 import { proteggiPagina } from './auth.js?v=10';
 

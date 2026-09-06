@@ -263,6 +263,30 @@ Dettagli che discendono da queste:
 - Eliminando un esame se ne vanno le sue date (`on delete cascade`): una
   chiamata sola, non due che possono fallire a meta'
 
+### Il guasto della creazione dei piani (7 settembre)
+
+Creare una materia nuova dava errore. Colpa mia, nata con la modifica
+dei piani: da allora le righe delle passate si portano dietro l'`id`
+(serve per correggerle), e `inserisciPiano` le passava al database con
+`{...f}`. Alla creazione quell'id e' nullo, e Postgres rifiuta:
+
+```
+cannot insert a non-DEFAULT value into column "id"
+Column "id" is an identity column defined as GENERATED ALWAYS
+```
+
+**La radice non e' l'id, e' lo spargimento.** `{...oggettoDelChiamante}`
+dentro un insert manda al database qualunque campo la pagina si sia
+portata dietro. Ora i campi si elencano a mano, in `inserisciPiano` e in
+`aggiungiAppello` che aveva lo stesso schema.
+
+**Perche' le prove non l'hanno visto.** Il database finto sostituiva
+proprio la funzione da collaudare, quindi il codice che sbagliava non
+veniva mai eseguito. Aggiunta `livello-dati.mjs`: fa girare il db.js
+**vero** contro un client-spia che registra cosa viene scritto, e
+controlla che nessuna riga nuova porti `id` o `created_at`. Verificato
+che diventa rossa col codice sbagliato.
+
 ### Guasti trovati per strada (6 settembre)
 
 - **`creaIcs` era usato ma mai importato** in `calendario.js`: il
@@ -402,6 +426,7 @@ altrimenti si collauda roba vecchia. Le suite:
 - `sessione.mjs` - esami e appelli
 - `giorno.mjs` - la finestra di un giorno nel calendario e la striscia
   delle materie
+- `livello-dati.mjs` - cosa scrive davvero `db.js` nel database
 - `sweep.mjs` - tutte le pagine si aprono senza errori
 - `contrasto.mjs` - leggibilita' del testo, chiaro e scuro
 

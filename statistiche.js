@@ -9,7 +9,7 @@ import {
   sommaPerSezione,
   formattaDurata,
   casiDaRipassareOggi,
-} from './db.js?v=29';
+} from './db.js?v=30';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');

@@ -618,9 +618,22 @@ export async function eliminaEsame(id) {
 }
 
 export async function aggiungiAppello(esame, voce) {
+  // Campi elencati a mano, non `{...voce}`: e' cosi' che l'id di una
+  // riga e' finito dentro un insert e ha rotto la creazione dei piani.
   const { data, error } = await supabase
     .from('date_esame')
-    .insert([{ ...voce, esame_id: esame.id, materia: esame.nome }])
+    .insert([
+      {
+        esame_id: esame.id,
+        materia: esame.nome,
+        tipo: voce.tipo,
+        giorno: voce.giorno,
+        ora: voce.ora,
+        luogo: voce.luogo,
+        note: voce.note || null,
+        visibilita: voce.visibilita || 'privato',
+      },
+    ])
     .select('*')
     .single();
 
@@ -849,7 +862,17 @@ export async function inserisciPiano(piano, fasi) {
     return null;
   }
 
-  const righe = fasi.map((f, i) => ({ ...f, piano_id: data.id, ordine: i + 1 }));
+  // Si scrivono solo i campi che ci interessano, uno per uno. Con
+  // `{...f}` finiva dentro anche l'id che le righe si portano dietro
+  // per la modifica: nullo alla creazione, e il database lo rifiuta
+  // perche' l'id se lo genera lui.
+  const righe = fasi.map((f, i) => ({
+    piano_id: data.id,
+    nome: f.nome,
+    giorni: f.giorni,
+    fatte: f.fatte || 0,
+    ordine: i + 1,
+  }));
   const { data: salvate, error: erroreFasi } = await supabase
     .from('piano_fasi')
     .insert(righe)
