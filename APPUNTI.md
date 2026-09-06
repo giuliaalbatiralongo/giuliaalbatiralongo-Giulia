@@ -501,6 +501,47 @@ veniva mai eseguito. Aggiunta `livello-dati.mjs`: fa girare il db.js
 controlla che nessuna riga nuova porti `id` o `created_at`. Verificato
 che diventa rossa col codice sbagliato.
 
+### Il guasto della modifica dei piani (7 settembre)
+
+Giulia: "mi da errore quando provo a modificare i piani dello studio e
+mi blocca il salvataggio delle modifiche".
+
+Postgres diceva, per esteso:
+
+    null value in column "fatte" of relation "piano_fasi"
+    violates not-null constraint
+
+Perche'. Salvando una modifica, `aggiornaPiano` limita quello che hai
+gia' fatto al totale del materiale, cosi' la barra non va oltre il suo
+binario. Il totale lo leggeva da `piano.quantita` -- solo che quel campo
+la pagina non lo manda mai: nel database e' il trigger `allinea_quantita`
+a ricavarlo dall'unita' scelta. Quindi era `undefined`,
+`Math.min(3, undefined)` fa `NaN`, e `NaN` diventa `null` appena esce
+di casa in JSON. Ma `fatte` e' NOT NULL, e il salvataggio si piantava.
+
+Colpiva ogni materia divisa **per pagine o per lezioni**. Quelle divise
+per giorni funzionavano, perche' li' il totale era gia' un altro
+(`fase.giorni`): ecco perche' l'errore sembrava capriccioso.
+
+Corretto rifacendo in `db.js` lo stesso conto del trigger
+(`quantitaPiano`), e con una rete sotto: se il totale proprio non si sa,
+il fatto si lascia com'e' invece di azzerarlo.
+
+**Perche' i collaudi nel browser non l'hanno visto.** Perche' il finto
+database *sostituisce* `aggiornaPiano`: la funzione rotta non veniva
+mai eseguita. E' lo stesso motivo per cui era sfuggito il guasto della
+creazione, ed e' esattamente il buco per cui esiste `livello-dati.mjs`,
+che il db.js vero lo esegue davvero con un client spia. La prova nuova
+sta li', ed e' stata vista fallire prima di correggere.
+
+Due cose rese piu' severe di conseguenza:
+
+- il finto `aggiornaPiano` adesso rifiuta un `fatte` che non sia intero,
+  come fa Postgres, e la modifica **resta scritta** (prima restituiva la
+  riga nuova ma non la salvava: riaprendo si ritrovava quella di prima)
+- la spia di `livello-dati.mjs` registra anche gli `update`, non solo
+  gli `insert`
+
 ### Guasti trovati per strada (6 settembre)
 
 - **`creaIcs` era usato ma mai importato** in `calendario.js`: il

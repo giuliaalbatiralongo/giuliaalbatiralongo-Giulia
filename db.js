@@ -1159,6 +1159,22 @@ function campiFase(fase, pianoId, ordine) {
   };
 }
 
+/* Quante pagine (o lezioni, o giorni) e' in tutto il materiale.
+
+   Nel database questo numero non lo manda il browser: lo ricava lui
+   dall'unita' scelta (il trigger `allinea_quantita`). Quando pero' ci
+   serve qui, in mezzo a un salvataggio, dobbiamo rifare lo stesso conto,
+   perche' l'oggetto che arriva dalla pagina il totale non ce l'ha. */
+function quantitaPiano(piano) {
+  if (Number.isFinite(piano.quantita)) return piano.quantita;
+  const scelta = {
+    pagine: piano.pagine,
+    lezioni: piano.lezioni,
+    giorni: piano.giorni_materiale,
+  }[piano.unita];
+  return Number.isFinite(scelta) ? scelta : null;
+}
+
 export async function inserisciPiano(piano, fasi) {
   const { data, error } = await supabase
     .from('piani')
@@ -1220,12 +1236,22 @@ export async function aggiornaPiano(id, piano, fasi) {
     if (erroreTagli) console.error('Errore nel togliere le passate:', erroreTagli);
   }
 
+  const totaleMateriale = quantitaPiano(piano);
+
   for (let i = 0; i < fasi.length; i += 1) {
     const fase = fasi[i];
     // Se il materiale si accorcia, il fatto non puo' restare piu' alto
     // del totale: la barra andrebbe oltre il suo binario.
-    const totale = piano.unita === 'giorni' ? fase.giorni : piano.quantita;
-    const fatte = Math.min(Math.max(fase.fatte || 0, 0), totale);
+    //
+    // Il totale pero' va saputo davvero. Prima si leggeva `piano.quantita`,
+    // che la pagina non manda: veniva `undefined`, Math.min faceva NaN, e
+    // NaN diventa `null` appena esce di qui. Ma `fatte` nel database non
+    // puo' essere nullo, e il salvataggio si piantava senza spiegarsi.
+    const totale = piano.unita === 'giorni' ? fase.giorni : totaleMateriale;
+    const gia = Math.max(fase.fatte || 0, 0);
+    // Se proprio il totale non si sa, si lascia stare il fatto com'e':
+    // meglio non toccarlo che azzerarlo per un conto che non abbiamo.
+    const fatte = Number.isFinite(totale) ? Math.min(gia, totale) : gia;
 
     if (fase.id) {
       const { error: e } = await supabase
@@ -1253,8 +1279,8 @@ export async function aggiornaPiano(id, piano, fasi) {
     .eq('id', id)
     .single();
 
-  if (erroreRilettura) {
-    console.error('Errore nella rilettura del piano:', erroreRilettura);
+  if (erroreRilettura || !rilette) {
+    segnaErrore('Errore nella rilettura del piano:', erroreRilettura);
     return null;
   }
 
