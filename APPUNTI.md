@@ -196,10 +196,13 @@ Tre decisioni sue, prese con una domanda diretta:
    raggruppamento per nome. Crei l'esame, poi ci appendi le date. Un
    passaggio in piu', ma "Farma 2" e "Farmacologia 2" non possono
    scollegarsi.
-2. **Gli appelli scartati spariscono dal calendario.** Restano nella
-   scheda del loro esame. La regola sta in un punto solo (`getDateEsame`
-   marca ogni data con `daMostrare`) e la applicano tutti: mese, "In
-   arrivo", home, esportazione.
+2. **Gli appelli scartati spariscono dal calendario.** La regola sta in
+   un punto solo (`getDateEsame` marca ogni data con `daMostrare`) e la
+   applicano tutti: mese, Prossimamente, home, esportazione.
+   **Dal 6 settembre spariscono anche dalla scheda dell'esame**: deciso
+   l'appello si vede solo quello, il resto sta dietro a "Cambia
+   appello". Giulia: "una volta scelto, devo vedere solo quello,
+   altrimenti si fa confusione".
 3. **Nessun legame automatico con l'organizzazione studio.** Scegliere
    l'appello non sposta la fine del piano: restano due cose separate,
    come ha chiesto lei.
@@ -209,6 +212,11 @@ Dettagli che discendono da queste:
 - L'appello scelto cambia `tipo` da `appello` a `iscritta`, cosi' nel
   mese prende il colore di "Esame". Ripremerlo toglie la scelta e lo
   riporta ad appello: serve quando l'appello salta
+- Il riquadro in fondo al calendario si chiama **Prossimamente** (non
+  piu' "In arrivo"), e il conto alla rovescia sta in una pastiglia gia'
+  scritta per esteso: "tra 12 giorni", "domani", "oggi". Prima era un
+  numero nudo che aveva bisogno di una riga di spiegazione sotto al
+  riquadro. Quella riga non c'e' piu'
 - Due controlli stanno nel database, non nel browser: l'autore lo scrive
   un trigger, e un secondo trigger rifiuta un `appello_scelto` che non
   appartiene a quell'esame. Verificato impersonando l'account di prova

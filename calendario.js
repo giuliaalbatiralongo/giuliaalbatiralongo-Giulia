@@ -8,7 +8,6 @@ import {
   aggiungiAppello,
   scegliAppello,
   giorniMancanti,
-  contoAllaRovescia,
   nomeTipoData,
   titoloData,
   tipoData,
@@ -296,7 +295,17 @@ document.getElementById('chiudi-giorno').addEventListener('click', () => {
   disegnaMese();
 });
 
-/* ---------- Prossime date ---------- */
+/* ---------- Prossimamente ----------
+   Il conto alla rovescia sta in una pastiglia a destra, gia' scritto
+   per esteso: prima era un numero nudo che serviva una riga di
+   spiegazione in fondo al riquadro. Meno da leggere, stessa cosa. */
+
+function quantoManca(giorno) {
+  const g = giorniMancanti(giorno);
+  if (g === 0) return 'oggi';
+  if (g === 1) return 'domani';
+  return `tra ${g} giorni`;
+}
 
 function disegnaProssime() {
   const future = date.filter((d) => giorniMancanti(d.giorno) >= 0).slice(0, 6);
@@ -314,14 +323,10 @@ function disegnaProssime() {
     riga.type = 'button';
     riga.className = 'prossima';
 
-    const quando = document.createElement('span');
-    quando.className = 'prossima-quando';
-    const g = giorniMancanti(voce.giorno);
-    // Il numero grande e' quello che si cerca davvero guardando qui.
-    quando.textContent = g === 0 ? 'oggi' : g;
-    if (g > 0) quando.classList.add('numero');
-    quando.style.color = coloreTipo(voce.tipo);
-    riga.appendChild(quando);
+    const filo = document.createElement('span');
+    filo.className = 'prossima-filo';
+    filo.style.background = coloreTipo(voce.tipo);
+    riga.appendChild(filo);
 
     const testo = document.createElement('span');
     testo.className = 'prossima-testo';
@@ -342,6 +347,13 @@ function disegnaProssime() {
 
     riga.appendChild(testo);
 
+    const quando = document.createElement('span');
+    quando.className = 'prossima-quando';
+    const g = giorniMancanti(voce.giorno);
+    if (g <= 1) quando.classList.add('vicino');
+    quando.textContent = quantoManca(voce.giorno);
+    riga.appendChild(quando);
+
     riga.addEventListener('click', () => {
       meseMostrato = new Date(voce.giorno + 'T00:00:00');
       meseMostrato.setDate(1);
@@ -350,14 +362,6 @@ function disegnaProssime() {
 
     elProssime.appendChild(riga);
   });
-
-  const nota = document.createElement('p');
-  nota.className = 'blocco-nota';
-  nota.textContent =
-    future.length === 1
-      ? 'I numeri sono i giorni che mancano.'
-      : `I numeri sono i giorni che mancano. La prima e ${contoAllaRovescia(future[0].giorno)}.`;
-  elProssime.appendChild(nota);
 }
 
 function disegnaTutto() {
@@ -511,7 +515,7 @@ function disegnaSessione() {
 
 /* ---------- La scheda di un esame ---------- */
 
-function rigaAppello(esame, appello) {
+function rigaAppello(esame, appello, conTasti = true) {
   const riga = document.createElement('div');
   const scelto = esame.appello_scelto === appello.id;
   riga.className = 'riga-appello' + (scelto ? ' scelto' : '');
@@ -545,7 +549,7 @@ function rigaAppello(esame, appello) {
   if (scelto) {
     scegli.className = 'segno-scelto';
     scegli.innerHTML = '<i class="ph-fill ph-seal-check" aria-hidden="true"></i> Ti presenti a questo';
-    scegli.title = 'Premi per togliere la scelta';
+    scegli.title = 'Premi per non presentarti piu a questo appello';
   } else {
     scegli.className = 'btn btn-neutro btn-piccolo';
     scegli.textContent = 'Mi presento a questo';
@@ -568,28 +572,33 @@ function rigaAppello(esame, appello) {
   });
   azioni.appendChild(scegli);
 
-  const togli = document.createElement('button');
-  togli.type = 'button';
-  togli.className = 'btn-piu';
-  togli.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
-  togli.setAttribute('aria-label', `Togli l'appello del ${dataLunga(appello.giorno)}`);
-  togli.addEventListener('click', async () => {
-    if (!window.confirm(`Togliere l'appello del ${dataLunga(appello.giorno)}?`)) return;
-    togli.disabled = true;
-    if (await eliminaDataEsame(appello.id)) {
-      await ricarica();
-      apriScheda(esami.find((e) => e.id === esame.id));
-    } else {
-      togli.disabled = false;
-    }
-  });
-  azioni.appendChild(togli);
+  if (conTasti) {
+    const togli = document.createElement('button');
+    togli.type = 'button';
+    togli.className = 'btn-piu';
+    togli.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
+    togli.setAttribute('aria-label', `Togli l'appello del ${dataLunga(appello.giorno)}`);
+    togli.addEventListener('click', async () => {
+      if (!window.confirm(`Togliere l'appello del ${dataLunga(appello.giorno)}?`)) return;
+      togli.disabled = true;
+      if (await eliminaDataEsame(appello.id)) {
+        await ricarica();
+        apriScheda(esami.find((e) => e.id === esame.id));
+      } else {
+        togli.disabled = false;
+      }
+    });
+    azioni.appendChild(togli);
+  }
 
   riga.appendChild(azioni);
   return riga;
 }
 
-function apriScheda(esame) {
+/* Deciso l'appello, gli altri spariscono: tenerli sotto gli occhi crea
+   confusione. Restano dietro a "Cambia appello", per quando l'appello
+   salta o si cambia idea. */
+function apriScheda(esame, apriTutti = false) {
   if (!esame) return;
   esameAperto = esame;
 
@@ -603,12 +612,40 @@ function apriScheda(esame) {
   esitoAppello.className = 'esito-form';
   formAppello.reset();
 
+  const deciso = !!esame.scelto;
+  const stretta = deciso && !apriTutti;
+
+  document.getElementById('scheda-aiuto').hidden = deciso;
+  formAppello.hidden = stretta;
+  esitoAppello.hidden = stretta;
+
   elSchedaAppelli.innerHTML = '';
+
   if (esame.appelli.length === 0) {
     const vuoto = document.createElement('p');
     vuoto.className = 'blocco-vuoto';
     vuoto.textContent = 'Ancora nessuna data. Aggiungi qui sotto quelle che ti propongono.';
     elSchedaAppelli.appendChild(vuoto);
+  } else if (stretta) {
+    elSchedaAppelli.appendChild(rigaAppello(esame, esame.scelto, false));
+
+    const altri = esame.appelli.length - 1;
+    if (altri > 0) {
+      const cambia = document.createElement('button');
+      cambia.type = 'button';
+      cambia.className = 'btn btn-neutro btn-piccolo cambia-appello';
+      cambia.innerHTML =
+        '<i class="ph ph-arrows-clockwise" aria-hidden="true"></i> Cambia appello';
+      cambia.addEventListener('click', () => apriScheda(esame, true));
+      elSchedaAppelli.appendChild(cambia);
+    } else {
+      const aggiungi = document.createElement('button');
+      aggiungi.type = 'button';
+      aggiungi.className = 'btn btn-neutro btn-piccolo cambia-appello';
+      aggiungi.innerHTML = '<i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un altra data';
+      aggiungi.addEventListener('click', () => apriScheda(esame, true));
+      elSchedaAppelli.appendChild(aggiungi);
+    }
   } else {
     esame.appelli.forEach((a) => elSchedaAppelli.appendChild(rigaAppello(esame, a)));
   }

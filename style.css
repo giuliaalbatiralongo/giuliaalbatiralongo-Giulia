@@ -2915,60 +2915,44 @@ body.barra-chiusa .contenuto {
 /* ---------- Prossime date ---------- */
 
 .prossima {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
-  padding: 10px 8px;
+  padding: 11px 0 11px 12px;
   border: none;
-  border-radius: var(--r-controllo);
+  border-bottom: 1px solid var(--linea);
   background: transparent;
-  color: inherit;
-  font-family: inherit;
+  font: inherit;
   text-align: left;
+  color: inherit;
   cursor: pointer;
-  transition: background-color 160ms var(--curva);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .prossima:hover { background: var(--superficie-alt); }
-}
+.prossima:last-child { border-bottom: none; }
 
-.prossima:focus-visible {
-  outline: 2px solid var(--accento);
-  outline-offset: 1px;
+.prossima-filo {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 2px;
 }
-
-/* Il numero di giorni che mancano e' la cosa che si cerca guardando
-   qui: porta tutto il peso, il resto sta in tono minore. */
-.prossima-quando {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 38px;
-  height: 38px;
-  padding: 0 6px;
-  border-radius: var(--r-controllo);
-  background: var(--accento-tenue);
-  color: var(--accento);
-  font-size: 12px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.prossima-quando.numero { font-size: 17px; }
 
 .prossima-testo {
   display: flex;
   flex-direction: column;
   gap: 1px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .prossima-materia {
   font-size: 13.5px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2977,9 +2961,35 @@ body.barra-chiusa .contenuto {
 .prossima-meta {
   font-size: 11.5px;
   color: var(--testo-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+/* Il conto alla rovescia, gia' scritto per esteso: "tra 12 giorni" non
+   ha bisogno di una legenda sotto al riquadro. */
+.prossima-quando {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--superficie-alt);
+  border: 1px solid var(--linea);
+  font-size: 11.5px;
+  font-weight: 600;
   white-space: nowrap;
+  color: var(--testo-2);
+}
+
+.prossima-quando.vicino {
+  background: var(--accento-tenue);
+  border-color: transparent;
+  color: var(--accento-su-tenue);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .prossima:hover .prossima-materia { color: var(--accento); }
+}
+
+.prossima:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: -2px;
 }
 
 /* ---------- Voce di una data ---------- */
@@ -4309,6 +4319,12 @@ a.oggi-riga {
 }
 
 .segno-scelto i { font-size: 15px; }
+
+/* Quando l'esame e' deciso resta solo la data scelta e questo tasto:
+   le altre date tornano visibili solo se si vuole cambiare. */
+.cambia-appello {
+  margin-top: 12px;
+}
 
 /* La riga per aggiungere un altro appello: i campi in fila, il
    pulsante in fondo, e su schermo stretto tutto incolonnato. */

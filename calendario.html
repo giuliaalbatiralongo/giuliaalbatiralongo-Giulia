@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=45">
+  <link rel="stylesheet" href="style.css?v=46">
 </head>
 <body>
   <div class="app">
@@ -110,7 +110,7 @@
           <div class="calendario-sotto">
             <section class="pannello">
               <div class="sezione-testa">
-                <h2 class="sezione-titolo">In arrivo</h2>
+                <h2 class="sezione-titolo">Prossimamente</h2>
               </div>
               <div id="prossime"></div>
             </section>
@@ -255,9 +255,9 @@
     <div class="finestra-corpo">
       <p class="scheda-note" id="scheda-note" hidden></p>
 
-      <p class="campo-aiuto">
+      <p class="campo-aiuto" id="scheda-aiuto">
         Metti tutte le date che l&rsquo;università propone. Poi scegli quella a cui ti
-        presenti: nel calendario resta solo quella.
+        presenti: le altre spariscono, di qui e dal calendario.
       </p>
 
       <div id="scheda-appelli"></div>
@@ -297,6 +297,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="calendario.js?v=6"></script>
+  <script type="module" src="calendario.js?v=7"></script>
 </body>
 </html>
