@@ -814,7 +814,7 @@ verificato e' peggio di un caso assente.
 | Domande d'esame inventate, con le loro note | 14 |
 | Schede di materiale senza un file vero dietro | 4 |
 | Date segnate `[prova]`, nomi finti, un doppione | 12 |
-| Piani di studio di prova (Materia, Materia 6, Tot) | 6 |
+| Piani di studio, tutti quanti | 8 |
 | Esami fuori dal manifesto (Anatopato 1, un doppione) | 2 |
 | Ore di studio finte | 2 |
 
@@ -826,8 +826,7 @@ verificato e' peggio di un caso assente.
   altri
 - **5 date**: i tre appelli di Farmacologia II, l'iscrizione ad Anatomia
   patologica, l'inizio delle lezioni. Le ha messe lei
-- **2 piani di studio**: Farmaco 2 e Gastroenterologia. Suoi
-- **2 materiali** con un file vero dietro: CORSIE e Prova 1
+- **1 materiale**: CORSIE, l'unico con un file vero dietro
 - **17 suggerimenti**: sono idee, non fatti sul suo corso. Restano
 
 Le date si portavano dietro il nome della materia scritto a mano dentro
@@ -839,16 +838,30 @@ come file. **Non sta nel progetto**: contiene le impronte delle chiavi
 di accesso ai materiali, e il progetto e' pubblico perche' cosi' vuole
 GitHub Pages.
 
-**Lasciato in piedi, da decidere:**
+**Poi ha deciso anche il resto:** via "Prova 1", via tutti e due i
+piani di studio (erano di prova pure quelli), l'account di prova
+`prova.studente@akesis.test` resta.
 
-- l'account di prova `prova.studente@akesis.test` (profilo "Prova01") e
-  i codici d'invito: cancellare un utente e' un'altra cosa, non l'ho
-  fatto di mia iniziativa
-- il materiale "Prova 1": il titolo dice prova, ma dietro c'e' un file
-  vero da 22 MB caricato da lei. Basta rinominarlo
-- i piani `Farmaco 2` e `Gastroenterologia` si agganciano agli esami per
-  nome, e i nomi sono cambiati: il filo e' rotto finche' non si
-  rinominano anche loro. Sono parole sue, non le tocco senza chiedere
+Quindi **l'organizzazione studio adesso e' vuota**, ed e' giusto cosi':
+il primo piano che ci nascera' dentro sara' su una materia vera, scelta
+da un elenco vero.
+
+**Una cosa che da qui non si puo' fare.** Cancellando "Prova 1" e' via
+la scheda, ma il PDF da 22 MB e' rimasto nell'archivio: Supabase
+proibisce di cancellare i file con una riga di SQL
+
+    ERROR: Direct deletion from storage tables is not allowed.
+    Use the Storage API instead.
+
+ed e' una protezione giusta, serve a non lasciare file orfani. Dentro
+Akesis il pulsante Elimina toglie tutti e due (`eliminaMateriale` in
+db.js cancella la riga e poi il file), ma la riga ormai non c'e' piu'.
+Il file sta nel secchio `dispense`, che e' **privato**: nessuno ci
+arriva da fuori, occupa solo spazio. Si toglie dal pannello Supabase,
+Storage, `dispense`, cartella `38e2a8ed-.../`.
+
+**Lezione per la prossima volta:** un materiale si cancella dall'app,
+non da SQL, altrimenti il file resta indietro.
 
 ## Regole di lavoro concordate
 
