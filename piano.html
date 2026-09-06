@@ -61,7 +61,7 @@
         <div class="testata">
           <div>
             <h1 class="page-titolo">Organizzazione studio</h1>
-            <p class="page-sub">Una materia per volta: quanto materiale c'e', in quanto tempo, e diviso in quante passate.</p>
+            <p class="page-sub">Una materia per volta: quanto materiale c&rsquo;è, in quanto tempo, e come dividere i giorni.</p>
           </div>
           <button type="button" class="btn" id="apri-nuovo">
             <i class="ph ph-plus" aria-hidden="true"></i> Nuova materia
@@ -204,8 +204,8 @@
         </div>
 
         <div class="campo">
-          <label>Passate</label>
-          <p class="campo-aiuto">Ogni passata rifa tutto il materiale, nei giorni che le dai. Per questo le ripetizioni sono piu fitte.</p>
+          <label>Come dividi i giorni</label>
+          <p class="campo-aiuto">Ogni riga rifà tutto il materiale nei giorni che le dai. Per questo le ripetizioni sono più fitte della prima lettura.</p>
           <div class="proposta" id="proposta" hidden>
             <div class="proposta-testo">
               <p class="proposta-titolo" id="proposta-titolo"></p>
@@ -218,11 +218,11 @@
 
           <div id="righe-fasi"></div>
           <p class="campo-aiuto">
-            Su ogni passata puoi dire anche <em>cosa</em> ripassare: un intervallo di
+            Su ognuna puoi dire anche <em>cosa</em> ripassare: un intervallo di
             pagine, o gli argomenti scritti a mano. Sono facoltativi.
           </p>
           <button type="button" class="btn btn-neutro btn-piccolo" id="aggiungi-fase">
-            <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi una passata
+            <i class="ph ph-plus" aria-hidden="true"></i> Aggiungine un&rsquo;altra
           </button>
           <p class="conto-fasi" id="conto-fasi"></p>
         </div>
@@ -245,6 +245,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="piano.js?v=10"></script>
+  <script type="module" src="piano.js?v=11"></script>
 </body>
 </html>

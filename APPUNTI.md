@@ -201,6 +201,29 @@ Nel dettaglio le voci sono sempre le stesse cinque (Esame, Giorni di
 studio, Pagine, Lezioni, Passate) con un trattino dove non si applicano:
 cosi' due materie si confrontano invece di avere ognuna la sua forma.
 
+### La parola "passate" e' sparita (7 settembre)
+
+Giulia: "Con passate che cosa intendi? Non capisco il significato della
+parola". Voleva dire *un giro completo sul materiale*: leggere tutte le
+450 pagine e' una passata, ripeterle tutte e' un'altra.
+
+Le ho proposto quattro alternative (giri, letture, ripassi, o tenerla
+spiegandola) e ha risposto: **"nessuna in realta'. La toglierei
+completamente. Tanto non serve."** Aveva ragione: i nomi delle singole
+righe (Prima lettura, Prima ripetizione, Ripasso) bastano da soli, il
+nome collettivo non serviva a niente.
+
+Sparita da tutte le scritte: "Passate" diventa "Come dividi i giorni",
+"Aggiungi una passata" diventa "Aggiungine un'altra", "Le passate
+chiedono 43 giorni" diventa "In tutto chiedono 43 giorni", e la riga
+"Passate: 3" nella scheda e' stata tolta perche' l'elenco sotto le
+mostra gia'. Nei nomi delle classi CSS e nei commenti resta: li' non la
+legge nessuno.
+
+C'e' una prova che lo controlla (`parole.mjs`): apre le pagine e le
+finestre e cerca la parola nel testo visibile. Una parola che ferma chi
+legge ha fallito il suo unico compito, e questa non deve tornare.
+
 ### La divisione proposta (7 settembre)
 
 Creando una materia non si parte piu' da tre passate fisse: `db.js`
@@ -513,6 +536,7 @@ altrimenti si collauda roba vecchia. Le suite:
 - `sessione.mjs` - esami e appelli
 - `giorno.mjs` - la finestra di un giorno nel calendario e la striscia
   delle materie
+- `parole.mjs` - parole bandite dall'interfaccia
 - `proposta.mjs` - il conto della divisione proposta, con numeri fissi
 - `proposta-ui.mjs` - il banner della proposta nel modulo
 - `livello-dati.mjs` - cosa scrive davvero `db.js` nel database

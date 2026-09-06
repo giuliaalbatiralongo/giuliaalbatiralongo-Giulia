@@ -255,8 +255,6 @@ function schedaMateria(piano, calcolo) {
     box.appendChild(riga);
   });
 
-  const quante = (piano.fasi || []).length;
-  box.appendChild(rigaScheda('Passate', quante === 1 ? 'una' : quante));
 
   return box;
 }
@@ -400,8 +398,8 @@ function apriMateria(piano) {
   if (!calcolo.fattibile) {
     oggi.classList.add('allarme');
     oggi.textContent =
-      `Le passate chiedono ${calcolo.giorniRichiesti} giorni, ma nella finestra ce ne sono ` +
-      `${calcolo.giorniDisponibili}. Accorcia una passata, allunga la finestra, o togli un giorno libero.`;
+      `Lo studio diviso cosi chiede ${calcolo.giorniRichiesti} giorni, ma nella finestra ce ne sono ` +
+      `${calcolo.giorniDisponibili}. Accorcia una parte, allunga la finestra, o togli un giorno libero.`;
   } else if (calcolo.finito) {
     oggi.classList.add('spento');
     oggi.textContent = 'La finestra di questa materia e passata.';
@@ -433,7 +431,7 @@ function apriMateria(piano) {
   const fatte = calcolo.fasi.filter(
     (f) => f.fatte >= (piano.unita === 'giorni' ? f.giorni : piano.quantita)
   ).length;
-  titolo.textContent = `Le passate · ${fatte} finite su ${calcolo.fasi.length}`;
+  titolo.textContent = `${fatte} finite su ${calcolo.fasi.length}`;
   elenco.appendChild(titolo);
 
   calcolo.fasi.forEach((f) => elenco.appendChild(rigaFase(piano, calcolo, f)));
@@ -520,7 +518,7 @@ function aggiungiRigaFase(preimpostata) {
   nome.placeholder = 'Es. Prima lettura';
   nome.required = true;
   nome.className = 'fase-nome-campo';
-  nome.setAttribute('aria-label', 'Nome della passata');
+  nome.setAttribute('aria-label', 'Come si chiama questa parte dello studio');
   if (preimpostata?.nome) nome.value = preimpostata.nome;
   nome.addEventListener('input', aggiornaProposta);
 
@@ -539,7 +537,7 @@ function aggiungiRigaFase(preimpostata) {
   togli.type = 'button';
   togli.className = 'btn-piu';
   togli.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
-  togli.setAttribute('aria-label', 'Togli questa passata');
+  togli.setAttribute('aria-label', 'Togli questa riga');
   togli.addEventListener('click', () => {
     riga.remove();
     if (!elRighe.querySelector('.riga-fase')) aggiungiRigaFase();
@@ -678,10 +676,10 @@ function aggiornaConto() {
   const disponibili = giorniDisponibiliNelModulo();
 
   if (disponibili === null) {
-    el.textContent = `Le passate chiedono ${chiesti} giorni.`;
+    el.textContent = `In tutto chiedono ${chiesti} giorni.`;
     el.className = 'conto-fasi';
   } else {
-    el.textContent = `Le passate chiedono ${chiesti} giorni di studio, nella finestra ce ne sono circa ${disponibili}.`;
+    el.textContent = `In tutto chiedono ${chiesti} giorni di studio, nella finestra ce ne sono circa ${disponibili}.`;
     el.className = 'conto-fasi' + (chiesti > disponibili ? ' stretto' : '');
   }
 
@@ -931,13 +929,13 @@ async function salvaMateria() {
   );
   if (intervalloStorto) {
     esito.className = 'esito-form ko';
-    esito.textContent = `In "${intervalloStorto.nome || 'una passata'}" l'intervallo di pagine non torna: servono sia la prima sia l'ultima, e l'ultima non puo' venire prima.`;
+    esito.textContent = `In "${intervalloStorto.nome || 'una delle righe'}" l'intervallo di pagine non torna: servono sia la prima sia l'ultima, e l'ultima non puo' venire prima.`;
     return;
   }
 
   if (fasi.some((f) => !f.nome || !f.giorni)) {
     esito.className = 'esito-form ko';
-    esito.textContent = 'Manca qualcosa in una delle passate.';
+    esito.textContent = 'Manca il nome o i giorni in una delle righe.';
     return;
   }
 

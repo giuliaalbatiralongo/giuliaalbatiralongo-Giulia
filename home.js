@@ -328,12 +328,8 @@ function mostraMaterie(piani) {
     const meta = document.createElement('span');
     meta.className = 'materia-riga-meta';
     meta.textContent = calcolo.fattibile
-      ? `${piano.quantita} ${nomeUnita(piano.unita, piano.quantita)} · ${plurale(
-          (piano.fasi || []).length,
-          'passata',
-          'passate'
-        )}`
-      : 'Le passate non stanno nella finestra';
+      ? `${piano.quantita} ${nomeUnita(piano.unita, piano.quantita)}`
+      : 'Lo studio diviso cosi non ci sta nella finestra';
     if (!calcolo.fattibile) meta.classList.add('stretta');
     riga.appendChild(meta);
 
