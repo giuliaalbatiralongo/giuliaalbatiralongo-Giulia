@@ -371,6 +371,25 @@ i[class*="ph-"] {
   margin-bottom: 0;
 }
 
+/* Il titolo da solo nella testata: senza il sottotitolo sotto, il
+   margine di 4px lo lascerebbe seduto storto rispetto al pulsante. */
+.testata > .page-titolo {
+  margin-bottom: 0;
+  align-self: center;
+}
+
+/* La spiegazione della pagina, quando sta in fondo invece che in cima.
+   Chi apre il Libretto vuole vedere i suoi esami: a cosa serve la
+   pagina lo legge dopo, se gli serve. */
+.page-coda {
+  margin-top: 36px;
+  padding-top: 18px;
+  border-top: 1px solid var(--linea);
+  font-size: 13px;
+  color: var(--testo-3);
+  max-width: 62ch;
+}
+
 /* ============================================================
    Card
    ============================================================ */

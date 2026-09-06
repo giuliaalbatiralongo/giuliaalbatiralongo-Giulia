@@ -115,6 +115,82 @@ E' stata riempita con le voci che stavano qui e in `PIANO.md`. **Questo
 file resta il posto dove sta il perche'**: le pagine di Akesis dicono
 cosa manca, gli appunti dicono cosa va deciso prima di costruirlo.
 
+## Il piano di lavoro di Giulia (7 settembre)
+
+Mandate tutte insieme: *"Queste idee ora le sviluppiamo passo passo.
+Intanto te le mando."* Quindi qui stanno per intero, in ordine di
+lavorazione, e si spuntano una alla volta.
+
+### A. Il Libretto (era la pagina Esami)
+
+1. **Il nome.** Non piu' "Esami". Giulia ha lasciato scegliere a me fra
+   "Libretto universitario", "Libretto" e "Libretto esami": **Libretto**.
+   E' la parola che userebbe a voce, di libretti qui dentro ce n'e' uno
+   solo quindi "universitario" non aggiunge niente, e nel menu di fianco
+   sta comoda accanto a Calendario e Materiali. **FATTO**
+2. **La descrizione va in fondo.** La frase sotto al titolo ("Tutti gli
+   esami del corso...") scende in fondo alla pagina. **FATTO**
+3. **Il riepilogo diventa quadratini**, non piu' rettangoli, e si
+   sposta accanto al pulsante "Nuovo esame". Dentro ogni quadratino due
+   numeri incolonnati: i **CFU** sopra e gli **esami** sotto. Uno per i
+   sostenuti, uno per il totale.
+4. **L'anno in corso.** Giulia dice a che anno e' (il quarto); gli anni
+   dopo si vedono **sfocati**, ma restano cliccabili e leggibili per
+   intero. Sfocato vuol dire "non e' ancora affar tuo", non "chiuso".
+5. **Lo stato di ogni anno.** Gli anni passati dicono se sono finiti o
+   se manca qualcosa; l'anno in corso dice **quanti esami mancano** per
+   chiuderlo.
+
+### B. La media
+
+6. **Voto e crediti per calcolare la media.** Sta **mezza nascosta**:
+   un pulsante in fondo all'elenco degli anni ("Calcola la mia media")
+   oppure "Libretto universitario". Si apre una finestra con tutti gli
+   esami sostenuti, accanto a ognuno i crediti e il voto — che **lo
+   scrive lei**, non i professori come nel libretto vero — e sotto o di
+   lato **la media aritmetica e la media pesata**, tutte e due.
+
+### C. Organizzazione studio
+
+**Da fare dopo che i dati veri sono dentro** (lo ha detto lei).
+
+7. **Far vedere solo quello che serve adesso.** Il sistema chiede anno e
+   semestre in corso ("quarto anno, primo semestre") e mostra **solo le
+   materie di quel semestre**, piu' gli **arretrati** non ancora
+   superati. I semestri futuri non si vedono: confondono.
+8. **Tutto allineato ovunque.** Le stesse materie nel piano di studio,
+   nel calendario con le loro date, e nel Libretto.
+9. **I giorni di riposo** si scelgono qui dentro, cosi' il programma si
+   divide sui giorni giusti.
+10. **Pulizia:** vanno tolte alcune cose della pagina che non servono o
+    non le piacciono. *Da farsi dire quali, una per una.*
+
+### D. La finestra di una materia
+
+11. **Solo tre voci**: "Data esame" (era "Esame"), "Pagine", "Lezioni".
+    Via "Giorni di studio" e via "Giorni di materiale": poco chiare, e
+    inutili dal momento in cui si sceglie in quanti giorni dividere.
+12. **Un pulsante "Materiale"** che porta dritto ai materiali di quella
+    materia, per caricare e ritrovare i file.
+13. **"Programma di studio"** sotto, con i compiti del giorno e una
+    **legenda a colori** in tre famiglie:
+    - **colore 1, si legge:** prima lettura (o prima lettura con
+      sottolineatura), seconda lettura
+    - **colore 2, si ripete:** prima, seconda e terza ripetizione
+    - **colore 3, si ripassa:** ripasso 1, 2 e 3
+
+### Cosa chiedere prima di partire
+
+- **punto 4:** l'anno in corso lo scrive una volta nel profilo, o si
+  ricava dal fatto che gli esami risultino sostenuti?
+- **punto 6:** la media pesata sui CFU e' lo standard, ma la lode conta
+  30 o 31? Cambia il numero, e i due modi si usano entrambi
+- **punto 10:** quali cose della pagina Organizzazione studio non le
+  piacciono
+- **punto 13:** i nomi delle fasi oggi li scrive lei a mano, quindi la
+  legenda deve indovinare la famiglia dal nome. Meglio far scegliere la
+  famiglia quando si crea la fase
+
 ## Da fare quando sara' il momento
 
 ### Simulatore per il test SSM

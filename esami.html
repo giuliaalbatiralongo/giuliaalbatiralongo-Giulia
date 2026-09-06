@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Esami - Akesis</title>
+  <title>Libretto - Akesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=55">
+  <link rel="stylesheet" href="style.css?v=56">
 </head>
 <body>
   <div class="app">
@@ -26,7 +26,7 @@
         <p class="nav-gruppo">Studio</p>
         <a href="index.html" class="nav-voce"><i class="ph ph-house" aria-hidden="true"></i><span>Home</span></a>
         <a href="calendario.html" class="nav-voce"><i class="ph ph-calendar-dots" aria-hidden="true"></i><span>Calendario</span></a>
-        <a href="esami.html" class="nav-voce attivo"><i class="ph-fill ph-graduation-cap" aria-hidden="true"></i><span>Esami</span></a>
+        <a href="esami.html" class="nav-voce attivo"><i class="ph-fill ph-graduation-cap" aria-hidden="true"></i><span>Libretto</span></a>
         <a href="piano.html" class="nav-voce"><i class="ph ph-path" aria-hidden="true"></i><span>Organizzazione studio</span></a>
         <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
         <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
@@ -60,10 +60,7 @@
     <main class="contenuto">
       <div class="contenuto-interno largo">
         <div class="testata">
-          <div>
-            <h1 class="page-titolo">Esami</h1>
-            <p class="page-sub">Tutti gli esami del corso, anno per anno. Sono gli stessi che usi nel calendario per le date e nell&rsquo;organizzazione studio.</p>
-          </div>
+          <h1 class="page-titolo">Libretto</h1>
           <button type="button" class="btn" id="apri-nuovo">
             <i class="ph ph-plus" aria-hidden="true"></i> Nuovo esame
           </button>
@@ -76,6 +73,10 @@
         </div>
 
         <div id="elenco" hidden></div>
+
+        <!-- La spiegazione sta in fondo: chi apre la pagina vuole vedere
+             i suoi esami, non leggere a cosa serve la pagina. -->
+        <p class="page-coda">Tutti gli esami del corso, anno per anno. Sono gli stessi che usi nel calendario per le date e nell&rsquo;organizzazione studio.</p>
       </div>
     </main>
   </div>
@@ -84,7 +85,7 @@
     <form id="form-esame" method="dialog">
       <div class="finestra-testata">
         <div>
-          <p class="finestra-occhiello">Esami</p>
+          <p class="finestra-occhiello">Libretto</p>
           <p class="finestra-titolo" id="titolo-finestra">Un esame</p>
         </div>
         <button type="button" class="btn-chiudi" id="chiudi-finestra" aria-label="Chiudi">
