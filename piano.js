@@ -10,11 +10,15 @@ import {
   FASI_PROPOSTE,
   getDateEsame,
   titoloData,
-} from './db.js?v=28';
+  giorniMancanti,
+} from './db.js?v=29';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
 const elPiani = document.getElementById('piani');
+const elStriscia = document.getElementById('materie-striscia');
+const elConto = document.getElementById('materie-conto');
+const finestraMateria = document.getElementById('finestra-materia');
 const elOggi = document.getElementById('oggi');
 const elOggiElenco = document.getElementById('oggi-elenco');
 const finestra = document.getElementById('finestra-piano');
@@ -28,6 +32,8 @@ let piani = [];
 let date = [];
 // null quando si sta creando, il piano quando lo si sta correggendo.
 let inModifica = null;
+// La materia di cui e' aperto il dettaglio.
+let materiaAperta = null;
 
 function oggiIso() {
   const d = new Date();
@@ -69,10 +75,15 @@ function mostraOggi() {
     const riga = document.createElement('div');
     riga.className = 'oggi-riga';
 
+    const q = voce.quantita === null ? null : arrotonda(voce.quantita);
+    const perGiorni = q === null && voce.giornoDiFase !== null;
+
     const quanto = document.createElement('span');
     quanto.className = 'oggi-quanto';
-    quanto.textContent =
-      voce.quantita === null ? '-' : arrotonda(voce.quantita);
+    // Chi conta in giorni non ha una quantita': gli si dice a che punto
+    // della passata e' arrivato.
+    quanto.textContent = q !== null ? q : perGiorni ? `${voce.giornoDiFase}/${voce.giorniFase}` : '—';
+    if (perGiorni) quanto.classList.add('piccolo');
     riga.appendChild(quanto);
 
     const testo = document.createElement('span');
@@ -85,10 +96,7 @@ function mostraOggi() {
 
     const dettaglio = document.createElement('span');
     dettaglio.className = 'oggi-dettaglio';
-    dettaglio.textContent =
-      voce.quantita === null
-        ? voce.fase
-        : `${nomeUnita(voce.unita, arrotonda(voce.quantita))} · ${voce.fase}`;
+    dettaglio.textContent = q === null ? voce.fase : `${nomeUnita(voce.unita, q)} · ${voce.fase}`;
     testo.appendChild(dettaglio);
 
     riga.appendChild(testo);
@@ -98,206 +106,278 @@ function mostraOggi() {
   elOggi.hidden = false;
 }
 
-/* ---------- Scheda di una materia ---------- */
+/* ---------- La striscia delle materie ----------
+   Una tessera per materia, stretta e verticale: si vede tutto in un
+   colpo d'occhio e si scorre di lato quando sono tante. Il dettaglio,
+   che e' la parte fitta di numeri, sta dentro la sua finestra. */
 
-function creaScheda(piano) {
+function fatteETotale(piano) {
+  const fatte = (piano.fasi || []).reduce((s, f) => s + (f.fatte || 0), 0);
+  const totale = (piano.fasi || []).reduce(
+    (s, f) => s + (piano.unita === 'giorni' ? f.giorni : piano.quantita),
+    0
+  );
+  return { fatte, totale };
+}
+
+function creaTessera(piano) {
   const calcolo = calcolaPiano(piano, oggiIso());
 
-  const card = document.createElement('article');
-  card.className = 'piano-card';
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'materia-tessera';
+  if (!calcolo.fattibile) card.classList.add('stretta');
+  card.addEventListener('click', () => apriMateria(piano));
 
-  const testa = document.createElement('div');
-  testa.className = 'piano-testa';
-
-  const titolo = document.createElement('div');
-  const nome = document.createElement('h2');
-  nome.className = 'piano-nome';
+  const nome = document.createElement('span');
+  nome.className = 'materia-tessera-nome';
   nome.textContent = piano.materia;
-  titolo.appendChild(nome);
+  card.appendChild(nome);
 
-  const sotto = document.createElement('p');
-  sotto.className = 'piano-quando';
-  sotto.textContent =
+  const quanto = document.createElement('span');
+  quanto.className = 'materia-tessera-quanto';
+  quanto.textContent = `${piano.quantita} ${nomeUnita(piano.unita, piano.quantita)}`;
+  card.appendChild(quanto);
+
+  /* Cosa tocca oggi: e' la riga che si cerca davvero */
+  const oggi = document.createElement('span');
+  oggi.className = 'materia-tessera-oggi';
+
+  if (!calcolo.fattibile) {
+    oggi.classList.add('allarme');
+    oggi.textContent = 'Le passate non ci stanno';
+  } else if (calcolo.finito) {
+    oggi.classList.add('spento');
+    oggi.textContent = 'Finestra passata';
+  } else if (calcolo.faseOggi) {
+    const q = calcolo.quantitaOggi === null ? null : arrotonda(calcolo.quantitaOggi);
+    const forte = document.createElement('strong');
+    forte.textContent = q === null ? calcolo.faseOggi.nome : `${q} ${nomeUnita(piano.unita, q)}`;
+    oggi.appendChild(forte);
+    if (q !== null) oggi.append(calcolo.faseOggi.nome);
+  } else if (calcolo.oggiELibero) {
+    oggi.classList.add('spento');
+    oggi.textContent = 'Oggi sei libera';
+  } else {
+    oggi.classList.add('spento');
+    oggi.textContent = 'Fuori dalla finestra';
+  }
+  card.appendChild(oggi);
+
+  const { fatte, totale } = fatteETotale(piano);
+
+  const barra = document.createElement('span');
+  barra.className = 'materia-tessera-barra';
+  const pieno = document.createElement('span');
+  pieno.style.width = totale > 0 ? `${Math.min((fatte / totale) * 100, 100)}%` : '0%';
+  barra.appendChild(pieno);
+  card.appendChild(barra);
+
+  const piede = document.createElement('span');
+  piede.className = 'materia-tessera-piede';
+
+  const conto = document.createElement('span');
+  conto.textContent = totale > 0 ? `${Math.round((fatte / totale) * 100)}% fatto` : 'da cominciare';
+  piede.appendChild(conto);
+
+  const restano = giorniMancanti(piano.fine);
+  const quando = document.createElement('span');
+  quando.textContent =
+    restano < 0 ? 'finita' : restano === 0 ? 'ultimo giorno' : `${restano} giorni`;
+  piede.appendChild(quando);
+
+  card.appendChild(piede);
+  return card;
+}
+
+/* ---------- Il dettaglio di una materia ---------- */
+
+function rigaFase(piano, calcolo, fase) {
+  const riga = document.createElement('div');
+  riga.className = 'fase-riga' + (fase === calcolo.faseOggi ? ' corrente' : '');
+
+  const info = document.createElement('div');
+  const nomeFase = document.createElement('p');
+  nomeFase.className = 'fase-nome';
+  nomeFase.textContent = fase.nome;
+  info.appendChild(nomeFase);
+
+  const meta = document.createElement('p');
+  meta.className = 'fase-meta';
+  meta.textContent = fase.dal
+    ? `${fase.giorni} giorni · ${dataBreve(fase.dal)} - ${dataBreve(fase.al)}`
+    : `${fase.giorni} giorni · fuori dalla finestra`;
+  info.appendChild(meta);
+  riga.appendChild(info);
+
+  const ritmo = document.createElement('span');
+  ritmo.className = 'fase-ritmo';
+  ritmo.textContent =
+    fase.alGiorno === null
+      ? '—'
+      : `${arrotonda(fase.alGiorno)} ${nomeUnita(piano.unita, arrotonda(fase.alGiorno))}/giorno`;
+  riga.appendChild(ritmo);
+
+  const totale = piano.unita === 'giorni' ? fase.giorni : piano.quantita;
+
+  const barra = document.createElement('span');
+  barra.className = 'stato-barra';
+  const pieno = document.createElement('span');
+  pieno.className = 'stato-barra-pieno';
+  pieno.style.width = `${Math.min((fase.fatte / totale) * 100, 100)}%`;
+  barra.appendChild(pieno);
+  riga.appendChild(barra);
+
+  const conto = document.createElement('span');
+  conto.className = 'fase-conto';
+  conto.textContent = `${fase.fatte}/${totale}`;
+  riga.appendChild(conto);
+
+  const azioni = document.createElement('div');
+  azioni.className = 'esame-azioni';
+
+  const passo = fase.alGiorno === null ? 1 : Math.max(arrotonda(fase.alGiorno), 1);
+
+  const meno = document.createElement('button');
+  meno.type = 'button';
+  meno.className = 'btn-piu';
+  meno.innerHTML = '<i class="ph ph-minus" aria-hidden="true"></i>';
+  meno.setAttribute('aria-label', `Togli da ${fase.nome}`);
+  meno.disabled = fase.fatte === 0;
+
+  const piu = document.createElement('button');
+  piu.type = 'button';
+  piu.className = 'btn-piu';
+  piu.innerHTML = '<i class="ph ph-plus" aria-hidden="true"></i>';
+  // Il piu' segna una giornata intera: e' l'unita' con cui si lavora.
+  piu.title = `Segna ${passo} ${nomeUnita(piano.unita, passo)} fatte`;
+  piu.setAttribute('aria-label', `Segna una giornata di ${fase.nome}`);
+  piu.disabled = fase.fatte >= totale;
+
+  async function cambia(delta) {
+    const nuovo = Math.min(Math.max(fase.fatte + delta, 0), totale);
+    if (nuovo === fase.fatte) return;
+    meno.disabled = true;
+    piu.disabled = true;
+    if (await aggiornaFatteFase(fase.id, nuovo)) {
+      const vera = piano.fasi.find((f) => f.id === fase.id);
+      if (vera) vera.fatte = nuovo;
+      disegna();
+      apriMateria(piano);
+    } else {
+      meno.disabled = false;
+      piu.disabled = false;
+    }
+  }
+
+  meno.addEventListener('click', () => cambia(-passo));
+  piu.addEventListener('click', () => cambia(passo));
+
+  azioni.appendChild(meno);
+  azioni.appendChild(piu);
+  riga.appendChild(azioni);
+
+  return riga;
+}
+
+function apriMateria(piano) {
+  if (!piano) return;
+  materiaAperta = piano;
+  const calcolo = calcolaPiano(piano, oggiIso());
+
+  document.getElementById('materia-nome').textContent = piano.materia;
+  document.getElementById('materia-riassunto').textContent =
     `${piano.quantita} ${nomeUnita(piano.unita, piano.quantita)} · ` +
     `${dataBreve(piano.inizio)} - ${dataBreve(piano.fine)} · ` +
     `${calcolo.giorniDisponibili} giorni utili`;
-  titolo.appendChild(sotto);
-  testa.appendChild(titolo);
 
-  const azioniPiano = document.createElement('div');
-  azioniPiano.className = 'piano-azioni';
-
-  const modifica = document.createElement('button');
-  modifica.type = 'button';
-  modifica.className = 'link-bottone';
-  modifica.textContent = 'Modifica';
-  modifica.addEventListener('click', () => apriFinestra(piano));
-  azioniPiano.appendChild(modifica);
-
-  const togli = document.createElement('button');
-  togli.type = 'button';
-  togli.className = 'link-bottone';
-  togli.textContent = 'Elimina';
-  togli.addEventListener('click', async () => {
-    if (!window.confirm(`Eliminare il piano di ${piano.materia}?`)) return;
-    togli.disabled = true;
-    if (await eliminaPiano(piano.id)) {
-      piani = piani.filter((p) => p.id !== piano.id);
-      disegna();
-    } else {
-      togli.disabled = false;
-    }
-  });
-  azioniPiano.appendChild(togli);
-  testa.appendChild(azioniPiano);
-  card.appendChild(testa);
-
-  /* Il riquadro di oggi per questa materia */
-  const riquadro = document.createElement('div');
-  riquadro.className = 'piano-oggi';
+  const oggi = document.getElementById('materia-oggi');
+  oggi.className = 'materia-oggi';
+  oggi.innerHTML = '';
 
   if (!calcolo.fattibile) {
-    riquadro.classList.add('allarme');
-    riquadro.textContent =
+    oggi.classList.add('allarme');
+    oggi.textContent =
       `Le passate chiedono ${calcolo.giorniRichiesti} giorni, ma nella finestra ce ne sono ` +
       `${calcolo.giorniDisponibili}. Accorcia una passata, allunga la finestra, o togli un giorno libero.`;
   } else if (calcolo.finito) {
-    riquadro.classList.add('spento');
-    riquadro.textContent = 'La finestra di questa materia e passata.';
+    oggi.classList.add('spento');
+    oggi.textContent = 'La finestra di questa materia e passata.';
   } else if (calcolo.faseOggi) {
+    const q = calcolo.quantitaOggi === null ? null : arrotonda(calcolo.quantitaOggi);
     const t = document.createElement('p');
-    t.className = 'piano-oggi-titolo';
-    t.textContent =
-      calcolo.quantitaOggi === null
-        ? calcolo.faseOggi.nome
-        : `${arrotonda(calcolo.quantitaOggi)} ${nomeUnita(piano.unita, arrotonda(calcolo.quantitaOggi))} oggi`;
-    riquadro.appendChild(t);
+    t.className = 'materia-oggi-titolo';
+    t.textContent = q === null ? calcolo.faseOggi.nome : `${q} ${nomeUnita(piano.unita, q)} oggi`;
+    oggi.appendChild(t);
 
-    const q = document.createElement('p');
-    q.className = 'piano-oggi-quali';
-    q.textContent = calcolo.quantitaOggi === null ? 'Studia e basta.' : calcolo.faseOggi.nome;
-    riquadro.appendChild(q);
+    const d = document.createElement('p');
+    d.className = 'materia-oggi-quali';
+    d.textContent = q === null ? 'Studia e basta.' : calcolo.faseOggi.nome;
+    oggi.appendChild(d);
   } else if (calcolo.oggiELibero) {
-    riquadro.classList.add('spento');
-    riquadro.textContent = 'Oggi e uno dei giorni che ti sei lasciata libera.';
+    oggi.classList.add('spento');
+    oggi.textContent = 'Oggi e uno dei giorni che ti sei lasciata libera.';
   } else {
-    riquadro.classList.add('spento');
-    riquadro.textContent = 'Oggi e fuori dalla finestra di questa materia.';
+    oggi.classList.add('spento');
+    oggi.textContent = 'Oggi e fuori dalla finestra di questa materia.';
   }
 
-  card.appendChild(riquadro);
-
-  /* Le passate */
-  const elenco = document.createElement('div');
+  const elenco = document.getElementById('materia-fasi');
+  elenco.innerHTML = '';
   elenco.className = 'fasi-elenco';
+  calcolo.fasi.forEach((f) => elenco.appendChild(rigaFase(piano, calcolo, f)));
 
-  calcolo.fasi.forEach((fase) => {
-    const riga = document.createElement('div');
-    riga.className = 'fase-riga' + (fase === calcolo.faseOggi ? ' corrente' : '');
-
-    const info = document.createElement('div');
-    const nomeFase = document.createElement('p');
-    nomeFase.className = 'fase-nome';
-    nomeFase.textContent = fase.nome;
-    info.appendChild(nomeFase);
-
-    const meta = document.createElement('p');
-    meta.className = 'fase-meta';
-    meta.textContent = fase.dal
-      ? `${fase.giorni} giorni · ${dataBreve(fase.dal)} - ${dataBreve(fase.al)}`
-      : `${fase.giorni} giorni · fuori dalla finestra`;
-    info.appendChild(meta);
-    riga.appendChild(info);
-
-    const ritmo = document.createElement('span');
-    ritmo.className = 'fase-ritmo';
-    ritmo.textContent =
-      fase.alGiorno === null
-        ? '-'
-        : `${arrotonda(fase.alGiorno)} ${nomeUnita(piano.unita, arrotonda(fase.alGiorno))}/giorno`;
-    riga.appendChild(ritmo);
-
-    /* Avanzamento della passata */
-    const barra = document.createElement('span');
-    barra.className = 'stato-barra';
-    const pieno = document.createElement('span');
-    pieno.className = 'stato-barra-pieno';
-    const totale = piano.unita === 'giorni' ? fase.giorni : piano.quantita;
-    pieno.style.width = `${Math.min((fase.fatte / totale) * 100, 100)}%`;
-    barra.appendChild(pieno);
-    riga.appendChild(barra);
-
-    const conto = document.createElement('span');
-    conto.className = 'fase-conto';
-    conto.textContent = `${fase.fatte}/${totale}`;
-    riga.appendChild(conto);
-
-    const azioni = document.createElement('div');
-    azioni.className = 'esame-azioni';
-
-    const passo = fase.alGiorno === null ? 1 : Math.max(arrotonda(fase.alGiorno), 1);
-
-    const meno = document.createElement('button');
-    meno.type = 'button';
-    meno.className = 'btn-piu';
-    meno.innerHTML = '<i class="ph ph-minus" aria-hidden="true"></i>';
-    meno.setAttribute('aria-label', `Togli da ${fase.nome}`);
-    meno.disabled = fase.fatte === 0;
-
-    const piu = document.createElement('button');
-    piu.type = 'button';
-    piu.className = 'btn-piu';
-    piu.innerHTML = '<i class="ph ph-plus" aria-hidden="true"></i>';
-    // Il piu' segna una giornata intera: e' l'unita' con cui si lavora.
-    piu.title = `Segna ${passo} ${nomeUnita(piano.unita, passo)} fatte`;
-    piu.setAttribute('aria-label', `Segna una giornata di ${fase.nome}`);
-    piu.disabled = fase.fatte >= totale;
-
-    async function cambia(delta) {
-      const nuovo = Math.min(Math.max(fase.fatte + delta, 0), totale);
-      if (nuovo === fase.fatte) return;
-      meno.disabled = true;
-      piu.disabled = true;
-      if (await aggiornaFatteFase(fase.id, nuovo)) {
-        const vera = piano.fasi.find((f) => f.id === fase.id);
-        if (vera) vera.fatte = nuovo;
-        disegna();
-      } else {
-        meno.disabled = false;
-        piu.disabled = false;
-      }
-    }
-
-    meno.addEventListener('click', () => cambia(-passo));
-    piu.addEventListener('click', () => cambia(passo));
-
-    azioni.appendChild(meno);
-    azioni.appendChild(piu);
-    riga.appendChild(azioni);
-
-    elenco.appendChild(riga);
-  });
-
-  card.appendChild(elenco);
-
+  const nota = document.getElementById('materia-nota');
   if (calcolo.fattibile && calcolo.avanzano > 0) {
-    const nota = document.createElement('p');
-    nota.className = 'blocco-nota';
     nota.textContent =
       calcolo.avanzano === 1
         ? 'Avanza un giorno prima della fine della finestra.'
         : `Avanzano ${calcolo.avanzano} giorni prima della fine della finestra.`;
-    card.appendChild(nota);
+    nota.hidden = false;
+  } else {
+    nota.hidden = true;
   }
 
-  return card;
+  if (!finestraMateria.open) finestraMateria.showModal();
 }
 
+document.getElementById('chiudi-materia').addEventListener('click', () => finestraMateria.close());
+document.getElementById('chiudi-materia-2').addEventListener('click', () => finestraMateria.close());
+finestraMateria.addEventListener('click', (e) => {
+  if (e.target === finestraMateria) finestraMateria.close();
+});
+finestraMateria.addEventListener('close', () => {
+  // Se si sta passando alla finestra di modifica, la materia resta
+  // segnata: ci si torna dopo aver salvato.
+  if (!finestra.open) materiaAperta = null;
+});
+
+document.getElementById('modifica-materia').addEventListener('click', () => {
+  const piano = materiaAperta;
+  finestraMateria.close();
+  apriFinestra(piano);
+});
+
+document.getElementById('elimina-materia').addEventListener('click', async () => {
+  if (!materiaAperta) return;
+  if (!window.confirm(`Eliminare l'organizzazione di ${materiaAperta.materia}?`)) return;
+
+  const id = materiaAperta.id;
+  if (await eliminaPiano(id)) {
+    piani = piani.filter((p) => p.id !== id);
+    finestraMateria.close();
+    disegna();
+  }
+});
+
 function disegna() {
-  elPiani.innerHTML = '';
+  elStriscia.innerHTML = '';
+
+  elConto.textContent =
+    piani.length === 0 ? '' : `${piani.length} ${piani.length === 1 ? 'materia' : 'materie'}`;
 
   if (piani.length === 0) {
-    elPiani.innerHTML = `
+    elStriscia.innerHTML = `
       <div class="stato-vuoto">
         <i class="ph ph-path" aria-hidden="true"></i>
         <p>Nessuna materia organizzata. Comincia da quella che ti preoccupa di piu.</p>
@@ -307,7 +387,7 @@ function disegna() {
     return;
   }
 
-  piani.forEach((p) => elPiani.appendChild(creaScheda(p)));
+  piani.forEach((p) => elStriscia.appendChild(creaTessera(p)));
   mostraOggi();
 }
 
@@ -522,6 +602,9 @@ finestra.addEventListener('click', (e) => {
 // piano di prima: la volta dopo si tornerebbe a correggere quello.
 finestra.addEventListener('close', () => {
   inModifica = null;
+  if (materiaAperta && !finestraMateria.open) {
+    apriMateria(piani.find((p) => p.id === materiaAperta.id));
+  }
 });
 
 form.addEventListener('submit', async (e) => {
@@ -604,6 +687,8 @@ form.addEventListener('submit', async (e) => {
     inModifica = null;
     finestra.close();
     disegna();
+    // Si era arrivati qui dal dettaglio: ci si torna, aggiornato.
+    if (materiaAperta) apriMateria(piani.find((p) => p.id === salvato.id));
     return;
   }
 

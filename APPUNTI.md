@@ -154,6 +154,46 @@ database. Restano aperte:
 - Gli intervalli sono uguali per tutti. FSRS li adatterebbe alla persona,
   ma serve molto piu' storico di quello che abbiamo.
 
+### Il calendario: cliccare un giorno
+
+Cliccando un giorno si apre una **finestra** con dentro quello che c'e'
+segnato, e ogni evento ha Modifica ed Elimina. In fondo "Aggiungi un
+evento", gia' col giorno scelto. Prima era un riquadro sotto al
+calendario e non si poteva correggere niente: si eliminava e si
+rifaceva.
+
+Due finestre non stanno aperte insieme: quella del giorno si chiude
+quando si apre quella della data, e torna da sola quando questa si
+chiude, salvata o annullata che sia.
+
+Un appello appeso a un esame non si corregge da qui: la finestra lo
+dice e rimanda alla scheda dell'esame. Due strade per la stessa cosa
+sono un modo sicuro di creare disallineamenti.
+
+### Organizzazione studio: come si vede adesso
+
+**Rifatta il 6 settembre.** Giulia: "la schermata che si apre mi sembra
+troppo confusionaria". Ogni materia era una scheda a tutta larghezza con
+dentro la tabella delle passate, i ritmi, le barre e i tasti piu/meno;
+tre materie facevano un muro di numeri tutti dello stesso peso.
+
+Adesso:
+
+- In cima **Oggi**, solo le materie e quanto tocca oggi
+- Sotto, **una tessera stretta e verticale per materia**: nome, quanto
+  materiale, cosa tocca oggi in evidenza, la barra, la percentuale e i
+  giorni che restano. Niente altro
+- La striscia **scorre di lato** quando le materie sono tante, invece di
+  allungare la pagina: il primo colpo d'occhio resta uguale con tre
+  materie o con dieci
+- Il dettaglio, cioe' la parte fitta di numeri, sta **nella finestra
+  della materia**: ci si va apposta, non ci si inciampa. Da li' anche
+  Modifica ed Elimina
+
+Sulla tessera c'e' la **percentuale**, non `fatte/totale`: tre passate su
+450 pagine fanno 1350, ma nessuno ragiona cosi'. I numeri esatti stanno
+nel dettaglio.
+
 ### Organizzazione studio: come ragiona adesso
 
 Non piu' esami e lezioni, ma **una materia per volta**: quanto materiale
@@ -360,6 +400,8 @@ altrimenti si collauda roba vecchia. Le suite:
 - `prova.mjs` - home, organizzazione studio, suggerimenti (due altezze
   di schermo, perche' un bug si vedeva solo su schermo alto)
 - `sessione.mjs` - esami e appelli
+- `giorno.mjs` - la finestra di un giorno nel calendario e la striscia
+  delle materie
 - `sweep.mjs` - tutte le pagine si aprono senza errori
 - `contrasto.mjs` - leggibilita' del testo, chiaro e scuro
 

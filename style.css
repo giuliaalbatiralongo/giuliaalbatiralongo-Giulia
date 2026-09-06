@@ -4248,6 +4248,22 @@ a.oggi-riga {
   outline-offset: 2px;
 }
 
+/* ---------- Calendario: la finestra di un giorno ---------- */
+
+.data-voce-azioni {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.data-voce-nota {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--testo-3);
+}
+
 /* ---------- Calendario: la scheda di un esame ---------- */
 
 .scheda-note {
@@ -4344,4 +4360,172 @@ a.oggi-riga {
   .riga-appello-nuovo { grid-template-columns: 1fr; align-items: stretch; }
   .riga-appello { flex-direction: column; align-items: stretch; }
   .riga-appello-azioni { justify-content: space-between; }
+}
+
+/* ---------- Organizzazione studio: la striscia delle materie ----------
+   Una tessera per materia, stretta e verticale. Quando sono tante la
+   striscia scorre di lato invece di allungare la pagina: cosi' il primo
+   colpo d'occhio resta uguale con tre materie o con dieci. */
+
+.materie-conto {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--testo-3);
+}
+
+.materie-striscia {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  /* Lo spazio sotto lascia respirare la barra di scorrimento e le
+     ombre delle tessere, che altrimenti verrebbero tagliate. */
+  padding: 4px 4px 14px;
+  margin: 0 -4px;
+  scrollbar-width: thin;
+}
+
+.materie-striscia .stato-vuoto { flex: 1 1 auto; }
+
+.materia-tessera {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  flex: 0 0 240px;
+  scroll-snap-align: start;
+  min-height: 190px;
+  padding: 18px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  box-shadow: var(--ombra-1);
+  transition: border-color 160ms var(--curva), box-shadow 160ms var(--curva),
+    transform 120ms var(--curva);
+}
+
+.materia-tessera-nome {
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: -0.014em;
+  line-height: 1.25;
+}
+
+.materia-tessera-quanto {
+  font-size: 12px;
+  color: var(--testo-3);
+}
+
+/* Cosa tocca oggi: e' la riga che si cerca davvero guardando la
+   tessera, quindi sta staccata e in evidenza. */
+.materia-tessera-oggi {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--testo-2);
+}
+
+.materia-tessera-oggi strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  color: var(--accento);
+}
+
+.materia-tessera-oggi.spento { color: var(--testo-3); }
+.materia-tessera-oggi.allarme { color: var(--pericolo); font-weight: 600; }
+
+.materia-tessera-barra {
+  display: block;
+  height: 4px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: var(--linea);
+  overflow: hidden;
+}
+
+.materia-tessera-barra span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accento);
+  transition: width 260ms var(--curva);
+}
+
+.materia-tessera.stretta .materia-tessera-barra span { background: var(--pericolo); }
+
+.materia-tessera-piede {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .materia-tessera:hover {
+    border-color: var(--linea-forte);
+    box-shadow: var(--ombra-2);
+  }
+}
+
+.materia-tessera:active { transform: translateY(1px); }
+
+.materia-tessera:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 2px;
+}
+
+/* ---------- Organizzazione studio: il dettaglio di una materia ---------- */
+
+.materia-riassunto {
+  margin: 0 0 16px;
+  font-size: 12.5px;
+  color: var(--testo-3);
+}
+
+.materia-oggi {
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border-radius: var(--r-controllo);
+  background: var(--accento-tenue);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--testo-2);
+}
+
+.materia-oggi.spento {
+  background: var(--superficie-alt);
+  border: 1px solid var(--linea);
+  color: var(--testo-3);
+}
+
+.materia-oggi.allarme {
+  background: var(--pericolo-tenue);
+  color: var(--pericolo);
+  font-weight: 500;
+}
+
+.materia-oggi-titolo {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  color: var(--accento-su-tenue);
+}
+
+.materia-oggi-quali {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+@media (max-width: 560px) {
+  .materia-tessera { flex-basis: 78%; }
 }

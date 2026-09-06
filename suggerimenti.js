@@ -4,7 +4,7 @@ import {
   cambiaStatoSuggerimento,
   eliminaSuggerimento,
   STATI_SUGGERIMENTO,
-} from './db.js?v=28';
+} from './db.js?v=29';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');

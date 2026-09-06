@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=46">
+  <link rel="stylesheet" href="style.css?v=48">
 </head>
 <body>
   <div class="app">
@@ -114,14 +114,6 @@
               </div>
               <div id="prossime"></div>
             </section>
-
-            <section class="pannello" id="pannello-giorno" hidden>
-              <div class="sezione-testa">
-                <h2 class="sezione-titolo" id="giorno-scelto"></h2>
-                <button type="button" class="link-bottone" id="chiudi-giorno">Chiudi</button>
-              </div>
-              <div id="dettaglio-giorno"></div>
-            </section>
           </div>
 
         </div>
@@ -129,12 +121,36 @@
     </main>
   </div>
 
+  <dialog id="finestra-giorno" class="finestra">
+    <div class="finestra-testata">
+      <div>
+        <p class="finestra-occhiello">Calendario</p>
+        <p class="finestra-titolo" id="giorno-scelto"></p>
+      </div>
+      <button type="button" class="btn-chiudi" id="chiudi-giorno" aria-label="Chiudi">
+        <i class="ph ph-x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="finestra-corpo">
+      <div id="dettaglio-giorno"></div>
+    </div>
+
+    <div class="finestra-fondo">
+      <div class="finestra-azioni">
+        <button type="button" class="btn" id="aggiungi-in-giorno">
+          <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un evento
+        </button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="finestra-data" class="finestra">
     <form id="form-data" method="dialog">
       <div class="finestra-testata">
         <div>
           <p class="finestra-occhiello">Calendario</p>
-          <p class="finestra-titolo">Aggiungi una data</p>
+          <p class="finestra-titolo" id="titolo-finestra-data">Aggiungi una data</p>
         </div>
         <button type="button" class="btn-chiudi" id="chiudi-finestra" aria-label="Chiudi">
           <i class="ph ph-x" aria-hidden="true"></i>
@@ -195,7 +211,7 @@
       <div class="finestra-fondo">
         <div class="finestra-azioni">
           <span class="esito-form" id="data-esito"></span>
-          <button type="submit" class="btn">
+          <button type="submit" class="btn" id="salva-data">
             <i class="ph ph-check" aria-hidden="true"></i> Salva
           </button>
         </div>
@@ -297,6 +313,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="calendario.js?v=7"></script>
+  <script type="module" src="calendario.js?v=8"></script>
 </body>
 </html>

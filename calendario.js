@@ -2,6 +2,7 @@ import {
   getDateEsame,
   inserisciDataEsame,
   eliminaDataEsame,
+  aggiornaDataEsame,
   getEsami,
   creaEsame,
   eliminaEsame,
@@ -13,7 +14,7 @@ import {
   tipoData,
   TIPI_DATA,
   creaIcs,
-} from './db.js?v=28';
+} from './db.js?v=29';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -22,7 +23,7 @@ const elGriglia = document.getElementById('griglia-mese');
 const elIntestazione = document.getElementById('intestazione-giorni');
 const elMeseNome = document.getElementById('mese-nome');
 const elProssime = document.getElementById('prossime');
-const elPannelloGiorno = document.getElementById('pannello-giorno');
+const finestraGiorno = document.getElementById('finestra-giorno');
 const elGiornoScelto = document.getElementById('giorno-scelto');
 const elDettaglioGiorno = document.getElementById('dettaglio-giorno');
 
@@ -48,6 +49,8 @@ let esameAperto = null;
 let meseMostrato = new Date();
 meseMostrato.setDate(1);
 let giornoAperto = null;
+// null quando si crea una data, la voce quando la si corregge.
+let dataInModifica = null;
 
 function dataBreve(iso) {
   return new Date(iso + 'T00:00:00').toLocaleDateString('it-IT', {
@@ -193,7 +196,7 @@ function disegnaMese() {
       );
     }
 
-    cella.addEventListener('click', () => apriGiorno(k, data));
+    cella.addEventListener('click', () => apriGiorno(k));
     elGriglia.appendChild(cella);
   }
 }
@@ -237,6 +240,16 @@ function creaVoce(voce, dentroPannello) {
   }
 
   if (dentroPannello && voce.mia) {
+    const azioni = document.createElement('div');
+    azioni.className = 'data-voce-azioni';
+
+    const modifica = document.createElement('button');
+    modifica.type = 'button';
+    modifica.className = 'link-bottone';
+    modifica.textContent = 'Modifica';
+    modifica.addEventListener('click', () => apriFinestra(voce.giorno, voce));
+    azioni.appendChild(modifica);
+
     const togli = document.createElement('button');
     togli.type = 'button';
     togli.className = 'link-bottone';
@@ -245,21 +258,33 @@ function creaVoce(voce, dentroPannello) {
       if (!window.confirm(`Eliminare ${titoloData(voce)} del ${voce.giorno}?`)) return;
       togli.disabled = true;
       if (await eliminaDataEsame(voce.id)) {
-        date = date.filter((d) => d.id !== voce.id);
-        disegnaTutto();
+        await ricarica();
+        if (giornoAperto) apriGiorno(giornoAperto);
       } else {
         togli.disabled = false;
       }
     });
-    riga.appendChild(togli);
+    azioni.appendChild(togli);
+
+    riga.appendChild(azioni);
+  }
+
+  // Un appello appeso a un esame si corregge dalla scheda dell'esame,
+  // non da qui: cosi' non ci sono due strade per la stessa cosa.
+  if (dentroPannello && voce.esame_id) {
+    const nota = document.createElement('p');
+    nota.className = 'data-voce-nota';
+    nota.textContent = 'Fa parte di un esame: si cambia dalla sua scheda, nella sessione.';
+    riga.appendChild(nota);
   }
 
   return riga;
 }
 
-function apriGiorno(k, data) {
+function apriGiorno(k) {
   giornoAperto = k;
   const voci = date.filter((d) => d.giorno === k);
+  const data = new Date(k + 'T00:00:00');
 
   elGiornoScelto.textContent = data.toLocaleDateString('it-IT', {
     weekday: 'long',
@@ -278,21 +303,25 @@ function apriGiorno(k, data) {
     voci.forEach((v) => elDettaglioGiorno.appendChild(creaVoce(v, true)));
   }
 
-  const aggiungi = document.createElement('button');
-  aggiungi.type = 'button';
-  aggiungi.className = 'btn btn-neutro btn-piccolo';
-  aggiungi.innerHTML = '<i class="ph ph-plus" aria-hidden="true"></i> Aggiungi qui';
-  aggiungi.addEventListener('click', () => apriFinestra(k));
-  elDettaglioGiorno.appendChild(aggiungi);
-
-  elPannelloGiorno.hidden = false;
+  if (!finestraGiorno.open) finestraGiorno.showModal();
   disegnaMese();
 }
 
-document.getElementById('chiudi-giorno').addEventListener('click', () => {
-  giornoAperto = null;
-  elPannelloGiorno.hidden = true;
-  disegnaMese();
+document.getElementById('chiudi-giorno').addEventListener('click', () => finestraGiorno.close());
+finestraGiorno.addEventListener('click', (e) => {
+  if (e.target === finestraGiorno) finestraGiorno.close();
+});
+finestraGiorno.addEventListener('close', () => {
+  // Se si sta passando all'altra finestra, il giorno resta segnato:
+  // ci si torna appena salvata la data.
+  if (!finestra.open) {
+    giornoAperto = null;
+    disegnaMese();
+  }
+});
+
+document.getElementById('aggiungi-in-giorno').addEventListener('click', () => {
+  apriFinestra(giornoAperto);
 });
 
 /* ---------- Prossimamente ----------
@@ -357,7 +386,7 @@ function disegnaProssime() {
     riga.addEventListener('click', () => {
       meseMostrato = new Date(voce.giorno + 'T00:00:00');
       meseMostrato.setDate(1);
-      apriGiorno(voce.giorno, new Date(voce.giorno + 'T00:00:00'));
+      apriGiorno(voce.giorno);
     });
 
     elProssime.appendChild(riga);
@@ -367,29 +396,56 @@ function disegnaProssime() {
 function disegnaTutto() {
   disegnaMese();
   disegnaProssime();
-  if (giornoAperto) {
-    const voci = date.filter((d) => d.giorno === giornoAperto);
-    if (voci.length === 0 && elDettaglioGiorno.querySelector('.data-voce')) {
-      apriGiorno(giornoAperto, new Date(giornoAperto + 'T00:00:00'));
-    }
-  }
 }
 
 /* ---------- Finestra di inserimento ---------- */
 
-function apriFinestra(giorno) {
+/* Una finestra sola per aggiungere e per correggere: cambiano il
+   titolo e cosa c'e' scritto dentro. */
+function apriFinestra(giorno, voce = null) {
+  dataInModifica = voce;
   form.reset();
   esito.textContent = '';
   esito.className = 'esito-form';
-  document.getElementById('data-giorno').value = giorno || chiave(new Date());
+
+  document.getElementById('titolo-finestra-data').textContent =
+    voce ? 'Modifica' : 'Aggiungi una data';
+  document.getElementById('salva-data').innerHTML = voce
+    ? '<i class="ph ph-check" aria-hidden="true"></i> Salva le modifiche'
+    : '<i class="ph ph-check" aria-hidden="true"></i> Salva';
+
+  if (voce) {
+    document.getElementById('data-tipo').value = voce.tipo;
+    document.getElementById('data-materia').value = voce.materia || '';
+    document.getElementById('data-giorno').value = voce.giorno;
+    document.getElementById('data-ora').value = voce.ora ? voce.ora.slice(0, 5) : '';
+    document.getElementById('data-luogo').value = voce.luogo || '';
+    document.getElementById('data-note').value = voce.note || '';
+    document.getElementById('data-condivisa').checked = voce.visibilita === 'condiviso';
+  } else {
+    document.getElementById('data-giorno').value = giorno || chiave(new Date());
+  }
+
+  // Due finestre aperte insieme si sovrappongono: quella del giorno si
+  // chiude e torna da sola appena questa e' finita.
+  if (finestraGiorno.open) finestraGiorno.close();
+
   finestra.showModal();
   document.getElementById('data-materia').focus();
+}
+
+function tornaAlGiorno() {
+  if (giornoAperto && !finestraGiorno.open) apriGiorno(giornoAperto);
 }
 
 document.getElementById('apri-aggiunta').addEventListener('click', () => apriFinestra(giornoAperto));
 document.getElementById('chiudi-finestra').addEventListener('click', () => finestra.close());
 finestra.addEventListener('click', (e) => {
   if (e.target === finestra) finestra.close();
+});
+finestra.addEventListener('close', () => {
+  dataInModifica = null;
+  tornaAlGiorno();
 });
 
 form.addEventListener('submit', async (e) => {
@@ -401,7 +457,7 @@ form.addEventListener('submit', async (e) => {
 
   const pulisci = (v) => (v && v.trim() ? v.trim() : null);
 
-  const salvata = await inserisciDataEsame({
+  const voce = {
     tipo: dati.get('tipo'),
     materia: pulisci(dati.get('materia')),
     giorno: dati.get('giorno'),
@@ -409,23 +465,26 @@ form.addEventListener('submit', async (e) => {
     luogo: pulisci(dati.get('luogo')),
     note: pulisci(dati.get('note')),
     visibilita: dati.get('condivisa') ? 'condiviso' : 'privato',
-  });
+  };
+
+  const salvata = dataInModifica
+    ? await aggiornaDataEsame(dataInModifica.id, voce)
+    : await inserisciDataEsame(voce);
 
   if (!salvata) {
     esito.className = 'esito-form ko';
-    esito.textContent = 'Non sono riuscita a salvare la data.';
+    esito.textContent = dataInModifica
+      ? 'Non sono riuscita a salvare le modifiche.'
+      : 'Non sono riuscita a salvare la data.';
     return;
   }
 
-  date.push({ ...salvata, mia: true, autoreNome: 'tu' });
-  date.sort((a, b) => a.giorno.localeCompare(b.giorno));
-
+  giornoAperto = salvata.giorno;
   meseMostrato = new Date(salvata.giorno + 'T00:00:00');
   meseMostrato.setDate(1);
 
+  await ricarica();
   finestra.close();
-  apriGiorno(salvata.giorno, new Date(salvata.giorno + 'T00:00:00'));
-  disegnaProssime();
 });
 
 /* ---------- Navigazione fra i mesi ---------- */

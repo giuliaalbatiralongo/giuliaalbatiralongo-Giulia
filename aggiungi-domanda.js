@@ -1,4 +1,4 @@
-import { inserisciDomandaEsame } from './db.js?v=28';
+import { inserisciDomandaEsame } from './db.js?v=29';
 import { proteggiPagina } from './auth.js?v=10';
 
 const form = document.getElementById('form-domanda');

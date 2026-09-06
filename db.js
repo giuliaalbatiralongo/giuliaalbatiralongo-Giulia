@@ -674,6 +674,21 @@ export async function inserisciDataEsame(voce) {
   return data;
 }
 
+export async function aggiornaDataEsame(id, voce) {
+  const { data, error } = await supabase
+    .from('date_esame')
+    .update(voce)
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error('Errore nella modifica della data:', error);
+    return null;
+  }
+  return data;
+}
+
 export async function eliminaDataEsame(id) {
   const { error } = await supabase.from('date_esame').delete().eq('id', id);
 
