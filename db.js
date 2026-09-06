@@ -757,7 +757,11 @@ export function nomeAnno(anno) {
 export function nomeSemestre(semestre) {
   if (semestre === 1) return 'Primo semestre';
   if (semestre === 2) return 'Secondo semestre';
-  return 'Semestre non indicato';
+  // Qui finiscono gli annuali (Anatomia patologica, i tirocini) e quelli
+  // a cui il semestre non l'hai ancora messo: sono due cose diverse ma
+  // il database non le distingue, e dire "non indicato" a un annuale
+  // sarebbe falso.
+  return 'Annuale o senza semestre';
 }
 
 /* Il voto come si dice a voce: 31 e' la lode. */

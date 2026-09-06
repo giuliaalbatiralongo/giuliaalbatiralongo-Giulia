@@ -270,6 +270,67 @@ Riempiti dal dettato di Giulia:
 "Microbiologia" da sola. Potrebbero essere due esami, o "Igiene e
 sanita' pubblica".
 
+### Il piano di studi vero, dal manifesto UniGe (7 settembre)
+
+Giulia ha scaricato il PDF del **Manifesto degli Studi A.A. 2026/2027,
+corso 8745 Medicina e Chirurgia** (da qui la rete verso `unige.it` e'
+chiusa, quindi il link non si poteva aprire: l'ha scaricato lei).
+
+Estratto a mano dal PDF: niente `pdftotext` in questa macchina, e
+`pypdf` non parte. Si decomprimono i flussi con `zlib` e si rileggono
+gli operatori di testo. Attenzione al punto in cui ci ero cascato: **ogni
+operatore che non riconosci deve svuotare la pila**, altrimenti i numeri
+di `cm` restano dentro e le coordinate saltano.
+
+Il manifesto ha due livelli, e vanno tenuti distinti:
+
+- il **corso integrato**, che e' l'esame che dai (codice nudo, poi il
+  nome, poi i crediti totali): `67415 PATOLOGIA INTEGRATA APPARATO
+  GASTROENTERICO 4`
+- i **moduli** che lo compongono, uno per docente o per materia (codice
+  con il trattino): `67416 - CHIRURGIA GENERALE (1° Semestre)`
+
+In Akesis va **il corso integrato**: e' quello che si prepara e che
+prende un voto. I moduli finiscono nella nota, quando aiutano a capire
+cosa c'e' dentro.
+
+**Il PDF copre solo dal terzo al sesto anno** (le coorti gia' iscritte:
+3° = coorte 2024/2025, 4° = 2023/2024, e cosi' via). Primo e secondo
+anno non ci sono proprio, e non me li sono inventati: li manda Giulia.
+
+Scelte fatte con lei (domande poste prima di toccare i dati):
+
+- **nomi ufficiali**, non le sue abbreviazioni. Il manifesto pero' urla
+  in maiuscolo, e in un'interfaccia il maiuscolo non si legge: si
+  abbassa, tenendo in piedi i numeri romani e le sigle (`Farmacologia
+  II`, non `Farmacologia Ii`). Il nome che usava lei resta nella nota,
+  cosi' "DIR" non si perde
+- **tirocini, ADE e preparazione tesi ci sono**, per vedere il carico
+  vero. Nella nota c'e' scritto che non prendono un voto
+- **quarto anno rifatto dal manifesto**. Lei aveva accettato di perdere
+  le date degli appelli: non e' stato necessario. Invece di cancellare e
+  riscrivere, le righe che aveva gia' sono state **rinominate** nella
+  loro voce del manifesto (Gastroenterologia -> Patologia integrata
+  apparato gastroenterico, e cosi' via). L'elenco finisce identico a
+  quello del manifesto e i suoi appelli restano attaccati
+
+Il ripristino sta in `backup-esami-2026-09-06.sql` (nel progetto): rimette i
+nomi di prima. Le voci nuove si riconoscono dalla nota
+`[manifesto UniGe 2026/2027]`.
+
+**Rimasto in sospeso, da dire a Giulia:**
+
+- i suoi **piani di studio** si agganciano agli esami **per nome**
+  ("Farmaco 2", "Gastroenterologia", "Anatomia patologica"). Rinominati
+  gli esami, quel filo si e' rotto: vanno rinominati anche i piani, ma
+  sono parole scritte da lei e non le tocco senza chiedere
+- c'e' un **doppione**: "Anatomia patologica" (senza anno) e "Anatomia
+  patologica e correlazioni anatomo-cliniche", tutti e due con la stessa
+  iscrizione al 16 ottobre. Non ho cancellato niente
+- **"Anatopato 1"** lei lo mette al terzo anno secondo semestre, ma nel
+  manifesto 2026/2027 Anatomia patologica sta al quarto come annuale.
+  Lasciato dove l'ha messo lei, con una nota
+
 ### L'esame e la materia sono la stessa cosa (7 settembre)
 
 Giulia: scrivevo la data d'esame nell'organizzazione studio, si salvava
