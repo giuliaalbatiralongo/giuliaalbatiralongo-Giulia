@@ -614,6 +614,88 @@ export async function getEsami() {
   });
 }
 
+/* Il ponte fra l'organizzazione studio e il calendario.
+
+   Un esame e una materia con lo stesso nome sono la stessa cosa: se
+   scrivi la data d'esame mentre organizzi lo studio, quell'esame deve
+   comparire nel calendario, e viceversa. Il legame e' il nome, perche'
+   e' cosi' che ci ragiona chi lo usa: "Farmacologia 2" e' Farmacologia 2
+   dovunque la scriva.
+
+   Torna { esito, esame } dove esito dice cosa e' successo: 'creato',
+   'spostato', 'scelto', 'gia-cosi'. Serve alla pagina per dirlo. */
+export async function assicuraEsameDiMateria(nome, giorno) {
+  const pulito = (nome || '').trim();
+  if (!pulito || !giorno) return { esito: 'niente', esame: null };
+
+  const confronto = pulito.toLowerCase();
+  const esami = await getEsami();
+  const esame = esami.find((e) => e.nome.trim().toLowerCase() === confronto);
+
+  if (esame) {
+    if (esame.scelto && esame.scelto.giorno === giorno) {
+      return { esito: 'gia-cosi', esame };
+    }
+
+    // La data c'e' gia' fra gli appelli, ma non e' quella scelta
+    const gia = esame.appelli.find((a) => a.giorno === giorno);
+    if (gia) {
+      const fatto = await scegliAppello(esame.id, gia.id, esame.appello_scelto);
+      return { esito: fatto ? 'scelto' : 'errore', esame };
+    }
+
+    // Se era gia' deciso, si sposta la data di quell'appello invece di
+    // aggiungerne un altro: cambiare la data dell'esame non vuol dire
+    // che l'universita' ne ha aperto uno nuovo.
+    if (esame.scelto) {
+      const spostato = await aggiornaDataEsame(esame.scelto.id, { giorno });
+      return { esito: spostato ? 'spostato' : 'errore', esame };
+    }
+
+    const nuovo = await aggiungiAppello(esame, {
+      tipo: 'appello',
+      giorno,
+      ora: null,
+      luogo: null,
+      visibilita: 'privato',
+    });
+    if (!nuovo) return { esito: 'errore', esame };
+    const fatto = await scegliAppello(esame.id, nuovo.id, null);
+    return { esito: fatto ? 'creato' : 'errore', esame };
+  }
+
+  // Nessun esame con questo nome: se c'e' gia' una data sciolta uguale
+  // nel calendario, va bene quella e non si duplica niente.
+  const sciolte = await getDateEsame();
+  const sciolta = sciolte.find(
+    (d) =>
+      d.esame_id === null &&
+      (d.tipo === 'iscritta' || d.tipo === 'appello') &&
+      titoloData(d).trim().toLowerCase() === confronto
+  );
+
+  if (sciolta) {
+    if (sciolta.giorno === giorno) return { esito: 'gia-cosi', esame: null };
+    const spostata = await aggiornaDataEsame(sciolta.id, { giorno });
+    return { esito: spostata ? 'spostato' : 'errore', esame: null };
+  }
+
+  const creato = await creaEsame(pulito, null);
+  if (!creato) return { esito: 'errore', esame: null };
+
+  const appello = await aggiungiAppello(creato, {
+    tipo: 'appello',
+    giorno,
+    ora: null,
+    luogo: null,
+    visibilita: 'privato',
+  });
+  if (!appello) return { esito: 'errore', esame: creato };
+
+  const fatto = await scegliAppello(creato.id, appello.id, null);
+  return { esito: fatto ? 'creato' : 'errore', esame: creato };
+}
+
 export async function creaEsame(nome, note) {
   const { data, error } = await supabase
     .from('esami')

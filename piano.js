@@ -11,10 +11,11 @@ import {
   proponiPassate,
   getDateEsame,
   getEsami,
+  assicuraEsameDiMateria,
   titoloData,
   misureDi,
   giorniMancanti,
-} from './db.js?v=33';
+} from './db.js?v=34';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -130,7 +131,8 @@ function fatteETotale(piano) {
    gli esami della sessione (dove l'appello e' stato scelto), poi fra le
    date sciolte del calendario con lo stesso titolo. */
 function dataEsameDi(piano) {
-  const nome = piano.materia.trim().toLowerCase();
+  const nome = (piano.materia || '').trim().toLowerCase();
+  if (!nome) return null;
 
   const esame = esami.find((e) => e.nome.trim().toLowerCase() === nome);
   if (esame && esame.scelto) return esame.scelto.giorno;
@@ -437,7 +439,15 @@ function apriMateria(piano) {
   calcolo.fasi.forEach((f) => elenco.appendChild(rigaFase(piano, calcolo, f)));
 
   const nota = document.getElementById('materia-nota');
-  if (calcolo.fattibile && calcolo.avanzano > 0) {
+  const esame = dataEsameDi(piano);
+  if (esame && piano.fine > esame) {
+    // La finestra di studio finisce dopo l'esame: non e' un errore, ma
+    // e' quasi sempre una svista.
+    nota.textContent =
+      `L'esame e il ${dataLunga(esame)}, ma lo studio arriva fino al ${dataLunga(piano.fine)}. ` +
+      'Se vuoi, accorcia la finestra fino al giorno dell esame.';
+    nota.hidden = false;
+  } else if (calcolo.fattibile && calcolo.avanzano > 0) {
     nota.textContent =
       calcolo.avanzano === 1
         ? 'Avanza un giorno prima della fine della finestra.'
@@ -767,14 +777,14 @@ function preparaFinestra() {
   document.getElementById('piano-durata').addEventListener('input', aggiornaConto);
   document.getElementById('piano-data').addEventListener('input', aggiornaConto);
 
-  /* Scrivendo una materia che e' gia' in calendario, la data arriva sola */
+  /* Scrivendo una materia che e' gia' in calendario, la data arriva
+     sola: prima si guarda fra gli esami della sessione, poi fra le date
+     sciolte, come fa la tessera. */
   document.getElementById('piano-materia').addEventListener('input', (e) => {
-    const trovata = date.find(
-      (d) => titoloData(d).toLowerCase() === e.target.value.trim().toLowerCase()
-    );
-    if (!trovata) return;
+    const giorno = dataEsameDi({ materia: e.target.value });
+    if (!giorno) return;
     const campo = document.getElementById('piano-data');
-    if (!campo.value) campo.value = trovata.giorno;
+    if (!campo.value) campo.value = giorno;
     aggiornaConto();
   });
 }
@@ -818,7 +828,10 @@ function apriFinestra(piano) {
     // dato che lei riconosce. "Fra tot giorni" resta disponibile, ma li
     // conta da oggi e quindi fa ripartire la finestra.
     scegliModo('data');
-    document.getElementById('piano-data').value = piano.fine;
+    // Il campo si chiama "Giorno dell'esame": se il calendario ne ha
+    // uno per questa materia, e' quello che va mostrato, non la fine
+    // della finestra che potrebbe essere rimasta indietro.
+    document.getElementById('piano-data').value = dataEsameDi(piano) || piano.fine;
 
     const liberi = piano.giorni_liberi || [];
     document.querySelectorAll('#giorni-liberi input').forEach((c) => {
@@ -986,6 +999,9 @@ async function salvaMateria() {
     piani = piani.map((p) => (p.id === salvato.id ? salvato : p));
     piani.sort((a, b) => a.fine.localeCompare(b.fine));
     inModifica = null;
+
+    await allineaEsame(dati.materia, modo === 'data' ? fine : null);
+
     finestra.close();
     disegna();
     // Si era arrivati qui dal dettaglio: ci si torna, aggiornato.
@@ -1007,8 +1023,32 @@ async function salvaMateria() {
 
   piani.push(salvato);
   piani.sort((a, b) => a.fine.localeCompare(b.fine));
+
+  await allineaEsame(dati.materia, modo === 'data' ? fine : null);
+
   finestra.close();
   disegna();
+}
+
+/* Scritta la data d'esame mentre organizzi lo studio, quell'esame deve
+   comparire anche nel calendario: sono la stessa cosa, e vederla in un
+   posto solo e' il modo migliore per dimenticarsela nell'altro. */
+async function allineaEsame(materia, giorno) {
+  if (!giorno) return;
+
+  esito.className = 'esito-form attesa';
+  esito.textContent = 'Aggiorno il calendario';
+
+  const { esito: come } = await assicuraEsameDiMateria(materia, giorno);
+
+  if (come === 'errore') {
+    console.error('Non sono riuscita ad allineare il calendario');
+    return;
+  }
+
+  // Le date e gli esami vanno riletti, altrimenti la tessera continua a
+  // dire che l'esame non c'e'.
+  [date, esami] = await Promise.all([getDateEsame(), getEsami()]);
 }
 
 /* ---------- Avvio ---------- */

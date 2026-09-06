@@ -201,6 +201,41 @@ Nel dettaglio le voci sono sempre le stesse cinque (Esame, Giorni di
 studio, Pagine, Lezioni, Passate) con un trattino dove non si applicano:
 cosi' due materie si confrontano invece di avere ognuna la sua forma.
 
+### L'esame e la materia sono la stessa cosa (7 settembre)
+
+Giulia: scrivevo la data d'esame nell'organizzazione studio, si salvava
+l'unita' ma "non mi risulta che quella materia abbia associato l'esame".
+
+**Il campo mentiva.** Si chiamava "Giorno dell'esame" ma scriveva solo
+`fine`, cioe' la fine della finestra di studio: nel calendario non
+finiva niente, e la tessera continuava a dire "Esame —" perche' cercava
+un esame che nessuno aveva creato.
+
+Ora il legame c'e' nei due versi, e il collante e' **il nome**: e' cosi'
+che ci ragiona chi lo usa, "Farmacologia 2" e' Farmacologia 2 dovunque
+la scriva.
+
+- **Organizzazione -> calendario:** salvando una materia con la data
+  d'esame, `assicuraEsameDiMateria` crea l'esame nel calendario con quel
+  giorno gia' scelto. Se l'esame c'e' gia', non ne apre un altro:
+  sceglie l'appello con quella data se esiste, altrimenti **sposta**
+  quello scelto, perche' cambiare la data non vuol dire che
+  l'universita' ne ha aperto uno nuovo
+- **Calendario -> organizzazione:** scrivendo il nome di una materia che
+  ha gia' un esame deciso, la data si compila da sola; e la tessera e la
+  scheda la mostrano gia' da prima
+- Se la finestra di studio finisce **dopo** la data d'esame, la scheda
+  lo dice: non e' un errore, ma e' quasi sempre una svista
+
+Otto casi provati in `ponte.mjs`, compresi quelli che fanno danno: la
+stessa data due volte, il nome con maiuscole e spazi diversi, la data
+cambiata su un esame gia' deciso, la data sciolta senza esame.
+
+**Il database finto adesso ricorda.** Prima si azzerava cambiando
+pagina, quindi una prova che salvava su una pagina e controllava
+sull'altra non diceva niente: e infatti il primo giro passava a vuoto.
+Ora le righe stanno in `sessionStorage`, come starebbero in Postgres.
+
 ### La parola "passate" e' sparita (7 settembre)
 
 Giulia: "Con passate che cosa intendi? Non capisco il significato della
@@ -536,6 +571,8 @@ altrimenti si collauda roba vecchia. Le suite:
 - `sessione.mjs` - esami e appelli
 - `giorno.mjs` - la finestra di un giorno nel calendario e la striscia
   delle materie
+- `ponte.mjs` - il legame fra materie ed esami, sul db.js vero
+- `ponte-ui.mjs` - lo stesso legame visto dalle pagine, nei due versi
 - `parole.mjs` - parole bandite dall'interfaccia
 - `proposta.mjs` - il conto della divisione proposta, con numeri fissi
 - `proposta-ui.mjs` - il banner della proposta nel modulo
