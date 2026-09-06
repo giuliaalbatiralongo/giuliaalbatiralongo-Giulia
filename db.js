@@ -515,24 +515,153 @@ export function titoloData(voce) {
 }
 
 export async function getDateEsame() {
-  const { data, error } = await supabase
-    .from('date_esame')
-    .select('*')
-    .order('giorno', { ascending: true })
-    .order('ora', { ascending: true, nullsFirst: true });
+  const [risposta, esami] = await Promise.all([
+    supabase
+      .from('date_esame')
+      .select('*')
+      .order('giorno', { ascending: true })
+      .order('ora', { ascending: true, nullsFirst: true }),
+    supabase.from('esami').select('id, nome, appello_scelto'),
+  ]);
+
+  const { data, error } = risposta;
 
   if (error) {
     console.error('Errore nel caricamento delle date:', error);
     return [];
   }
 
+  if (esami.error) console.error('Errore nel caricamento degli esami:', esami.error);
+
+  const scelti = new Map((esami.data || []).map((e) => [e.id, e.appello_scelto]));
+
   const [nomi, mio] = await Promise.all([nomiAutori(data.map((d) => d.autore)), idUtente()]);
 
-  return data.map((d) => ({
-    ...d,
-    autoreNome: nomi.get(d.autore) || 'Sconosciuto',
-    mia: d.autore === mio,
-  }));
+  return data.map((d) => {
+    // Una data si nasconde solo se so a quale esame appartiene e non e'
+    // quella scelta. Di una data condivisa da un altro l'esame non lo
+    // vedo: in dubbio si mostra, sparire in silenzio e' peggio.
+    const conosco = d.esame_id !== null && scelti.has(d.esame_id);
+    const scelta = conosco && scelti.get(d.esame_id) === d.id;
+    return {
+      ...d,
+      autoreNome: nomi.get(d.autore) || 'Sconosciuto',
+      mia: d.autore === mio,
+      scelta,
+      daMostrare: !conosco || scelta,
+    };
+  });
+}
+
+/* ---------- Esami con piu' appelli ----------
+   L'universita' propone piu' date per lo stesso esame e tu ti presenti
+   a una. L'esame tiene insieme le sue date e dice qual e' quella buona;
+   le altre restano scritte ma fuori dal calendario. */
+
+export async function getEsami() {
+  const [esami, date] = await Promise.all([
+    supabase.from('esami').select('*').order('created_at', { ascending: true }),
+    supabase
+      .from('date_esame')
+      .select('*')
+      .not('esame_id', 'is', null)
+      .order('giorno', { ascending: true }),
+  ]);
+
+  if (esami.error) {
+    console.error('Errore nel caricamento degli esami:', esami.error);
+    return [];
+  }
+  if (date.error) console.error('Errore nel caricamento degli appelli:', date.error);
+
+  const perEsame = new Map();
+  (date.data || []).forEach((d) => {
+    if (!perEsame.has(d.esame_id)) perEsame.set(d.esame_id, []);
+    perEsame.get(d.esame_id).push(d);
+  });
+
+  return (esami.data || []).map((e) => {
+    const appelli = perEsame.get(e.id) || [];
+    return {
+      ...e,
+      appelli,
+      scelto: appelli.find((a) => a.id === e.appello_scelto) || null,
+    };
+  });
+}
+
+export async function creaEsame(nome, note) {
+  const { data, error } = await supabase
+    .from('esami')
+    .insert([{ nome, note: note || null }])
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error('Errore nella creazione dell esame:', error);
+    return null;
+  }
+  return { ...data, appelli: [], scelto: null };
+}
+
+export async function eliminaEsame(id) {
+  // Le date appese all'esame se ne vanno con lui: e' il database a
+  // farlo (on delete cascade), non una seconda chiamata che puo'
+  // fallire a meta'.
+  const { error } = await supabase.from('esami').delete().eq('id', id);
+
+  if (error) {
+    console.error('Errore nell eliminazione dell esame:', error);
+    return false;
+  }
+  return true;
+}
+
+export async function aggiungiAppello(esame, voce) {
+  const { data, error } = await supabase
+    .from('date_esame')
+    .insert([{ ...voce, esame_id: esame.id, materia: esame.nome }])
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error('Errore nel salvataggio dell appello:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function scegliAppello(esameId, dataId, precedenteId = null) {
+  const { error } = await supabase
+    .from('esami')
+    .update({ appello_scelto: dataId })
+    .eq('id', esameId);
+
+  if (error) {
+    console.error('Errore nella scelta dell appello:', error);
+    return false;
+  }
+
+  // La data scelta smette di essere una possibilita' e diventa l'esame
+  // vero: cambia tipo, e nel calendario prende il colore di "Esame".
+  // Quella lasciata torna a essere un appello fra gli altri.
+  if (precedenteId && precedenteId !== dataId) {
+    const { error: e } = await supabase
+      .from('date_esame')
+      .update({ tipo: 'appello' })
+      .eq('id', precedenteId);
+    if (e) console.error('Errore nel riportare indietro l appello lasciato:', e);
+  }
+
+  if (dataId) {
+    const { error: e } = await supabase
+      .from('date_esame')
+      .update({ tipo: 'iscritta' })
+      .eq('id', dataId);
+    if (e) console.error('Errore nel segnare l appello scelto:', e);
+  }
+
+  return true;
 }
 
 export async function inserisciDataEsame(voce) {

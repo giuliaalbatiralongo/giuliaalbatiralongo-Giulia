@@ -2,13 +2,19 @@ import {
   getDateEsame,
   inserisciDataEsame,
   eliminaDataEsame,
+  getEsami,
+  creaEsame,
+  eliminaEsame,
+  aggiungiAppello,
+  scegliAppello,
   giorniMancanti,
   contoAllaRovescia,
   nomeTipoData,
   titoloData,
   tipoData,
   TIPI_DATA,
-} from './db.js?v=25';
+  creaIcs,
+} from './db.js?v=27';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -25,12 +31,31 @@ const finestra = document.getElementById('finestra-data');
 const form = document.getElementById('form-data');
 const esito = document.getElementById('data-esito');
 
+const elSessione = document.getElementById('sessione-elenco');
+const elSessioneConto = document.getElementById('sessione-conto');
+const finestraEsame = document.getElementById('finestra-esame');
+const formEsame = document.getElementById('form-esame');
+const esitoEsame = document.getElementById('esame-esito');
+const finestraScheda = document.getElementById('finestra-scheda');
+const elSchedaAppelli = document.getElementById('scheda-appelli');
+const formAppello = document.getElementById('form-appello');
+const esitoAppello = document.getElementById('appello-esito');
+
 const GIORNI_CORTI = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
 
 let date = [];
+let esami = [];
+let esameAperto = null;
 let meseMostrato = new Date();
 meseMostrato.setDate(1);
 let giornoAperto = null;
+
+function dataBreve(iso) {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('it-IT', {
+    day: 'numeric',
+    month: 'short',
+  });
+}
 
 function chiave(data) {
   // Niente toISOString: converte in UTC e a fine mese sposta il giorno.
@@ -414,6 +439,283 @@ document.getElementById('torna-oggi').addEventListener('click', () => {
   disegnaMese();
 });
 
+
+/* ---------- La sessione: gli esami e i loro appelli ----------
+   Un esame e' una cosa sola con piu' date possibili. Qui si vedono
+   tutti insieme; il mese sotto mostra solo gli appelli scelti. */
+
+function dataLunga(iso) {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('it-IT', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+}
+
+function creaSchedaEsame(esame) {
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'esame-card' + (esame.scelto ? ' scelta' : '');
+  card.addEventListener('click', () => apriScheda(esame));
+
+  const nome = document.createElement('span');
+  nome.className = 'esame-card-nome';
+  nome.textContent = esame.nome;
+  card.appendChild(nome);
+
+  const stato = document.createElement('span');
+  stato.className = 'esame-card-stato';
+
+  if (esame.scelto) {
+    const g = giorniMancanti(esame.scelto.giorno);
+    const quando = document.createElement('strong');
+    quando.textContent =
+      g < 0 ? 'passato' : g === 0 ? 'oggi' : g === 1 ? 'domani' : `fra ${g} giorni`;
+    stato.appendChild(quando);
+    stato.append(` · ${dataBreve(esame.scelto.giorno)}`);
+  } else if (esame.appelli.length === 0) {
+    stato.classList.add('vuoto');
+    stato.textContent = 'Nessuna data ancora';
+  } else {
+    stato.classList.add('da-scegliere');
+    stato.textContent =
+      esame.appelli.length === 1
+        ? 'Un appello, da scegliere'
+        : `${esame.appelli.length} appelli, da scegliere`;
+  }
+
+  card.appendChild(stato);
+  return card;
+}
+
+function disegnaSessione() {
+  elSessione.innerHTML = '';
+
+  const scelti = esami.filter((e) => e.scelto).length;
+  elSessioneConto.textContent =
+    esami.length === 0
+      ? ''
+      : `${scelti} su ${esami.length} ${esami.length === 1 ? 'esame deciso' : 'esami decisi'}`;
+
+  if (esami.length === 0) {
+    const vuoto = document.createElement('p');
+    vuoto.className = 'blocco-vuoto';
+    vuoto.textContent =
+      'Nessun esame ancora. Creane uno, mettici dentro tutte le date che l\'università propone, e poi scegli a quale ti presenti.';
+    elSessione.appendChild(vuoto);
+    return;
+  }
+
+  esami.forEach((e) => elSessione.appendChild(creaSchedaEsame(e)));
+}
+
+/* ---------- La scheda di un esame ---------- */
+
+function rigaAppello(esame, appello) {
+  const riga = document.createElement('div');
+  const scelto = esame.appello_scelto === appello.id;
+  riga.className = 'riga-appello' + (scelto ? ' scelto' : '');
+
+  const testo = document.createElement('div');
+  testo.className = 'riga-appello-testo';
+
+  const quando = document.createElement('p');
+  quando.className = 'riga-appello-quando';
+  quando.textContent = dataLunga(appello.giorno);
+  testo.appendChild(quando);
+
+  const dettagli = [];
+  if (appello.ora) dettagli.push(appello.ora.slice(0, 5));
+  if (appello.luogo) dettagli.push(appello.luogo);
+  const g = giorniMancanti(appello.giorno);
+  dettagli.push(g < 0 ? 'già passato' : g === 0 ? 'oggi' : `fra ${g} giorni`);
+
+  const meta = document.createElement('p');
+  meta.className = 'riga-appello-meta';
+  meta.textContent = dettagli.join(' · ');
+  testo.appendChild(meta);
+
+  riga.appendChild(testo);
+
+  const azioni = document.createElement('div');
+  azioni.className = 'riga-appello-azioni';
+
+  const scegli = document.createElement('button');
+  scegli.type = 'button';
+  if (scelto) {
+    scegli.className = 'segno-scelto';
+    scegli.innerHTML = '<i class="ph-fill ph-seal-check" aria-hidden="true"></i> Ti presenti a questo';
+    scegli.title = 'Premi per togliere la scelta';
+  } else {
+    scegli.className = 'btn btn-neutro btn-piccolo';
+    scegli.textContent = 'Mi presento a questo';
+  }
+  scegli.addEventListener('click', async () => {
+    scegli.disabled = true;
+    // Ripremere quello gia' scelto toglie la scelta: serve quando
+    // l'appello salta e si torna indecisi.
+    const nuovo = scelto ? null : appello.id;
+    if (await scegliAppello(esame.id, nuovo, esame.appello_scelto)) {
+      esame.appello_scelto = nuovo;
+      esame.scelto = nuovo ? appello : null;
+      await ricarica();
+      apriScheda(esami.find((e) => e.id === esame.id));
+    } else {
+      scegli.disabled = false;
+      esitoAppello.className = 'esito-form ko';
+      esitoAppello.textContent = 'Non sono riuscita a salvare la scelta.';
+    }
+  });
+  azioni.appendChild(scegli);
+
+  const togli = document.createElement('button');
+  togli.type = 'button';
+  togli.className = 'btn-piu';
+  togli.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
+  togli.setAttribute('aria-label', `Togli l'appello del ${dataLunga(appello.giorno)}`);
+  togli.addEventListener('click', async () => {
+    if (!window.confirm(`Togliere l'appello del ${dataLunga(appello.giorno)}?`)) return;
+    togli.disabled = true;
+    if (await eliminaDataEsame(appello.id)) {
+      await ricarica();
+      apriScheda(esami.find((e) => e.id === esame.id));
+    } else {
+      togli.disabled = false;
+    }
+  });
+  azioni.appendChild(togli);
+
+  riga.appendChild(azioni);
+  return riga;
+}
+
+function apriScheda(esame) {
+  if (!esame) return;
+  esameAperto = esame;
+
+  document.getElementById('scheda-nome').textContent = esame.nome;
+
+  const note = document.getElementById('scheda-note');
+  note.textContent = esame.note || '';
+  note.hidden = !esame.note;
+
+  esitoAppello.textContent = '';
+  esitoAppello.className = 'esito-form';
+  formAppello.reset();
+
+  elSchedaAppelli.innerHTML = '';
+  if (esame.appelli.length === 0) {
+    const vuoto = document.createElement('p');
+    vuoto.className = 'blocco-vuoto';
+    vuoto.textContent = 'Ancora nessuna data. Aggiungi qui sotto quelle che ti propongono.';
+    elSchedaAppelli.appendChild(vuoto);
+  } else {
+    esame.appelli.forEach((a) => elSchedaAppelli.appendChild(rigaAppello(esame, a)));
+  }
+
+  if (!finestraScheda.open) finestraScheda.showModal();
+}
+
+document.getElementById('chiudi-scheda').addEventListener('click', () => finestraScheda.close());
+document.getElementById('chiudi-scheda-2').addEventListener('click', () => finestraScheda.close());
+finestraScheda.addEventListener('click', (e) => {
+  if (e.target === finestraScheda) finestraScheda.close();
+});
+finestraScheda.addEventListener('close', () => {
+  esameAperto = null;
+});
+
+document.getElementById('elimina-esame').addEventListener('click', async () => {
+  if (!esameAperto) return;
+  const quanti = esameAperto.appelli.length;
+  const avviso =
+    quanti === 0
+      ? `Eliminare ${esameAperto.nome}?`
+      : `Eliminare ${esameAperto.nome}? Se ne vanno anche le sue ${quanti} date.`;
+  if (!window.confirm(avviso)) return;
+
+  if (await eliminaEsame(esameAperto.id)) {
+    finestraScheda.close();
+    await ricarica();
+  }
+});
+
+formAppello.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!esameAperto) return;
+
+  const giorno = document.getElementById('appello-giorno').value;
+  if (!giorno) {
+    esitoAppello.className = 'esito-form ko';
+    esitoAppello.textContent = 'Serve almeno il giorno.';
+    return;
+  }
+
+  esitoAppello.className = 'esito-form attesa';
+  esitoAppello.textContent = 'Salvataggio';
+
+  const salvato = await aggiungiAppello(esameAperto, {
+    tipo: 'appello',
+    giorno,
+    ora: document.getElementById('appello-ora').value || null,
+    luogo: document.getElementById('appello-luogo').value.trim() || null,
+    visibilita: 'privato',
+  });
+
+  if (!salvato) {
+    esitoAppello.className = 'esito-form ko';
+    esitoAppello.textContent = 'Non sono riuscita a salvare l\'appello.';
+    return;
+  }
+
+  const id = esameAperto.id;
+  await ricarica();
+  apriScheda(esami.find((x) => x.id === id));
+});
+
+/* ---------- Finestra: nuovo esame ---------- */
+
+document.getElementById('apri-esame').addEventListener('click', () => {
+  formEsame.reset();
+  esitoEsame.textContent = '';
+  esitoEsame.className = 'esito-form';
+  finestraEsame.showModal();
+  document.getElementById('esame-nome').focus();
+});
+
+document.getElementById('chiudi-esame').addEventListener('click', () => finestraEsame.close());
+finestraEsame.addEventListener('click', (e) => {
+  if (e.target === finestraEsame) finestraEsame.close();
+});
+
+formEsame.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const nome = document.getElementById('esame-nome').value.trim();
+  if (!nome) {
+    esitoEsame.className = 'esito-form ko';
+    esitoEsame.textContent = 'Serve il nome dell\'esame.';
+    return;
+  }
+
+  esitoEsame.className = 'esito-form attesa';
+  esitoEsame.textContent = 'Creazione';
+
+  const creato = await creaEsame(nome, document.getElementById('esame-note').value.trim());
+
+  if (!creato) {
+    esitoEsame.className = 'esito-form ko';
+    esitoEsame.textContent = 'Non sono riuscita a creare l\'esame.';
+    return;
+  }
+
+  finestraEsame.close();
+  await ricarica();
+  // Si apre subito la scheda: creato l'esame, la cosa successiva e'
+  // sempre mettergli dentro le date.
+  apriScheda(esami.find((x) => x.id === creato.id));
+});
+
 /* ---------- Esportazione ---------- */
 
 document.getElementById('esporta').addEventListener('click', () => {
@@ -440,14 +742,24 @@ document.getElementById('esporta').addEventListener('click', () => {
 
 /* ---------- Avvio ---------- */
 
+async function ricarica() {
+  const [tutte, elenco] = await Promise.all([getDateEsame(), getEsami()]);
+  // Nel mese finiscono solo le date da mostrare: gli appelli scartati
+  // restano nella scheda del loro esame e basta. La regola sta in
+  // db.js, qui si applica in un punto solo.
+  date = tutte.filter((d) => d.daMostrare);
+  esami = elenco;
+
+  disegnaMese();
+  disegnaProssime();
+  disegnaSessione();
+}
+
 async function avvia() {
   try {
-    date = await getDateEsame();
-
     disegnaIntestazione();
     disegnaLegenda();
-    disegnaMese();
-    disegnaProssime();
+    await ricarica();
 
     elScheletro.remove();
     elTutto.hidden = false;

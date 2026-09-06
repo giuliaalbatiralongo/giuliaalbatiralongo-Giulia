@@ -1,4 +1,4 @@
-import { getCasiClinici } from './db.js?v=25';
+import { getCasiClinici } from './db.js?v=27';
 import { iconaPerMateria } from './materie.js?v=3';
 import { proteggiPagina } from './auth.js?v=10';
 

@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=42">
+  <link rel="stylesheet" href="style.css?v=44">
 </head>
 <body>
   <div class="app">
@@ -61,14 +61,17 @@
         <div class="testata">
           <div>
             <h1 class="page-titolo">Calendario</h1>
-            <p class="page-sub">Appelli, esami a cui ti sei iscritta e scadenze da non mancare.</p>
+            <p class="page-sub">Gli esami della sessione con tutti i loro appelli, i tirocini, le lezioni e le scadenze.</p>
           </div>
           <div class="azioni-testata">
             <button type="button" class="btn btn-neutro" id="esporta">
               <i class="ph ph-download-simple" aria-hidden="true"></i> Esporta
             </button>
-            <button type="button" class="btn" id="apri-aggiunta">
+            <button type="button" class="btn btn-neutro" id="apri-aggiunta">
               <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi una data
+            </button>
+            <button type="button" class="btn" id="apri-esame">
+              <i class="ph ph-seal-check" aria-hidden="true"></i> Nuovo esame
             </button>
           </div>
         </div>
@@ -78,6 +81,14 @@
         </div>
 
         <div class="calendario-impianto" id="calendario" hidden>
+
+          <section class="sessione" id="sessione">
+            <div class="sezione-testa">
+              <h2 class="sezione-titolo">La tua sessione</h2>
+              <span class="sessione-conto" id="sessione-conto"></span>
+            </div>
+            <div class="sessione-griglia" id="sessione-elenco"></div>
+          </section>
 
           <section class="pannello mese">
             <div class="mese-testa">
@@ -192,12 +203,100 @@
     </form>
   </dialog>
 
+  <dialog id="finestra-esame" class="finestra">
+    <form id="form-esame" method="dialog">
+      <div class="finestra-testata">
+        <div>
+          <p class="finestra-occhiello">Sessione</p>
+          <p class="finestra-titolo">Un esame</p>
+        </div>
+        <button type="button" class="btn-chiudi" id="chiudi-esame" aria-label="Chiudi">
+          <i class="ph ph-x" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="finestra-corpo">
+        <div class="campo">
+          <label for="esame-nome">Che esame è</label>
+          <input type="text" id="esame-nome" name="nome" required maxlength="120"
+                 autocomplete="off" placeholder="Es. Farmacologia 2">
+        </div>
+
+        <div class="campo">
+          <label for="esame-note">Note</label>
+          <textarea id="esame-note" name="note" rows="3" maxlength="1000"
+                    placeholder="Il professore, cosa portare, com&rsquo;è strutturato."></textarea>
+          <p class="campo-aiuto">Facoltativo. Gli appelli si aggiungono dopo, dalla scheda dell&rsquo;esame.</p>
+        </div>
+      </div>
+
+      <div class="finestra-fondo">
+        <div class="finestra-azioni">
+          <span class="esito-form" id="esame-esito"></span>
+          <button type="submit" class="btn">
+            <i class="ph ph-check" aria-hidden="true"></i> Crea
+          </button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="finestra-scheda" class="finestra finestra-larga">
+    <div class="finestra-testata">
+      <div>
+        <p class="finestra-occhiello">Esame</p>
+        <p class="finestra-titolo" id="scheda-nome"></p>
+      </div>
+      <button type="button" class="btn-chiudi" id="chiudi-scheda" aria-label="Chiudi">
+        <i class="ph ph-x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="finestra-corpo">
+      <p class="scheda-note" id="scheda-note" hidden></p>
+
+      <p class="campo-aiuto">
+        Metti tutte le date che l&rsquo;università propone. Poi scegli quella a cui ti
+        presenti: nel calendario resta solo quella.
+      </p>
+
+      <div id="scheda-appelli"></div>
+
+      <form id="form-appello" class="riga-appello-nuovo">
+        <div class="campo">
+          <label for="appello-giorno">Un altro appello</label>
+          <input type="date" id="appello-giorno" required>
+        </div>
+        <div class="campo">
+          <label for="appello-ora">Ora</label>
+          <input type="time" id="appello-ora">
+        </div>
+        <div class="campo">
+          <label for="appello-luogo">Dove</label>
+          <input type="text" id="appello-luogo" maxlength="120" autocomplete="off"
+                 placeholder="Aula, padiglione">
+        </div>
+        <button type="submit" class="btn btn-neutro">
+          <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi
+        </button>
+      </form>
+      <span class="esito-form" id="appello-esito"></span>
+    </div>
+
+    <div class="finestra-fondo">
+      <div class="finestra-azioni">
+        <button type="button" class="link-bottone" id="elimina-esame">Elimina l&rsquo;esame</button>
+        <button type="button" class="btn" id="chiudi-scheda-2">Fatto</button>
+      </div>
+    </div>
+  </dialog>
+
   <script>
     window.addEventListener('error', (e) => {
       const el = document.getElementById('scheletro');
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="calendario.js?v=4"></script>
+  <script type="module" src="calendario.js?v=6"></script>
 </body>
 </html>

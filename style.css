@@ -360,12 +360,15 @@ i[class*="ph-"] {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 20px;
+  gap: 20px 24px;
   flex-wrap: wrap;
+  /* Lo spazio sotto sta qui, non sul sottotitolo: se i pulsanti vanno
+     a capo il sottotitolo non e' piu' l'ultima cosa della riga. */
+  margin-bottom: 28px;
 }
 
 .testata .page-sub {
-  margin-bottom: 30px;
+  margin-bottom: 0;
 }
 
 /* ============================================================
@@ -4123,4 +4126,172 @@ a.oggi-riga {
 
 @media (hover: hover) and (pointer: fine) {
   .pannello .materia-riga:hover .materia-riga-nome { color: var(--accento); }
+}
+
+/* ---------- Calendario: la sessione ----------
+   Sopra al mese, la vista d'insieme: un esame per scheda, con la data
+   scelta o l'avviso che manca. Il mese sotto resta il dettaglio. */
+
+.sessione {
+  margin-bottom: 20px;
+}
+
+.sessione-conto {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--testo-3);
+}
+
+.sessione-griglia {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.esame-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 14px 16px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  /* Il filo a sinistra si accende solo quando l'esame e' deciso: si
+     vede a colpo d'occhio quanta sessione manca da sistemare. */
+  border-left: 3px solid var(--linea-forte);
+  border-radius: var(--r-controllo);
+  color: inherit;
+  transition: border-color 160ms var(--curva), box-shadow 160ms var(--curva),
+    transform 120ms var(--curva);
+}
+
+.esame-card.scelta { border-left-color: var(--accento); }
+
+.esame-card-nome {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.esame-card-stato {
+  font-size: 12px;
+  color: var(--testo-2);
+}
+
+.esame-card-stato strong {
+  font-weight: 700;
+  color: var(--accento);
+}
+
+.esame-card-stato.da-scegliere { color: var(--st-ripassare); font-weight: 600; }
+.esame-card-stato.vuoto { color: var(--testo-3); }
+
+@media (hover: hover) and (pointer: fine) {
+  .esame-card:hover {
+    border-color: var(--linea-forte);
+    box-shadow: var(--ombra-1);
+  }
+  .esame-card.scelta:hover { border-left-color: var(--accento); }
+}
+
+.esame-card:active { transform: translateY(1px); }
+
+.esame-card:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 2px;
+}
+
+/* ---------- Calendario: la scheda di un esame ---------- */
+
+.scheda-note {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: var(--r-controllo);
+  background: var(--superficie-alt);
+  border: 1px solid var(--linea);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--testo-2);
+  white-space: pre-wrap;
+}
+
+.riga-appello {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+}
+
+.riga-appello.scelto {
+  border-color: transparent;
+  background: var(--accento-tenue);
+}
+
+.riga-appello-testo { min-width: 0; }
+
+.riga-appello-quando {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.riga-appello.scelto .riga-appello-quando { color: var(--accento-su-tenue); }
+
+.riga-appello-meta {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--testo-2);
+}
+
+.riga-appello-azioni {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.segno-scelto {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accento-su-tenue);
+  cursor: pointer;
+}
+
+.segno-scelto i { font-size: 15px; }
+
+/* La riga per aggiungere un altro appello: i campi in fila, il
+   pulsante in fondo, e su schermo stretto tutto incolonnato. */
+.riga-appello-nuovo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.7fr) minmax(0, 1.4fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--linea);
+}
+
+.riga-appello-nuovo .campo { margin-bottom: 0; }
+
+@media (max-width: 720px) {
+  .riga-appello-nuovo { grid-template-columns: 1fr; align-items: stretch; }
+  .riga-appello { flex-direction: column; align-items: stretch; }
+  .riga-appello-azioni { justify-content: space-between; }
 }

@@ -172,12 +172,47 @@ Aperte:
   ("Farmaco 2", 32 lezioni, 7 gennaio): era quello che c'era nel
   database al momento
 
-### Prossimo pezzo del calendario: scegliere l'appello
+### Scegliere l'appello: FATTO il 6 settembre
 
-Giulia lo ha descritto e va costruito **nel calendario**, non qui:
-l'universita' propone piu' date per ogni esame, e lei sceglie a quale
-appello presentarsi (Farmacologia il 7 gennaio, Gastro il secondo
-appello il 18, e cosi' via). Le date le inserira' lei a mano.
+L'universita' propone piu' date per lo stesso esame e Giulia si presenta
+a una. Nel calendario c'e' ora **La tua sessione**, sopra al mese: una
+scheda per esame, con la data scelta e il conto alla rovescia, oppure
+"3 appelli, da scegliere".
+
+Tre decisioni sue, prese con una domanda diretta:
+
+1. **Un esame e' un oggetto vero** (tabella `esami`), non un
+   raggruppamento per nome. Crei l'esame, poi ci appendi le date. Un
+   passaggio in piu', ma "Farma 2" e "Farmacologia 2" non possono
+   scollegarsi.
+2. **Gli appelli scartati spariscono dal calendario.** Restano nella
+   scheda del loro esame. La regola sta in un punto solo (`getDateEsame`
+   marca ogni data con `daMostrare`) e la applicano tutti: mese, "In
+   arrivo", home, esportazione.
+3. **Nessun legame automatico con l'organizzazione studio.** Scegliere
+   l'appello non sposta la fine del piano: restano due cose separate,
+   come ha chiesto lei.
+
+Dettagli che discendono da queste:
+
+- L'appello scelto cambia `tipo` da `appello` a `iscritta`, cosi' nel
+  mese prende il colore di "Esame". Ripremerlo toglie la scelta e lo
+  riporta ad appello: serve quando l'appello salta
+- Due controlli stanno nel database, non nel browser: l'autore lo scrive
+  un trigger, e un secondo trigger rifiuta un `appello_scelto` che non
+  appartiene a quell'esame. Verificato impersonando l'account di prova
+- Eliminando un esame se ne vanno le sue date (`on delete cascade`): una
+  chiamata sola, non due che possono fallire a meta'
+
+### Guasti trovati per strada (6 settembre)
+
+- **`creaIcs` era usato ma mai importato** in `calendario.js`: il
+  pulsante Esporta lanciava un errore appena premuto. Nessuna prova se
+  ne accorgeva perche' succede solo al clic
+- **Lo spazio sotto la testata** stava sul sottotitolo. Con tre pulsanti
+  che vanno a capo, il sottotitolo non e' piu' l'ultima cosa della riga
+  e la sezione seguente ci finiva addosso. Lo spazio ora appartiene alla
+  testata
 
 ### La visione: bacheca piu' elenco di disponibili
 
@@ -294,6 +329,24 @@ occasionali, non da una condivisione voluta. Chi ha fatto accesso puo'
 anche provare chiavi a ripetizione: il calcolo e' lento di proposito,
 quindi tentare a caso e' impraticabile, ma un blocco dopo N tentativi
 sbagliati non c'e'. Da aggiungere se Giulia lo vuole.
+
+---
+
+## Come si collauda
+
+C'e' una copia di prova che gira in locale con un database finto, in
+`scratchpad/`. Si rifa' con `rifai-prova.sh` **dopo ogni modifica**,
+altrimenti si collauda roba vecchia. Le suite:
+
+- `prova.mjs` - home, organizzazione studio, suggerimenti (due altezze
+  di schermo, perche' un bug si vedeva solo su schermo alto)
+- `sessione.mjs` - esami e appelli
+- `sweep.mjs` - tutte le pagine si aprono senza errori
+- `contrasto.mjs` - leggibilita' del testo, chiaro e scuro
+
+I dati di prova si calcolano da oggi (i giorni liberi compresi):
+scriverli fissi faceva passare o fallire le prove a seconda del giorno
+della settimana.
 
 ---
 
