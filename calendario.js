@@ -15,7 +15,7 @@ import {
   tipoData,
   TIPI_DATA,
   creaIcs,
-} from './db.js?v=34';
+} from './db.js?v=35';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -45,7 +45,7 @@ const esitoAppello = document.getElementById('appello-esito');
 const GIORNI_CORTI = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
 
 let date = [];
-let esami = [];
+let tuttiGliEsami = [];
 let esameAperto = null;
 let meseMostrato = new Date();
 meseMostrato.setDate(1);
@@ -555,6 +555,11 @@ function creaSchedaEsame(esame) {
 function disegnaSessione() {
   elSessione.innerHTML = '';
 
+  // Nel calendario stanno solo gli esami che hai gia' cominciato a
+  // datare: l'elenco completo del corso e' nella pagina Esami, e qui
+  // riempirebbe la sessione di roba che non ti riguarda adesso.
+  const esami = tuttiGliEsami.filter((e) => e.appelli.length > 0);
+
   const scelti = esami.filter((e) => e.scelto).length;
   elSessioneConto.textContent =
     esami.length === 0
@@ -623,7 +628,7 @@ function rigaAppello(esame, appello, conTasti = true) {
       esame.appello_scelto = nuovo;
       esame.scelto = nuovo ? appello : null;
       await ricarica();
-      apriScheda(esami.find((e) => e.id === esame.id));
+      apriScheda(tuttiGliEsami.find((e) => e.id === esame.id));
     } else {
       scegli.disabled = false;
       esitoAppello.className = 'esito-form ko';
@@ -643,7 +648,7 @@ function rigaAppello(esame, appello, conTasti = true) {
       togli.disabled = true;
       if (await eliminaDataEsame(appello.id)) {
         await ricarica();
-        apriScheda(esami.find((e) => e.id === esame.id));
+        apriScheda(tuttiGliEsami.find((e) => e.id === esame.id));
       } else {
         togli.disabled = false;
       }
@@ -767,7 +772,7 @@ formAppello.addEventListener('submit', async (e) => {
 
   const id = esameAperto.id;
   await ricarica();
-  apriScheda(esami.find((x) => x.id === id));
+  apriScheda(tuttiGliEsami.find((x) => x.id === id));
 });
 
 /* ---------- Finestra: nuovo esame ---------- */
@@ -810,7 +815,7 @@ formEsame.addEventListener('submit', async (e) => {
   await ricarica();
   // Si apre subito la scheda: creato l'esame, la cosa successiva e'
   // sempre mettergli dentro le date.
-  apriScheda(esami.find((x) => x.id === creato.id));
+  apriScheda(tuttiGliEsami.find((x) => x.id === creato.id));
 });
 
 /* ---------- Esportazione ---------- */
@@ -845,7 +850,7 @@ async function ricarica() {
   // restano nella scheda del loro esame e basta. La regola sta in
   // db.js, qui si applica in un punto solo.
   date = tutte.filter((d) => d.daMostrare);
-  esami = elenco;
+  tuttiGliEsami = elenco;
 
   disegnaMese();
   disegnaProssime();

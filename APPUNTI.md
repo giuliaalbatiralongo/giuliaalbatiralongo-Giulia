@@ -201,6 +201,40 @@ Nel dettaglio le voci sono sempre le stesse cinque (Esame, Giorni di
 studio, Pagine, Lezioni, Passate) con un trattino dove non si applicano:
 cosi' due materie si confrontano invece di avere ognuna la sua forma.
 
+### La sezione Esami (7 settembre)
+
+L'elenco vero del corso di laurea: anno, semestre, crediti, professore,
+note, e se l'hai gia' dato con che voto.
+
+**Non e' una tabella nuova.** Sono le stesse righe di `esami` che il
+calendario usa per gli appelli e che l'organizzazione studio cerca per
+nome: si sono solo aggiunte le colonne `corso`, `anno`, `semestre`,
+`cfu`, `docente`, `sostenuto`, `voto`. Un esame sta scritto in un posto
+solo, e quello che fai di qua si vede di la'. Era la richiesta di
+Giulia: "questi esami qui sono gli stessi che poi utilizzero' nel
+calendario".
+
+Discende una cosa: **il calendario ora mostra solo gli esami che hanno
+gia' delle date.** Con l'elenco completo del corso, la sessione si
+sarebbe riempita di esami che adesso non riguardano nessuno. L'elenco
+intero sta nella pagina Esami.
+
+Dettagli:
+
+- Il voto si chiede solo se l'esame risulta dato, e va da 18 a "30 e
+  lode" (31 nel database, mai mostrato come numero)
+- Un esame gia' dato resta scritto ma sbiadito: serve a ricordare che
+  c'e' stato, non a essere fatto
+- Il corso di laurea si ricopia dall'ultimo esame: non si riscrive
+  "Medicina e chirurgia" trenta volte
+- Chi non ha anno o semestre finisce in fondo, non sparisce
+
+**Da confermare con Giulia:** il quarto anno primo semestre l'ho
+riempito dal suo dettato, ma due nomi erano incerti. Ho messo
+"Organi di senso" e "Microbiologia"; lei aveva detto qualcosa come
+"microbiologia pubblica", che potrebbe essere due esami distinti o
+"Igiene e sanita' pubblica".
+
 ### L'esame e la materia sono la stessa cosa (7 settembre)
 
 Giulia: scrivevo la data d'esame nell'organizzazione studio, si salvava
@@ -571,6 +605,7 @@ altrimenti si collauda roba vecchia. Le suite:
 - `sessione.mjs` - esami e appelli
 - `giorno.mjs` - la finestra di un giorno nel calendario e la striscia
   delle materie
+- `esami-ui.mjs` - la pagina Esami e il suo legame col calendario
 - `ponte.mjs` - il legame fra materie ed esami, sul db.js vero
 - `ponte-ui.mjs` - lo stesso legame visto dalle pagine, nei due versi
 - `parole.mjs` - parole bandite dall'interfaccia

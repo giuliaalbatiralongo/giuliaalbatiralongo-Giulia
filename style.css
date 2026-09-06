@@ -4765,3 +4765,150 @@ a.oggi-riga {
 }
 
 .proposta .btn { flex: 0 0 auto; }
+
+/* ---------- Esami: il riepilogo ---------- */
+
+.riepilogo-esami {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.riepilogo-voce {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 10px 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+}
+
+.riepilogo-voce strong {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.riepilogo-voce span {
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+/* ---------- Esami: anni e semestri ---------- */
+
+.anno { margin-bottom: 30px; }
+
+.anno-conto {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--testo-3);
+}
+
+.semestre { margin-bottom: 18px; }
+
+.semestre-nome {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--testo-3);
+}
+
+.esame-riga {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 160ms var(--curva), box-shadow 160ms var(--curva),
+    transform 120ms var(--curva);
+}
+
+/* Un esame gia' dato resta scritto ma non tira l'occhio: serve a
+   ricordare che c'e' stato, non a essere fatto. */
+.esame-riga.fatto { opacity: 0.6; }
+
+.esame-riga-segno {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  font-size: 18px;
+  color: var(--testo-3);
+}
+
+.esame-riga.fatto .esame-riga-segno { color: var(--st-consolidato); }
+
+.esame-riga-testo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.esame-riga-nome {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.esame-riga-meta {
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+.esame-riga-stato {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--superficie-alt);
+  border: 1px solid var(--linea);
+  color: var(--testo-2);
+}
+
+.esame-riga-stato.con-data {
+  background: var(--accento-tenue);
+  border-color: transparent;
+  color: var(--accento-su-tenue);
+}
+
+.esame-riga-stato.da-scegliere {
+  background: var(--ripassare-tenue);
+  border-color: transparent;
+  color: var(--st-ripassare);
+}
+
+.esame-riga-stato.preso {
+  background: var(--consolidato-tenue);
+  border-color: transparent;
+  color: var(--st-consolidato);
+}
+
+.esame-riga-stato.senza { color: var(--testo-3); }
+
+@media (hover: hover) and (pointer: fine) {
+  .esame-riga:hover {
+    border-color: var(--linea-forte);
+    box-shadow: var(--ombra-1);
+  }
+}
+
+.esame-riga:active { transform: translateY(1px); }
+
+.esame-riga:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 2px;
+}

@@ -696,10 +696,30 @@ export async function assicuraEsameDiMateria(nome, giorno) {
   return { esito: fatto ? 'creato' : 'errore', esame: creato };
 }
 
+/* I campi di un esame, elencati a mano. L'autore non si manda: lo
+   scrive il database. */
+function campiEsame(esame) {
+  return {
+    nome: esame.nome,
+    note: esame.note || null,
+    corso: esame.corso || null,
+    anno: esame.anno ?? null,
+    semestre: esame.semestre ?? null,
+    cfu: esame.cfu ?? null,
+    docente: esame.docente || null,
+    sostenuto: esame.sostenuto ?? false,
+    voto: esame.voto ?? null,
+  };
+}
+
 export async function creaEsame(nome, note) {
+  return creaEsameCompleto(typeof nome === 'object' ? nome : { nome, note });
+}
+
+export async function creaEsameCompleto(esame) {
   const { data, error } = await supabase
     .from('esami')
-    .insert([{ nome, note: note || null }])
+    .insert([campiEsame(esame)])
     .select('*')
     .single();
 
@@ -708,6 +728,72 @@ export async function creaEsame(nome, note) {
     return null;
   }
   return { ...data, appelli: [], scelto: null };
+}
+
+export async function aggiornaEsame(id, esame) {
+  const { data, error } = await supabase
+    .from('esami')
+    .update(campiEsame(esame))
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) {
+    segnaErrore('Errore nella modifica dell esame:', error);
+    return null;
+  }
+  return data;
+}
+
+/* Gli anni del corso, con il posto per chi non li segue in ordine. */
+export const ANNI = [1, 2, 3, 4, 5, 6];
+
+export function nomeAnno(anno) {
+  if (!anno) return 'Anno non indicato';
+  const nomi = ['primo', 'secondo', 'terzo', 'quarto', 'quinto', 'sesto', 'settimo', 'ottavo'];
+  return `${nomi[anno - 1] || anno} anno`;
+}
+
+export function nomeSemestre(semestre) {
+  if (semestre === 1) return 'Primo semestre';
+  if (semestre === 2) return 'Secondo semestre';
+  return 'Semestre non indicato';
+}
+
+/* Il voto come si dice a voce: 31 e' la lode. */
+export function nomeVoto(voto) {
+  if (!voto) return null;
+  return voto === 31 ? '30 e lode' : String(voto);
+}
+
+/* Gli esami raggruppati per anno e semestre, nell'ordine in cui si
+   studiano. Chi non ha anno o semestre finisce in fondo, non sparisce:
+   un esame senza etichetta e' comunque un esame da dare. */
+export function esamiPerAnno(esami) {
+  const gruppi = new Map();
+
+  esami.forEach((e) => {
+    const anno = e.anno || 0;
+    if (!gruppi.has(anno)) gruppi.set(anno, new Map());
+    const semestri = gruppi.get(anno);
+    const semestre = e.semestre || 0;
+    if (!semestri.has(semestre)) semestri.set(semestre, []);
+    semestri.get(semestre).push(e);
+  });
+
+  const ordinaChiavi = (a, b) => (a === 0 ? 1 : b === 0 ? -1 : a - b);
+
+  return [...gruppi.keys()].sort(ordinaChiavi).map((anno) => ({
+    anno,
+    semestri: [...gruppi.get(anno).keys()].sort(ordinaChiavi).map((semestre) => ({
+      semestre,
+      esami: gruppi
+        .get(anno)
+        .get(semestre)
+        .slice()
+        .sort((a, b) => a.nome.localeCompare(b.nome, 'it')),
+    })),
+  }));
 }
 
 export async function eliminaEsame(id) {
