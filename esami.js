@@ -14,8 +14,9 @@ import {
   annoIndovinato,
   contiLibretto,
   statoAnno,
+  calcolaMedie,
   ANNI,
-} from './db.js?v=39';
+} from './db.js?v=40';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -133,6 +134,196 @@ function mostraSceltaAnno() {
   riga.hidden = false;
 }
 
+/* ---------- La media ----------
+
+   Sta dietro un pulsante in fondo: e' una cosa che si guarda ogni tanto,
+   non ogni volta che si apre il libretto.
+
+   I voti li scrive lei qui dentro, uno dietro l'altro, senza aprire la
+   scheda di ogni esame: e' l'unico posto dove serve farlo in fila. */
+
+const finestraMedia = document.getElementById('finestra-media');
+let lodeCome = 30;
+
+function menuVoto(esame) {
+  const menu = document.createElement('select');
+  menu.className = 'media-voto';
+  menu.setAttribute('aria-label', `Voto di ${esame.nome}`);
+
+  const vuoto = document.createElement('option');
+  vuoto.value = '';
+  vuoto.textContent = '—';
+  menu.appendChild(vuoto);
+
+  for (let v = 18; v <= 31; v += 1) {
+    const o = document.createElement('option');
+    o.value = String(v);
+    o.textContent = nomeVoto(v);
+    o.selected = esame.voto === v;
+    menu.appendChild(o);
+  }
+
+  menu.addEventListener('change', async () => {
+    const voto = menu.value ? Number(menu.value) : null;
+    const prima = esame.voto;
+    esame.voto = voto;
+    disegnaMedia();
+    const salvato = await aggiornaEsame(esame.id, { ...esame, voto });
+    if (!salvato) {
+      // Se il salvataggio non passa, il numero a schermo deve tornare
+      // quello vero: una media giusta su un voto che non c'e' e' peggio
+      // di un errore visibile.
+      esame.voto = prima;
+      disegnaMedia();
+      menu.classList.add('non-salvato');
+      menu.title = ultimoErroreDb() || 'Non sono riuscita a salvare questo voto.';
+    } else {
+      menu.classList.remove('non-salvato');
+      menu.title = '';
+      esami = esami.map((e) => (e.id === salvato.id ? { ...e, ...salvato } : e));
+      disegna();
+    }
+  });
+
+  return menu;
+}
+
+function disegnaMedia() {
+  const elenco = document.getElementById('media-elenco');
+  const conti = document.getElementById('media-conti');
+  elenco.innerHTML = '';
+  conti.innerHTML = '';
+
+  const dati = esami
+    .filter((e) => e.sostenuto)
+    .sort((a, b) => (a.anno || 9) - (b.anno || 9) || a.nome.localeCompare(b.nome, 'it'));
+
+  if (dati.length === 0) {
+    const vuoto = document.createElement('p');
+    vuoto.className = 'blocco-nota';
+    vuoto.textContent =
+      'Nessun esame ancora dato. Segnane uno come gi\u00e0 sostenuto dalla sua scheda e comparir\u00e0 qui.';
+    elenco.appendChild(vuoto);
+    return;
+  }
+
+  dati.forEach((esame) => {
+    const riga = document.createElement('div');
+    riga.className = 'media-riga';
+
+    const testo = document.createElement('div');
+    testo.className = 'media-riga-testo';
+
+    const nome = document.createElement('span');
+    nome.className = 'media-riga-nome';
+    nome.textContent = esame.nome;
+    testo.appendChild(nome);
+
+    const dove = document.createElement('span');
+    dove.className = 'media-riga-dove';
+    dove.textContent = esame.anno ? nomeAnno(esame.anno) : 'anno non indicato';
+    testo.appendChild(dove);
+
+    riga.appendChild(testo);
+
+    const cfu = document.createElement('span');
+    cfu.className = 'media-riga-cfu' + (esame.cfu ? '' : ' manca');
+    cfu.textContent = esame.cfu ? `${esame.cfu} CFU` : 'crediti?';
+    riga.appendChild(cfu);
+
+    riga.appendChild(menuVoto(esame));
+    elenco.appendChild(riga);
+  });
+
+  const m = calcolaMedie(esami, lodeCome);
+
+  const dueMedie = [
+    { nome: 'Media aritmetica', valore: m.aritmetica, sotto: `su ${m.quanti} ${m.quanti === 1 ? 'esame' : 'esami'}` },
+    { nome: 'Media pesata', valore: m.pesata, sotto: `sui crediti · ${m.cfu} CFU` },
+  ];
+
+  dueMedie.forEach((d) => {
+    const box = document.createElement('div');
+    box.className = 'media-conto';
+
+    const n = document.createElement('strong');
+    n.className = 'media-conto-numero';
+    n.textContent = d.valore == null ? '—' : d.valore.toFixed(2).replace('.', ',');
+    box.appendChild(n);
+
+    const t = document.createElement('span');
+    t.className = 'media-conto-nome';
+    t.textContent = d.nome;
+    box.appendChild(t);
+
+    const s = document.createElement('span');
+    s.className = 'media-conto-sotto';
+    s.textContent = d.sotto;
+    box.appendChild(s);
+
+    conti.appendChild(box);
+  });
+
+  /* Come contare la lode. Sono due conti diversi, tutti e due usati:
+     l'ateneo la conta 30 per la media di carriera, fra studenti si dice
+     31. Si vedono tutte e due con un clic. */
+  const scelta = document.createElement('div');
+  scelta.className = 'media-lode';
+
+  const et = document.createElement('span');
+  et.className = 'media-lode-testo';
+  et.textContent = 'La lode vale';
+  scelta.appendChild(et);
+
+  const gruppo = document.createElement('div');
+  gruppo.className = 'media-lode-gruppo';
+  [30, 31].forEach((v) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'media-lode-tasto' + (lodeCome === v ? ' scelto' : '');
+    b.textContent = String(v);
+    b.setAttribute('aria-pressed', String(lodeCome === v));
+    b.addEventListener('click', async () => {
+      lodeCome = v;
+      disegnaMedia();
+      await salvaImpostazioni({ lode_come: v });
+    });
+    gruppo.appendChild(b);
+  });
+  scelta.appendChild(gruppo);
+  conti.appendChild(scelta);
+
+  const nota = document.createElement('p');
+  nota.className = 'media-nota';
+  nota.textContent =
+    lodeCome === 30
+      ? 'Come la conta l\u2019universit\u00e0 per la media di carriera.'
+      : 'Come se la contano fra studenti. L\u2019ateneo di solito usa 30.';
+  conti.appendChild(nota);
+
+  /* Quello che la media ha saltato va detto: un numero che tace i buchi
+     e' un numero falso. */
+  const buchi = [];
+  if (m.senzaVoto > 0) {
+    buchi.push(`${m.senzaVoto} ${m.senzaVoto === 1 ? 'esame \u00e8 senza voto' : 'esami sono senza voto'}`);
+  }
+  if (m.senzaCfu > 0) {
+    buchi.push(`${m.senzaCfu} ${m.senzaCfu === 1 ? '\u00e8 senza crediti' : 'sono senza crediti'}, quindi fuori dalla pesata`);
+  }
+  if (buchi.length > 0) {
+    const avviso = document.createElement('p');
+    avviso.className = 'media-buchi';
+    avviso.innerHTML = '<i class="ph ph-info" aria-hidden="true"></i> ';
+    avviso.append(buchi.join('; ') + '.');
+    conti.appendChild(avviso);
+  }
+}
+
+function apriMedia() {
+  disegnaMedia();
+  finestraMedia.showModal();
+}
+
 /* ---------- Un esame nell'elenco ---------- */
 
 function creaRiga(esame) {
@@ -195,6 +386,8 @@ function disegna() {
   elElenco.innerHTML = '';
   mostraRiepilogo();
   mostraSceltaAnno();
+  // Senza esami non c'e' niente di cui fare la media.
+  document.getElementById('fondo-libretto').hidden = esami.length === 0;
 
   if (esami.length === 0) {
     const invito = document.createElement('p');
@@ -375,6 +568,12 @@ function apriFinestra(esame, casella = null) {
 
 document.getElementById('apri-nuovo').addEventListener('click', () => apriFinestra(null));
 document.getElementById('chiudi-finestra').addEventListener('click', () => finestra.close());
+
+document.getElementById('apri-media').addEventListener('click', apriMedia);
+document.getElementById('chiudi-media').addEventListener('click', () => finestraMedia.close());
+finestraMedia.addEventListener('click', (e) => {
+  if (e.target === finestraMedia) finestraMedia.close();
+});
 finestra.addEventListener('click', (e) => {
   if (e.target === finestra) finestra.close();
 });
@@ -473,6 +672,7 @@ async function avvia() {
     esami = elenco;
     indovinato = impostazioni.anno_corso == null;
     annoCorso = impostazioni.anno_corso ?? annoIndovinato(esami);
+    lodeCome = impostazioni.lode_come ?? 30;
     disegna();
     elScheletro.remove();
     elElenco.hidden = false;

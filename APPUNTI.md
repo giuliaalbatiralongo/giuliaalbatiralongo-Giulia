@@ -154,7 +154,25 @@ lavorazione, e si spuntano una alla volta.
    oppure "Libretto universitario". Si apre una finestra con tutti gli
    esami sostenuti, accanto a ognuno i crediti e il voto — che **lo
    scrive lei**, non i professori come nel libretto vero — e sotto o di
-   lato **la media aritmetica e la media pesata**, tutte e due.
+   lato **la media aritmetica e la media pesata**, tutte e due. **FATTO**
+
+   Come e' venuta:
+
+   - i voti si scrivono **in fila dentro la finestra**, senza aprire la
+     scheda di ogni esame: e' l'unico posto dove serve farlo uno dietro
+     l'altro. Se il salvataggio non passa, il numero a schermo **torna
+     indietro** e il campo si segna: una media giusta calcolata su un
+     voto che nel database non c'e' e' peggio di un errore visibile
+   - **la lode vale 30 o 31**, si sceglie con due tasti e resta scelta
+     (`profili.lode_come`). 30 e' come la conta l'ateneo per la media di
+     carriera, 31 come se la contano fra studenti: sono due conti
+     diversi, tutti e due usati, e si vedono con un clic
+   - **quello che la media salta viene detto**: gli esami dati senza
+     voto, e quelli senza crediti che restano fuori dalla pesata. Un
+     numero che tace i suoi buchi e' un numero falso
+   - la matematica ha un collaudo **senza browser** (`media.mjs` importa
+     `calcolaMedie` e conta a mano): se sbaglia i conti si sa senza
+     dover guardare uno schermo
 
 ### C. Organizzazione studio
 

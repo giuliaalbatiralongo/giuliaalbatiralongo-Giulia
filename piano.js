@@ -15,7 +15,7 @@ import {
   titoloData,
   misureDi,
   giorniMancanti,
-} from './db.js?v=39';
+} from './db.js?v=40';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');

@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=57">
+  <link rel="stylesheet" href="style.css?v=58">
 </head>
 <body>
   <div class="app">
@@ -76,6 +76,14 @@
         </div>
 
         <div id="elenco" hidden></div>
+
+        <!-- La media sta mezza nascosta, in fondo agli anni: si guarda
+             ogni tanto, non ogni volta che si apre il libretto. -->
+        <div class="fondo-libretto" id="fondo-libretto" hidden>
+          <button type="button" class="btn-secondario" id="apri-media">
+            <i class="ph ph-calculator" aria-hidden="true"></i> Calcola la mia media
+          </button>
+        </div>
 
         <!-- La spiegazione sta in fondo: chi apre la pagina vuole vedere
              i suoi esami, non leggere a cosa serve la pagina. -->
@@ -181,6 +189,23 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="esami.js?v=5"></script>
+  <dialog id="finestra-media" class="finestra finestra-larga">
+    <div class="finestra-testata">
+      <div>
+        <p class="finestra-occhiello">Libretto</p>
+        <p class="finestra-titolo">La mia media</p>
+      </div>
+      <button type="button" class="btn-chiudi" id="chiudi-media" aria-label="Chiudi">
+        <i class="ph ph-x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="finestra-corpo media-corpo">
+      <div class="media-elenco" id="media-elenco"></div>
+      <aside class="media-conti" id="media-conti"></aside>
+    </div>
+  </dialog>
+
+  <script type="module" src="esami.js?v=7"></script>
 </body>
 </html>

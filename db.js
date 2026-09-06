@@ -842,6 +842,41 @@ export function statoAnno(gruppo, annoCorso) {
   return { quando, dati, mancano, quanti: esami.length, vuoto: esami.length === 0, testo };
 }
 
+/* ---------- Le due medie ----------
+
+   Aritmetica: tutti gli esami pesano uguale.
+   Pesata sui crediti: un esame da 12 conta il doppio di uno da 6, ed e'
+   quella che l'universita' usa per il voto di laurea.
+
+   La lode vale 30 o 31 secondo come l'hai scelta: l'ateneo la conta 30
+   per la media di carriera, fra studenti si usa spesso 31. Sono tutte e
+   due giuste, dipende da cosa stai guardando.
+
+   Un esame sostenuto senza voto non entra in nessuna delle due, e uno
+   senza crediti non entra nella pesata: si contano a parte, perche' una
+   media che tace quello che ha saltato dice un numero falso. */
+
+export function calcolaMedie(esami, lodeCome = 30) {
+  const conVoto = esami.filter((e) => e.sostenuto && e.voto);
+  const valore = (e) => (e.voto === 31 ? lodeCome : e.voto);
+
+  const conPeso = conVoto.filter((e) => e.cfu > 0);
+  const cfu = conPeso.reduce((n, e) => n + e.cfu, 0);
+
+  return {
+    quanti: conVoto.length,
+    senzaVoto: esami.filter((e) => e.sostenuto && !e.voto).length,
+    senzaCfu: conVoto.length - conPeso.length,
+    cfu,
+    aritmetica: conVoto.length
+      ? conVoto.reduce((n, e) => n + valore(e), 0) / conVoto.length
+      : null,
+    pesata: cfu
+      ? conPeso.reduce((n, e) => n + valore(e) * e.cfu, 0) / cfu
+      : null,
+  };
+}
+
 /* Gli anni del corso, con il posto per chi non li segue in ordine. */
 export const ANNI = [1, 2, 3, 4, 5, 6];
 

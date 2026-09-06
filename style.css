@@ -4888,6 +4888,166 @@ a.oggi-riga {
 
 .scelta-anno-nota { font-size: 12px; color: var(--testo-3); }
 
+/* ---------- Libretto: la media ----------
+
+   Sta dietro un pulsante in fondo agli anni, non in cima: la media si
+   guarda ogni tanto, non ogni volta che si apre il libretto. */
+
+.fondo-libretto {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.media-corpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 22px;
+  align-items: start;
+}
+
+.media-elenco { min-width: 0; }
+
+.media-riga {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.media-riga:last-child { border-bottom: none; }
+
+.media-riga-testo {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.media-riga-nome {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.media-riga-dove { font-size: 11.5px; color: var(--testo-3); }
+
+.media-riga-cfu {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--testo-2);
+  white-space: nowrap;
+}
+
+/* Un esame senza crediti non entra nella media pesata: si vede da qui
+   perche' manca, invece di scoprirlo dal totale che non torna. */
+.media-riga-cfu.manca { color: var(--st-ripassare); font-style: italic; }
+
+.media-voto {
+  width: auto;
+  flex: 0 0 auto;
+  min-width: 104px;
+  padding: 6px 30px 6px 10px;
+  font-size: 13px;
+  background-position: right 10px center;
+}
+
+.media-voto.non-salvato { border-color: var(--pericolo); background-color: var(--pericolo-tenue); }
+
+/* I due numeri, di lato all'elenco. Su schermo stretto vanno sotto. */
+.media-conti {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.media-conto {
+  padding: 12px 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie-alt);
+}
+
+.media-conto-numero {
+  display: block;
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.media-conto-nome {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--testo-2);
+}
+
+.media-conto-sotto {
+  display: block;
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+.media-lode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.media-lode-testo { font-size: 12.5px; color: var(--testo-2); }
+
+.media-lode-gruppo {
+  display: flex;
+  border: 1px solid var(--linea-forte);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.media-lode-tasto {
+  padding: 5px 11px;
+  border: none;
+  background: var(--superficie);
+  color: var(--testo-2);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms var(--curva), color 160ms var(--curva);
+}
+
+.media-lode-tasto + .media-lode-tasto { border-left: 1px solid var(--linea-forte); }
+
+.media-lode-tasto.scelto {
+  background: var(--accento);
+  color: #fff;
+}
+
+.media-nota { margin: 0; font-size: 11.5px; color: var(--testo-3); }
+
+.media-buchi {
+  margin: 0;
+  padding: 9px 11px;
+  border-radius: 8px;
+  background: var(--ripassare-tenue);
+  color: var(--st-ripassare);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .media-corpo { grid-template-columns: minmax(0, 1fr); }
+  .media-conti { position: static; }
+  .media-riga { flex-wrap: wrap; }
+}
+
 /* ---------- Esami: anni e semestri ---------- */
 
 .semestre { margin-bottom: 18px; }
