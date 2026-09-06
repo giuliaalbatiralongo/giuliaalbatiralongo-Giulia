@@ -9,7 +9,13 @@ import {
   nomeVoto,
   giorniMancanti,
   ultimoErroreDb,
-} from './db.js?v=38';
+  mieImpostazioni,
+  salvaImpostazioni,
+  annoIndovinato,
+  contiLibretto,
+  statoAnno,
+  ANNI,
+} from './db.js?v=39';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -22,6 +28,11 @@ const esito = document.getElementById('esame-esito');
 let esami = [];
 // null quando si crea, l'esame quando lo si corregge.
 let inModifica = null;
+// A che anno sei. Null finche' non si sa: allora lo indovina il libretto.
+let annoCorso = null;
+// Vero quando l'anno non l'ha scelto lei: allora lo si dice, invece di
+// far finta di saperlo.
+let indovinato = false;
 
 function dataBreve(iso) {
   return new Date(iso + 'T00:00:00').toLocaleDateString('it-IT', {
@@ -30,10 +41,11 @@ function dataBreve(iso) {
   });
 }
 
-/* ---------- Il riepilogo in cima ----------
-   Tre numeri, non di piu': quanti esami hai messo, quanti ne hai gia'
-   dati, quanti hanno una data. E' il colpo d'occhio, il resto sta
-   sotto. */
+/* ---------- I due quadratini in cima ----------
+
+   Quanto hai in tasca e quanto fa il corso intero. I crediti sono il
+   numero grande, gli esami quello sotto: un esame da 15 crediti e uno
+   da 2 non sono la stessa cosa, e il libretto vero va a crediti. */
 
 function mostraRiepilogo() {
   elRiepilogo.innerHTML = '';
@@ -42,28 +54,83 @@ function mostraRiepilogo() {
     return;
   }
 
-  const dati = [
-    { quanto: esami.length, nome: esami.length === 1 ? 'esame' : 'esami' },
-    { quanto: esami.filter((e) => e.sostenuto).length, nome: 'gia dati' },
-    { quanto: esami.filter((e) => !e.sostenuto && e.scelto).length, nome: 'con una data' },
+  const c = contiLibretto(esami);
+  const caselle = [
+    { cfu: c.cfuDati, che: 'CFU dati', quanti: c.esamiDati, forte: true },
+    { cfu: c.cfuTotali, che: 'CFU totali', quanti: c.esamiTotali, forte: false },
   ];
 
-  dati.forEach((d) => {
+  caselle.forEach((v) => {
     const box = document.createElement('div');
-    box.className = 'riepilogo-voce';
+    box.className = 'quadratino' + (v.forte ? ' fatto' : '');
 
     const n = document.createElement('strong');
-    n.textContent = d.quanto;
+    n.className = 'quadratino-numero';
+    n.textContent = v.cfu;
     box.appendChild(n);
 
-    const t = document.createElement('span');
-    t.textContent = d.nome;
-    box.appendChild(t);
+    const cfu = document.createElement('span');
+    cfu.className = 'quadratino-cfu';
+    cfu.textContent = v.che;
+    box.appendChild(cfu);
+
+    const esa = document.createElement('span');
+    esa.className = 'quadratino-esami';
+    esa.textContent = `${v.quanti} ${v.quanti === 1 ? 'esame' : 'esami'}`;
+    box.appendChild(esa);
 
     elRiepilogo.appendChild(box);
   });
 
   elRiepilogo.hidden = false;
+}
+
+/* ---------- A che anno sei ----------
+
+   Serve a due cose: dire quanti esami mancano per chiudere l'anno, e
+   sfocare gli anni che non sono ancora affar tuo. Se non l'hai mai
+   scelto viene indovinato dagli esami che risultano dati, e lo dice. */
+
+function mostraSceltaAnno() {
+  const riga = document.getElementById('scelta-anno');
+  riga.innerHTML = '';
+  if (esami.length === 0) {
+    riga.hidden = true;
+    return;
+  }
+
+  const et = document.createElement('label');
+  et.className = 'scelta-anno-testo';
+  et.setAttribute('for', 'anno-corso');
+  et.textContent = 'Sei al';
+  riga.appendChild(et);
+
+  const scelta = document.createElement('select');
+  scelta.id = 'anno-corso';
+  scelta.className = 'scelta-anno-menu';
+  ANNI.forEach((a) => {
+    const o = document.createElement('option');
+    o.value = String(a);
+    o.textContent = nomeAnno(a);
+    o.selected = a === annoCorso;
+    scelta.appendChild(o);
+  });
+  scelta.addEventListener('change', async () => {
+    annoCorso = Number(scelta.value);
+    indovinato = false;
+    disegna();
+    await salvaImpostazioni({ anno_corso: annoCorso });
+  });
+  riga.appendChild(scelta);
+
+  if (indovinato) {
+    const nota = document.createElement('span');
+    nota.className = 'scelta-anno-nota';
+    nota.textContent = 'indovinato dagli esami che hai dato, correggilo se sbaglio';
+    riga.appendChild(nota);
+  }
+
+  riga.hidden = false;
 }
 
 /* ---------- Un esame nell'elenco ---------- */
@@ -127,6 +194,7 @@ function creaRiga(esame) {
 function disegna() {
   elElenco.innerHTML = '';
   mostraRiepilogo();
+  mostraSceltaAnno();
 
   if (esami.length === 0) {
     const invito = document.createElement('p');
@@ -137,17 +205,19 @@ function disegna() {
   }
 
   strutturaAnni(esami).forEach((gruppo) => {
-    const quanti = gruppo.semestri.reduce((s, x) => s + x.esami.length, 0);
-    elElenco.appendChild(creaAnno(gruppo, quanti));
+    elElenco.appendChild(creaAnno(gruppo, statoAnno(gruppo, annoCorso)));
   });
 }
 
 /* Ogni anno e' una cartella che si apre. Chiusa, la pagina e' sei righe
    e si vede tutto il corso in un colpo; aperta, c'e' l'anno che stai
    guardando e basta. */
-function creaAnno(gruppo, quanti) {
+function creaAnno(gruppo, stato) {
   const box = document.createElement('details');
-  box.className = 'anno' + (quanti === 0 ? ' vuoto' : '');
+  box.className = 'anno'
+    + (stato.vuoto ? ' vuoto' : '')
+    + (stato.quando === 'futuro' ? ' futuro' : '')
+    + (stato.quando === 'corso' ? ' adesso' : '');
   box.open = anniAperti().includes(gruppo.anno);
 
   box.addEventListener('toggle', () => ricordaAnno(gruppo.anno, box.open));
@@ -167,17 +237,18 @@ function creaAnno(gruppo, quanti) {
 
   const conto = document.createElement('span');
   conto.className = 'anno-conto';
-  if (quanti === 0) {
-    conto.classList.add('da-riempire');
-    conto.textContent = 'da riempire';
-  } else {
-    const conData = gruppo.semestri
-      .flatMap((s) => s.esami)
-      .filter((e) => !e.sostenuto && e.scelto).length;
-    conto.textContent =
-      `${quanti} ${quanti === 1 ? 'esame' : 'esami'}` + (conData > 0 ? ` · ${conData} con una data` : '');
-  }
+  if (stato.vuoto) conto.classList.add('da-riempire');
+  else if (stato.mancano === 0) conto.classList.add('finito');
+  else if (stato.quando === 'passato') conto.classList.add('indietro');
+  conto.textContent = stato.testo;
   testa.appendChild(conto);
+
+  // Un anno che deve ancora venire si vede sfocato: non e' chiuso, e'
+  // solo che adesso non e' affar tuo. Basta passarci sopra o aprirlo e
+  // torna a fuoco per intero.
+  if (stato.quando === 'futuro') {
+    testa.title = 'Non ci sei ancora arrivata. Aprilo pure: si legge tutto.';
+  }
 
   box.appendChild(testa);
 
@@ -395,7 +466,14 @@ async function ricarica() {
 async function avvia() {
   try {
     preparaVoti();
-    await ricarica();
+
+    // L'anno in corso e gli esami servono tutti e due prima di disegnare:
+    // senza l'anno non si sa cosa sfocare ne' cosa manca per finirlo.
+    const [impostazioni, elenco] = await Promise.all([mieImpostazioni(), getEsami()]);
+    esami = elenco;
+    indovinato = impostazioni.anno_corso == null;
+    annoCorso = impostazioni.anno_corso ?? annoIndovinato(esami);
+    disegna();
     elScheletro.remove();
     elElenco.hidden = false;
   } catch (errore) {

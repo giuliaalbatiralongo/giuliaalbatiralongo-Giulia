@@ -133,13 +133,19 @@ lavorazione, e si spuntano una alla volta.
 3. **Il riepilogo diventa quadratini**, non piu' rettangoli, e si
    sposta accanto al pulsante "Nuovo esame". Dentro ogni quadratino due
    numeri incolonnati: i **CFU** sopra e gli **esami** sotto. Uno per i
-   sostenuti, uno per il totale.
+   sostenuti, uno per il totale. **FATTO**
 4. **L'anno in corso.** Giulia dice a che anno e' (il quarto); gli anni
    dopo si vedono **sfocati**, ma restano cliccabili e leggibili per
    intero. Sfocato vuol dire "non e' ancora affar tuo", non "chiuso".
+   **FATTO.** L'anno sta sul profilo (`profili.anno_corso`), non nel
+   browser, cosi' vale anche dal telefono. Se non l'ha mai scelto lo
+   indovina dagli esami dati e **lo dice**, invece di far finta di
+   saperlo. La sfocatura sta solo sulla riga chiusa e sparisce col
+   passaggio del mouse, con la tastiera e all'apertura; con
+   `prefers-reduced-motion` resta solo la trasparenza.
 5. **Lo stato di ogni anno.** Gli anni passati dicono se sono finiti o
    se manca qualcosa; l'anno in corso dice **quanti esami mancano** per
-   chiuderlo.
+   chiuderlo. **FATTO** (`statoAnno` in db.js).
 
 ### B. La media
 
@@ -178,6 +184,20 @@ lavorazione, e si spuntano una alla volta.
       sottolineatura), seconda lettura
     - **colore 2, si ripete:** prima, seconda e terza ripetizione
     - **colore 3, si ripassa:** ripasso 1, 2 e 3
+
+### Due difetti trovati facendo A (7 settembre)
+
+- **Un parametro che copriva la variabile di fuori.**
+  `function mostraSceltaAnno(indovinato)` aveva lo stesso nome della
+  variabile di modulo: assegnarlo dentro non cambiava niente fuori, e la
+  nota "lo sto indovinando" restava anche dopo che l'anno era stato
+  scelto a mano. Il parametro se n'e' andato. Se una funzione legge una
+  cosa di modulo, la legga e basta.
+- **`select { width: 100% }`.** Giusto dentro una finestra, sbagliato
+  per un menu in mezzo a una frase: il menu dell'anno si allargava per
+  tutta la riga. E' la **quarta** regola larga che scavalca un caso
+  stretto in questo progetto. Si scoprono solo guardando lo schermo, mai
+  leggendo il codice.
 
 ### Cosa chiedere prima di partire
 

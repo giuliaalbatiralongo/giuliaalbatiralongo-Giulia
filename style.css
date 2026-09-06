@@ -4787,33 +4787,106 @@ a.oggi-riga {
 
 /* ---------- Esami: il riepilogo ---------- */
 
-.riepilogo-esami {
+/* ---------- Libretto: i due quadratini in cima ----------
+
+   Stanno accanto al pulsante "Nuovo esame", non su una riga per conto
+   loro: sono la prima cosa che guardi aprendo il libretto, e il pulsante
+   e' la prima cosa che fai. Quadrati, non fasce: due numeri incolonnati
+   ci stanno bene, e due quadrati si confrontano a occhio. */
+
+.testata-destra {
   display: flex;
+  align-items: center;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 26px;
 }
 
-.riepilogo-voce {
+.riepilogo-esami {
   display: flex;
-  align-items: baseline;
-  gap: 7px;
-  padding: 10px 16px;
+  gap: 10px;
+}
+
+.quadratino {
+  /* Quadrato vero: stessa misura in larghezza e in altezza, cosi' i due
+     numeri si confrontano a occhio senza doverli leggere. */
+  width: 104px;
+  height: 104px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 8px;
   border: 1px solid var(--linea);
   border-radius: var(--r-controllo);
   background: var(--superficie);
+  text-align: center;
 }
 
-.riepilogo-voce strong {
-  font-size: 20px;
+/* Quello dei crediti gia' presi si stacca: e' il numero che cresce, ed
+   e' quello che vuoi vedere per primo. */
+.quadratino.fatto {
+  border-color: transparent;
+  background: var(--accento-tenue);
+}
+
+.quadratino-numero {
+  font-size: 23px;
   font-weight: 700;
+  line-height: 1.1;
   letter-spacing: -0.03em;
 }
 
-.riepilogo-voce span {
-  font-size: 12.5px;
+.quadratino.fatto .quadratino-numero { color: var(--accento-su-tenue); }
+.quadratino.fatto .quadratino-esami { border-top-color: rgba(91, 75, 214, 0.18); }
+
+.quadratino-cfu {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--testo-2);
 }
+
+.quadratino-esami {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--linea);
+  width: 62%;
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+/* ---------- Libretto: a che anno sei ---------- */
+
+.scelta-anno {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: -12px 0 20px;
+  font-size: 13px;
+  color: var(--testo-2);
+}
+
+.scelta-anno-testo { color: var(--testo-2); }
+
+/* I controlli del modulo sono larghi quanto la loro riga: giusto dentro
+   una finestra, sbagliato per un menu in mezzo a una frase. Qui la
+   larghezza torna a essere quella del testo. (E' la quarta volta che
+   una regola larga scavalca un caso stretto: si scopre solo guardando.) */
+.scelta-anno-menu {
+  width: auto;
+  flex: 0 0 auto;
+  font: inherit;
+  font-weight: 600;
+  color: var(--testo);
+  padding: 5px 30px 5px 9px;
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  background-position: right 10px center;
+}
+
+.scelta-anno-nota { font-size: 12px; color: var(--testo-3); }
 
 /* ---------- Esami: anni e semestri ---------- */
 
@@ -4974,6 +5047,36 @@ a.oggi-riga {
 }
 
 .anno.vuoto { background: transparent; border-style: dashed; }
+
+/* L'anno in corso ha un filo di colore sul bordo sinistro: fra sei
+   righe uguali, quella dove sei adesso si trova senza cercarla. */
+.anno.adesso { border-left: 3px solid var(--accento); }
+
+/* Gli anni che devono ancora venire si vedono sfocati. Non e' un blocco:
+   restano cliccabili, e appena ci passi sopra, ci arrivi con la
+   tastiera o li apri, tornano a fuoco per intero. La sfocatura sta solo
+   sulla riga chiusa, mai su quello che c'e' dentro. */
+.anno.futuro > .anno-testa {
+  filter: blur(1.6px);
+  opacity: 0.75;
+  transition: filter 200ms var(--curva), opacity 200ms var(--curva);
+}
+
+.anno.futuro:hover > .anno-testa,
+.anno.futuro > .anno-testa:focus-visible,
+.anno.futuro[open] > .anno-testa {
+  filter: none;
+  opacity: 1;
+}
+
+/* Chi ha chiesto meno effetti non vuole nemmeno questo: resta la
+   trasparenza, che dice la stessa cosa senza rendere illeggibile. */
+@media (prefers-reduced-motion: reduce) {
+  .anno.futuro > .anno-testa { filter: none; opacity: 0.6; }
+}
+
+.anno-conto.finito { color: var(--accento-su-tenue); }
+.anno-conto.indietro { color: var(--st-ripassare); }
 
 .anno-testa {
   display: flex;

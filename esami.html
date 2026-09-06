@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=56">
+  <link rel="stylesheet" href="style.css?v=57">
 </head>
 <body>
   <div class="app">
@@ -59,14 +59,17 @@
 
     <main class="contenuto">
       <div class="contenuto-interno largo">
-        <div class="testata">
+        <div class="testata testata-libretto">
           <h1 class="page-titolo">Libretto</h1>
-          <button type="button" class="btn" id="apri-nuovo">
-            <i class="ph ph-plus" aria-hidden="true"></i> Nuovo esame
-          </button>
+          <div class="testata-destra">
+            <div class="riepilogo-esami" id="riepilogo" hidden></div>
+            <button type="button" class="btn" id="apri-nuovo">
+              <i class="ph ph-plus" aria-hidden="true"></i> Nuovo esame
+            </button>
+          </div>
         </div>
 
-        <div class="riepilogo-esami" id="riepilogo" hidden></div>
+        <p class="scelta-anno" id="scelta-anno" hidden></p>
 
         <div id="scheletro">
           <div class="scheletro scheletro-card"></div>
@@ -178,6 +181,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="esami.js?v=4"></script>
+  <script type="module" src="esami.js?v=5"></script>
 </body>
 </html>

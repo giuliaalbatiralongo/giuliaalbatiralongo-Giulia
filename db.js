@@ -745,6 +745,103 @@ export async function aggiornaEsame(id, esame) {
   return data;
 }
 
+/* ---------- Le due impostazioni del libretto ----------
+
+   A che anno sei, e come vuoi che conti la lode. Stanno sul profilo e
+   non nel browser: cosi' valgono anche quando apri Akesis dal telefono.
+   Se non le hai ancora scelte, l'anno lo indovina il libretto dagli
+   esami che risultano dati. */
+
+export async function mieImpostazioni() {
+  const { data: sessione } = await supabase.auth.getUser();
+  const io = sessione?.user?.id;
+  if (!io) return { anno_corso: null, lode_come: 30 };
+
+  const { data, error } = await supabase
+    .from('profili')
+    .select('anno_corso, lode_come')
+    .eq('id', io)
+    .maybeSingle();
+
+  if (error) {
+    segnaErrore('Errore nella lettura del profilo:', error);
+    return { anno_corso: null, lode_come: 30 };
+  }
+  return { anno_corso: data?.anno_corso ?? null, lode_come: data?.lode_come ?? 30 };
+}
+
+export async function salvaImpostazioni(campi) {
+  const { data: sessione } = await supabase.auth.getUser();
+  const io = sessione?.user?.id;
+  if (!io) return false;
+
+  const { error } = await supabase.from('profili').update(campi).eq('id', io);
+  if (error) {
+    segnaErrore('Errore nel salvataggio del profilo:', error);
+    return false;
+  }
+  return true;
+}
+
+/* A che anno sei, quando non l'hai detto: e' il primo anno che ha
+   ancora qualcosa da dare. Un'ipotesi, non un fatto, e si corregge in
+   un clic. */
+export function annoIndovinato(esami, quantiAnni = 6) {
+  for (let anno = 1; anno <= quantiAnni; anno += 1) {
+    const suoi = esami.filter((e) => e.anno === anno);
+    if (suoi.length > 0 && suoi.some((e) => !e.sostenuto)) return anno;
+  }
+  const conAnno = esami.filter((e) => e.anno);
+  return conAnno.length > 0 ? Math.min(quantiAnni, Math.max(...conAnno.map((e) => e.anno))) : 1;
+}
+
+/* ---------- I conti del libretto ----------
+
+   Due numeri per due quadratini: quanto hai gia' in tasca e quanto fa
+   il corso intero. I crediti prima degli esami, perche' un esame da 15
+   crediti e uno da 2 non sono la stessa cosa. */
+
+export function contiLibretto(esami) {
+  const dati = esami.filter((e) => e.sostenuto);
+  const somma = (righe) => righe.reduce((n, e) => n + (e.cfu || 0), 0);
+  return {
+    cfuDati: somma(dati),
+    cfuTotali: somma(esami),
+    esamiDati: dati.length,
+    esamiTotali: esami.length,
+  };
+}
+
+/* Come sta messo un anno rispetto a dove sei arrivata.
+
+   `quando` dice se l'anno e' passato, se e' quello in corso o se deve
+   ancora venire: da li' dipende sia cosa c'e' scritto sopra sia se si
+   vede sfocato. */
+export function statoAnno(gruppo, annoCorso) {
+  const esami = gruppo.semestri.flatMap((s) => s.esami);
+  const dati = esami.filter((e) => e.sostenuto).length;
+  const mancano = esami.length - dati;
+  const quando =
+    gruppo.anno < annoCorso ? 'passato' : gruppo.anno > annoCorso ? 'futuro' : 'corso';
+
+  let testo;
+  if (esami.length === 0) {
+    testo = 'da riempire';
+  } else if (mancano === 0) {
+    testo = quando === 'futuro' ? `${esami.length} ${esami.length === 1 ? 'esame' : 'esami'}` : 'tutti dati';
+  } else if (quando === 'passato') {
+    testo = dati === 0
+      ? `nessuno dei ${esami.length} dato`
+      : `ne manca${mancano === 1 ? '' : 'no'} ${mancano} indietro`;
+  } else if (quando === 'corso') {
+    testo = `ne manca${mancano === 1 ? '' : 'no'} ${mancano} per finire l\u2019anno`;
+  } else {
+    testo = `${esami.length} ${esami.length === 1 ? 'esame' : 'esami'}`;
+  }
+
+  return { quando, dati, mancano, quanti: esami.length, vuoto: esami.length === 0, testo };
+}
+
 /* Gli anni del corso, con il posto per chi non li segue in ordine. */
 export const ANNI = [1, 2, 3, 4, 5, 6];
 

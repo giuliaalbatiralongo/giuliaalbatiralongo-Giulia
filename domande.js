@@ -6,7 +6,7 @@ import {
   eliminaNota,
   aggiungiProfessore,
   togliProfessore,
-} from './db.js?v=38';
+} from './db.js?v=39';
 import { iconaPerMateria } from './materie.js?v=3';
 import { proteggiPagina } from './auth.js?v=10';
 import { misuraTempo } from './tempo.js?v=2';
