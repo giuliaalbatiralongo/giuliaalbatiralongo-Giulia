@@ -790,45 +790,65 @@ della settimana.
 
 ---
 
-## Dati di prova ancora in giro
+## Solo cose vere (7 settembre)
 
-Giulia ha detto di **riempire pure di dati finti** per poter provare le
-cose ("tanto poi bisognera' togliere tutto per inserire quelle vere").
-Tutto quello che ho aggiunto io porta la scritta `[prova]` nelle note,
-tranne i piani, che non hanno un campo dove metterla.
+Giulia: *"e importante resettare e cancellare tutti i dati fittizi
+inseriti in precedenza per fare delle prove... Da questo momento in poi,
+il sito dovra contenere e accogliere solo informazioni veritiere."*
 
-**Quello che ha creato lei, e che non va toccato:**
+**Regola d'ora in poi: dentro Akesis non si mette niente di inventato.**
+Non piu' casi clinici verosimili, non piu' domande d'esame plausibili,
+non piu' appelli finti per far vedere come viene. Se serve provare una
+cosa, si prova nel finto database del collaudo, che sta fuori dal
+progetto vero e non lo tocca nessuno.
 
-- L'esame `Farmacologia 2` (nota: "Esame orale. Lungo, si passa da due
-  docenti") con i suoi tre appelli
-- La data `Inizio lezioni medicina`
-- I piani `Farmaco 2` (32 lezioni) e `Gastroenterologia` (450 pagine)
-- I 6 materiali, le 14 domande, i 10 casi clinici
+Il motivo non e' l'ordine: e' che una vignetta clinica scritta da me
+sembra vera, e su Akesis Giulia ci studia. Un caso plausibile ma non
+verificato e' peggio di un caso assente.
 
-**Quello che ho aggiunto io, da togliere quando lo dice:**
+**Cancellato il 7 settembre:**
 
-```sql
-delete from date_esame where note like '%[prova]%';
-delete from esami where note like '%[prova]%';
-delete from piani where id = 6;  -- "Anatomia patologica", contato in giorni
-```
+| Cosa | Quante |
+|---|---|
+| Casi clinici inventati (con risposte e avanzamento) | 10 |
+| Domande d'esame inventate, con le loro note | 14 |
+| Schede di materiale senza un file vero dietro | 4 |
+| Date segnate `[prova]`, nomi finti, un doppione | 12 |
+| Piani di studio di prova (Materia, Materia 6, Tot) | 6 |
+| Esami fuori dal manifesto (Anatopato 1, un doppione) | 2 |
+| Ore di studio finte | 2 |
 
-L'ordine conta: prima le date, poi gli esami (le date appese a un esame
-se ne andrebbero comunque in cascata, ma quelle sciolte no).
+**Rimasto, ed e' tutto vero:**
 
-Restano da togliere, quando lo dira' lei:
+- **46 esami**, tutti dal manifesto UniGe, uno per ogni riga del corso.
+  Ognuno porta scritto in nota da dove viene: `[manifesto UniGe
+  2026/2027]`. Si controlla con una riga di SQL che non ce ne siano
+  altri
+- **5 date**: i tre appelli di Farmacologia II, l'iscrizione ad Anatomia
+  patologica, l'inizio delle lezioni. Le ha messe lei
+- **2 piani di studio**: Farmaco 2 e Gastroenterologia. Suoi
+- **2 materiali** con un file vero dietro: CORSIE e Prova 1
+- **17 suggerimenti**: sono idee, non fatti sul suo corso. Restano
 
-- Account `prova.studente@akesis.test` (profilo "Prova01")
-- 14 domande d'esame inventate e le loro note
-- 4 proposte di materiale in coda di revisione, senza file vero dietro
-- Il materiale "Prova 1" e il PDF "CORSIE"
-- I 17 suggerimenti che ho scritto io nella pagina Suggerimenti
+Le date si portavano dietro il nome della materia scritto a mano dentro
+la riga, e dopo il cambio di nomi si leggeva un esame che non esiste
+piu': adesso si allineano da sole a quello dell'esame a cui sono appese.
 
-**Nota sui trigger:** riempire da SQL richiede di spegnere i trigger che
-scrivono `autore := auth.uid()` (nullo fuori dal browser) e riaccenderli
-subito dopo. Vale per `esami`, `date_esame`, `piani`, `suggerimenti`.
+Il backup completo di prima della pulizia e' stato mandato a Giulia
+come file. **Non sta nel progetto**: contiene le impronte delle chiavi
+di accesso ai materiali, e il progetto e' pubblico perche' cosi' vuole
+GitHub Pages.
 
----
+**Lasciato in piedi, da decidere:**
+
+- l'account di prova `prova.studente@akesis.test` (profilo "Prova01") e
+  i codici d'invito: cancellare un utente e' un'altra cosa, non l'ho
+  fatto di mia iniziativa
+- il materiale "Prova 1": il titolo dice prova, ma dietro c'e' un file
+  vero da 22 MB caricato da lei. Basta rinominarlo
+- i piani `Farmaco 2` e `Gastroenterologia` si agganciano agli esami per
+  nome, e i nomi sono cambiati: il filo e' rotto finche' non si
+  rinominano anche loro. Sono parole sue, non le tocco senza chiedere
 
 ## Regole di lavoro concordate
 
@@ -839,3 +859,8 @@ subito dopo. Vale per `esami`, `date_esame`, `piani`, `suggerimenti`.
 - Un solo colore d'accento, nessuna sfumatura
 - Alzare il numero di versione (`?v=`) di **ogni** riferimento a un file
   condiviso che cambia: e' stata la fonte piu' frequente di guasti
+- **Dentro Akesis non entra niente di inventato.** Niente casi clinici
+  verosimili, niente domande d'esame plausibili, niente appelli finti per
+  far vedere come viene. Per provare c'e' il finto database del
+  collaudo. Sopra ci studia, e una cosa falsa che sembra vera e' peggio
+  di una cosa che manca
