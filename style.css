@@ -3908,9 +3908,10 @@ a.oggi-riga {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   gap: 4px;
-  min-height: 168px;
-  padding: 20px;
+  min-height: 130px;
+  padding: 22px;
   border: 1px solid var(--linea);
   border-radius: var(--r-card);
   background: var(--superficie);
@@ -3926,7 +3927,7 @@ a.oggi-riga {
   place-items: center;
   width: 42px;
   height: 42px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   border-radius: 12px;
   background: var(--accento-tenue);
   color: var(--accento-su-tenue);
@@ -3934,23 +3935,9 @@ a.oggi-riga {
 }
 
 .tessera-grande-nome {
-  font-size: 16px;
+  font-size: 16.5px;
   font-weight: 600;
-  letter-spacing: -0.014em;
-}
-
-.tessera-grande-conto {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--testo-3);
-}
-
-.tessera-grande-sotto {
-  margin-top: auto;
-  padding-top: 10px;
-  font-size: 12.5px;
-  line-height: 1.45;
-  color: var(--testo-2);
+  letter-spacing: -0.016em;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -4392,9 +4379,9 @@ a.oggi-riga {
   flex-direction: column;
   align-items: stretch;
   gap: 6px;
-  flex: 0 0 240px;
+  flex: 0 0 230px;
   scroll-snap-align: start;
-  min-height: 190px;
+  min-height: 150px;
   padding: 18px;
   text-align: left;
   font: inherit;
@@ -4415,36 +4402,31 @@ a.oggi-riga {
   line-height: 1.25;
 }
 
-.materia-tessera-quanto {
-  font-size: 12px;
-  color: var(--testo-3);
-}
-
-/* Cosa tocca oggi: e' la riga che si cerca davvero guardando la
-   tessera, quindi sta staccata e in evidenza. */
-.materia-tessera-oggi {
-  margin-top: auto;
-  padding-top: 12px;
+/* Sempre la stessa riga per tutte le materie: quando e' l'esame. Se
+   non c'e' ancora, un trattino, non una riga diversa per ogni modo di
+   contare. */
+.materia-tessera-esame {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   font-size: 12.5px;
-  line-height: 1.4;
+  font-weight: 600;
   color: var(--testo-2);
 }
 
-.materia-tessera-oggi strong {
-  display: block;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.018em;
+.materia-tessera-esame.senza { color: var(--testo-3); font-weight: 500; }
+
+.materia-tessera-manca {
+  font-size: 11.5px;
+  font-weight: 600;
   color: var(--accento);
 }
-
-.materia-tessera-oggi.spento { color: var(--testo-3); }
-.materia-tessera-oggi.allarme { color: var(--pericolo); font-weight: 600; }
 
 .materia-tessera-barra {
   display: block;
   height: 4px;
-  margin-top: 10px;
+  margin-top: auto;
+  padding-top: 0;
   border-radius: 2px;
   background: var(--linea);
   overflow: hidden;
@@ -4461,9 +4443,6 @@ a.oggi-riga {
 .materia-tessera.stretta .materia-tessera-barra span { background: var(--pericolo); }
 
 .materia-tessera-piede {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
   font-size: 11.5px;
   color: var(--testo-3);
 }
@@ -4528,4 +4507,131 @@ a.oggi-riga {
 
 @media (max-width: 560px) {
   .materia-tessera { flex-basis: 78%; }
+}
+
+/* ---------- Organizzazione studio: la scheda della materia ----------
+   Le stesse voci per tutte, con un trattino dove non si applicano:
+   cosi' due materie si confrontano invece di avere ognuna la sua
+   forma. */
+
+.scheda-materia {
+  margin-bottom: 18px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  overflow: hidden;
+}
+
+.scheda-riga {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--linea);
+  background: var(--superficie);
+}
+
+.scheda-riga:last-child { border-bottom: none; }
+
+.scheda-riga-etichetta {
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+.scheda-riga-valore {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-align: right;
+}
+
+.scheda-riga-valore.senza { color: var(--testo-3); font-weight: 500; }
+
+/* ---------- Organizzazione studio: le passate ----------
+   Finita, in corso, da fare. E l'unita' scritta per esteso: "180 pagine
+   su 450", non "5/9" che non dice se sono giorni, pagine o volte. */
+
+.passate-titolo {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--testo-3);
+}
+
+.passata {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.passata:last-child { border-bottom: none; }
+
+.passata-segno {
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  color: var(--testo-3);
+}
+
+.passata.finita .passata-segno { color: var(--st-consolidato); }
+.passata.corrente .passata-segno { color: var(--accento); }
+
+.passata-testo { min-width: 0; }
+
+.passata-nome {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.passata.finita .passata-nome { color: var(--testo-2); }
+
+.passata-stato {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--testo-2);
+}
+
+.passata.corrente .passata-stato { color: var(--accento); font-weight: 600; }
+
+.passata-quando {
+  margin: 1px 0 0;
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+.passata-barra {
+  grid-column: 2 / 3;
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--linea);
+  overflow: hidden;
+}
+
+.passata-barra span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accento);
+  transition: width 260ms var(--curva);
+}
+
+.passata.finita .passata-barra span { background: var(--st-consolidato); }
+
+.passata-azioni {
+  grid-row: 1 / 3;
+  grid-column: 3 / 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 560px) {
+  .passata { grid-template-columns: auto minmax(0, 1fr); }
+  .passata-azioni { grid-row: auto; grid-column: 2 / 3; justify-content: flex-end; }
 }

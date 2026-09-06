@@ -1,6 +1,4 @@
 import {
-  getDomandeEsame,
-  getMateriali,
   getCasiInAttesa,
   getMaterialiInAttesa,
   getDateEsame,
@@ -11,7 +9,7 @@ import {
   giorniMancanti,
   nomeTipoData,
   titoloData,
-} from './db.js?v=30';
+} from './db.js?v=31';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -198,35 +196,15 @@ function tesseraGrande(voce) {
   nome.textContent = voce.nome;
   a.appendChild(nome);
 
-  const conto = document.createElement('span');
-  conto.className = 'tessera-grande-conto';
-  conto.textContent = voce.conto;
-  a.appendChild(conto);
-
-  const sotto = document.createElement('span');
-  sotto.className = 'tessera-grande-sotto';
-  sotto.textContent = voce.sotto;
-  a.appendChild(sotto);
-
   return a;
 }
 
-function mostraTessere(materiali, domande) {
+/* Solo il nome e il collegamento: i conteggi e le descrizioni li ha
+   tolti Giulia, facevano confusione senza aggiungere niente. */
+function mostraTessere() {
   [
-    {
-      nome: 'Materiali',
-      indirizzo: 'materiali.html',
-      icona: 'ph-folder',
-      conto: materiali.length ? plurale(materiali.length, 'documento', 'documenti') : 'ancora niente',
-      sotto: 'Sbobine, dispense e appunti, divisi per materia.',
-    },
-    {
-      nome: 'Domande esami',
-      indirizzo: 'domande.html',
-      icona: 'ph-exam',
-      conto: domande.length ? plurale(domande.length, 'domanda', 'domande') : 'ancora niente',
-      sotto: 'Quello che i professori hanno chiesto davvero, e chi l\'ha chiesto.',
-    },
+    { nome: 'Materiali', indirizzo: 'materiali.html', icona: 'ph-folder' },
+    { nome: 'Domande esami', indirizzo: 'domande.html', icona: 'ph-exam' },
   ].forEach((v) => elTessere.appendChild(tesseraGrande(v)));
 }
 
@@ -406,15 +384,10 @@ async function avvia(profilo) {
   elSaluto.textContent = saluto(profilo.nome);
 
   try {
-    const [domande, materiali, date, piani] = await Promise.all([
-      getDomandeEsame(),
-      getMateriali(),
-      getDateEsame(),
-      getPiani(),
-    ]);
+    const [date, piani] = await Promise.all([getDateEsame(), getPiani()]);
 
     mostraOggi(piani, date);
-    mostraTessere(materiali, domande);
+    mostraTessere();
     mostraScadenze(date);
     mostraMaterie(piani);
 

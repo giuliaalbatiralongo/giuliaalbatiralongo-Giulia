@@ -1,5 +1,6 @@
 import {
   getDateEsame,
+  ultimoErroreDb,
   inserisciDataEsame,
   eliminaDataEsame,
   aggiornaDataEsame,
@@ -14,7 +15,7 @@ import {
   tipoData,
   TIPI_DATA,
   creaIcs,
-} from './db.js?v=30';
+} from './db.js?v=31';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -473,9 +474,9 @@ form.addEventListener('submit', async (e) => {
 
   if (!salvata) {
     esito.className = 'esito-form ko';
-    esito.textContent = dataInModifica
-      ? 'Non sono riuscita a salvare le modifiche.'
-      : 'Non sono riuscita a salvare la data.';
+    esito.textContent = `${
+      dataInModifica ? 'Non sono riuscita a salvare le modifiche.' : 'Non sono riuscita a salvare la data.'
+    } ${ultimoErroreDb() || ''}`.trim();
     return;
   }
 
@@ -760,7 +761,7 @@ formAppello.addEventListener('submit', async (e) => {
 
   if (!salvato) {
     esitoAppello.className = 'esito-form ko';
-    esitoAppello.textContent = 'Non sono riuscita a salvare l\'appello.';
+    esitoAppello.textContent = `Non sono riuscita a salvare l'appello. ${ultimoErroreDb() || ''}`.trim();
     return;
   }
 
@@ -801,7 +802,7 @@ formEsame.addEventListener('submit', async (e) => {
 
   if (!creato) {
     esitoEsame.className = 'esito-form ko';
-    esitoEsame.textContent = 'Non sono riuscita a creare l\'esame.';
+    esitoEsame.textContent = `Non sono riuscita a creare l'esame. ${ultimoErroreDb() || ''}`.trim();
     return;
   }
 

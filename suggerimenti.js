@@ -1,10 +1,11 @@
 import {
   getSuggerimenti,
+  ultimoErroreDb,
   inserisciSuggerimento,
   cambiaStatoSuggerimento,
   eliminaSuggerimento,
   STATI_SUGGERIMENTO,
-} from './db.js?v=30';
+} from './db.js?v=31';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -176,7 +177,7 @@ form.addEventListener('submit', async (e) => {
 
   if (!salvato) {
     esito.className = 'esito-form ko';
-    esito.textContent = 'Non sono riuscita a salvare il suggerimento.';
+    esito.textContent = `Non sono riuscita a salvare il suggerimento. ${ultimoErroreDb() || ''}`.trim();
     return;
   }
 

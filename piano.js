@@ -1,5 +1,6 @@
 import {
   getPiani,
+  ultimoErroreDb,
   inserisciPiano,
   aggiornaPiano,
   aggiornaFatteFase,
@@ -9,9 +10,10 @@ import {
   nomeUnita,
   FASI_PROPOSTE,
   getDateEsame,
+  getEsami,
   titoloData,
   giorniMancanti,
-} from './db.js?v=30';
+} from './db.js?v=31';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -30,6 +32,7 @@ const NOMI_GIORNI = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 
 let piani = [];
 let date = [];
+let esami = [];
 // null quando si sta creando, il piano quando lo si sta correggendo.
 let inModifica = null;
 // La materia di cui e' aperto il dettaglio.
@@ -120,6 +123,35 @@ function fatteETotale(piano) {
   return { fatte, totale };
 }
 
+/* La data dell'esame di questa materia, se c'e'. Prima si guarda fra
+   gli esami della sessione (dove l'appello e' stato scelto), poi fra le
+   date sciolte del calendario con lo stesso titolo. */
+function dataEsameDi(piano) {
+  const nome = piano.materia.trim().toLowerCase();
+
+  const esame = esami.find((e) => e.nome.trim().toLowerCase() === nome);
+  if (esame && esame.scelto) return esame.scelto.giorno;
+
+  const voce = date
+    .filter((d) => d.tipo === 'iscritta' || d.tipo === 'appello')
+    .filter((d) => titoloData(d).trim().toLowerCase() === nome)
+    .filter((d) => giorniMancanti(d.giorno) >= 0)
+    .sort((a, b) => a.giorno.localeCompare(b.giorno))[0];
+
+  return voce ? voce.giorno : null;
+}
+
+function dataLunga(iso) {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('it-IT', {
+    day: 'numeric',
+    month: 'long',
+  });
+}
+
+/* Una tessera dice tre cose e basta: come si chiama, quando e' l'esame,
+   e a che punto sei. Prima diceva "450 pagine" o "32 lezioni" o "9
+   giorni" a seconda di come avevi contato quella materia, e le tessere
+   non si somigliavano piu'. */
 function creaTessera(piano) {
   const calcolo = calcolaPiano(piano, oggiIso());
 
@@ -134,35 +166,21 @@ function creaTessera(piano) {
   nome.textContent = piano.materia;
   card.appendChild(nome);
 
-  const quanto = document.createElement('span');
-  quanto.className = 'materia-tessera-quanto';
-  quanto.textContent = `${piano.quantita} ${nomeUnita(piano.unita, piano.quantita)}`;
-  card.appendChild(quanto);
-
-  /* Cosa tocca oggi: e' la riga che si cerca davvero */
-  const oggi = document.createElement('span');
-  oggi.className = 'materia-tessera-oggi';
-
-  if (!calcolo.fattibile) {
-    oggi.classList.add('allarme');
-    oggi.textContent = 'Le passate non ci stanno';
-  } else if (calcolo.finito) {
-    oggi.classList.add('spento');
-    oggi.textContent = 'Finestra passata';
-  } else if (calcolo.faseOggi) {
-    const q = calcolo.quantitaOggi === null ? null : arrotonda(calcolo.quantitaOggi);
-    const forte = document.createElement('strong');
-    forte.textContent = q === null ? calcolo.faseOggi.nome : `${q} ${nomeUnita(piano.unita, q)}`;
-    oggi.appendChild(forte);
-    if (q !== null) oggi.append(calcolo.faseOggi.nome);
-  } else if (calcolo.oggiELibero) {
-    oggi.classList.add('spento');
-    oggi.textContent = 'Oggi sei libera';
+  const esame = document.createElement('span');
+  esame.className = 'materia-tessera-esame';
+  const giorno = dataEsameDi(piano);
+  if (giorno) {
+    const g = giorniMancanti(giorno);
+    esame.textContent = `Esame ${dataLunga(giorno)}`;
+    const manca = document.createElement('span');
+    manca.className = 'materia-tessera-manca';
+    manca.textContent = g === 0 ? 'oggi' : g === 1 ? 'domani' : `tra ${g} giorni`;
+    esame.appendChild(manca);
   } else {
-    oggi.classList.add('spento');
-    oggi.textContent = 'Fuori dalla finestra';
+    esame.classList.add('senza');
+    esame.textContent = '—';
   }
-  card.appendChild(oggi);
+  card.appendChild(esame);
 
   const { fatte, totale } = fatteETotale(piano);
 
@@ -175,66 +193,123 @@ function creaTessera(piano) {
 
   const piede = document.createElement('span');
   piede.className = 'materia-tessera-piede';
-
-  const conto = document.createElement('span');
-  conto.textContent = totale > 0 ? `${Math.round((fatte / totale) * 100)}% fatto` : 'da cominciare';
-  piede.appendChild(conto);
-
-  const restano = giorniMancanti(piano.fine);
-  const quando = document.createElement('span');
-  quando.textContent =
-    restano < 0 ? 'finita' : restano === 0 ? 'ultimo giorno' : `${restano} giorni`;
-  piede.appendChild(quando);
-
+  piede.textContent = totale > 0 ? `${Math.round((fatte / totale) * 100)}% fatto` : 'da cominciare';
   card.appendChild(piede);
+
   return card;
 }
 
-/* ---------- Il dettaglio di una materia ---------- */
+/* ---------- Il dettaglio di una materia ----------
+   Qui ci si arriva apposta, quindi qui stanno i numeri. Due cose che
+   prima mancavano: le voci sono sempre le stesse tre (giorni, pagine,
+   lezioni) con un trattino dove non si applicano, e si vede cosa hai
+   gia' finito, non solo dove sei adesso. */
 
-function rigaFase(piano, calcolo, fase) {
+function rigaScheda(etichetta, valore) {
   const riga = document.createElement('div');
-  riga.className = 'fase-riga' + (fase === calcolo.faseOggi ? ' corrente' : '');
+  riga.className = 'scheda-riga';
 
-  const info = document.createElement('div');
-  const nomeFase = document.createElement('p');
-  nomeFase.className = 'fase-nome';
-  nomeFase.textContent = fase.nome;
-  info.appendChild(nomeFase);
+  const e = document.createElement('span');
+  e.className = 'scheda-riga-etichetta';
+  e.textContent = etichetta;
+  riga.appendChild(e);
 
-  const meta = document.createElement('p');
-  meta.className = 'fase-meta';
-  meta.textContent = fase.dal
-    ? `${fase.giorni} giorni · ${dataBreve(fase.dal)} - ${dataBreve(fase.al)}`
-    : `${fase.giorni} giorni · fuori dalla finestra`;
-  info.appendChild(meta);
-  riga.appendChild(info);
+  const v = document.createElement('span');
+  v.className = 'scheda-riga-valore';
+  if (valore === null || valore === undefined || valore === '') {
+    v.classList.add('senza');
+    v.textContent = '—';
+  } else {
+    v.textContent = valore;
+  }
+  riga.appendChild(v);
 
-  const ritmo = document.createElement('span');
-  ritmo.className = 'fase-ritmo';
-  ritmo.textContent =
-    fase.alGiorno === null
-      ? '—'
-      : `${arrotonda(fase.alGiorno)} ${nomeUnita(piano.unita, arrotonda(fase.alGiorno))}/giorno`;
-  riga.appendChild(ritmo);
+  return riga;
+}
 
+/* Quanto materiale c'e', detto sempre con la stessa griglia. Le voci
+   che non si applicano restano scritte, con un trattino: cosi' le
+   materie si confrontano fra loro invece di avere ognuna la sua forma. */
+function schedaMateria(piano, calcolo) {
+  const box = document.createElement('div');
+  box.className = 'scheda-materia';
+
+  const giorno = dataEsameDi(piano);
+  box.appendChild(rigaScheda('Esame', giorno ? dataLunga(giorno) : null));
+  box.appendChild(rigaScheda('Giorni di studio', calcolo.giorniDisponibili));
+  box.appendChild(rigaScheda('Pagine', piano.unita === 'pagine' ? piano.quantita : null));
+  box.appendChild(rigaScheda('Lezioni', piano.unita === 'lezioni' ? piano.quantita : null));
+  const quante = (piano.fasi || []).length;
+  box.appendChild(rigaScheda('Passate', quante === 1 ? 'una' : quante));
+
+  return box;
+}
+
+/* Una passata: finita, in corso, o ancora da fare. L'unita' e' sempre
+   scritta per esteso ("180 pagine su 450"): il vecchio "5/9" non
+   diceva se erano giorni, pagine o volte. */
+function rigaFase(piano, calcolo, fase) {
   const totale = piano.unita === 'giorni' ? fase.giorni : piano.quantita;
+  const unita = piano.unita === 'giorni' ? 'giorni' : nomeUnita(piano.unita, totale);
+  const finita = fase.fatte >= totale;
+  const corrente = fase === calcolo.faseOggi;
+
+  const riga = document.createElement('div');
+  riga.className = 'passata' + (finita ? ' finita' : corrente ? ' corrente' : '');
+
+  const segno = document.createElement('span');
+  segno.className = 'passata-segno';
+  segno.innerHTML = finita
+    ? '<i class="ph-fill ph-check-circle" aria-hidden="true"></i>'
+    : corrente
+      ? '<i class="ph-fill ph-caret-circle-right" aria-hidden="true"></i>'
+      : '<i class="ph ph-circle" aria-hidden="true"></i>';
+  riga.appendChild(segno);
+
+  const testo = document.createElement('div');
+  testo.className = 'passata-testo';
+
+  const nome = document.createElement('p');
+  nome.className = 'passata-nome';
+  nome.textContent = fase.nome;
+  testo.appendChild(nome);
+
+  const stato = document.createElement('p');
+  stato.className = 'passata-stato';
+  if (finita) {
+    stato.textContent = `Fatta · ${totale} ${unita}`;
+  } else if (fase.fatte > 0) {
+    stato.textContent = `${fase.fatte} ${unita} su ${totale}`;
+  } else {
+    stato.textContent = `Da fare · ${totale} ${unita}`;
+  }
+  testo.appendChild(stato);
+
+  const quando = document.createElement('p');
+  quando.className = 'passata-quando';
+  const alGiorno =
+    fase.alGiorno === null
+      ? null
+      : `${arrotonda(fase.alGiorno)} ${nomeUnita(piano.unita, arrotonda(fase.alGiorno))} al giorno`;
+  quando.textContent = [
+    fase.dal ? `${dataBreve(fase.dal)} - ${dataBreve(fase.al)}` : 'fuori dalla finestra',
+    alGiorno,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  testo.appendChild(quando);
+
+  riga.appendChild(testo);
 
   const barra = document.createElement('span');
-  barra.className = 'stato-barra';
+  barra.className = 'passata-barra';
   const pieno = document.createElement('span');
-  pieno.className = 'stato-barra-pieno';
   pieno.style.width = `${Math.min((fase.fatte / totale) * 100, 100)}%`;
   barra.appendChild(pieno);
   riga.appendChild(barra);
 
-  const conto = document.createElement('span');
-  conto.className = 'fase-conto';
-  conto.textContent = `${fase.fatte}/${totale}`;
-  riga.appendChild(conto);
-
   const azioni = document.createElement('div');
-  azioni.className = 'esame-azioni';
+  azioni.className = 'passata-azioni';
 
   const passo = fase.alGiorno === null ? 1 : Math.max(arrotonda(fase.alGiorno), 1);
 
@@ -249,7 +324,6 @@ function rigaFase(piano, calcolo, fase) {
   piu.type = 'button';
   piu.className = 'btn-piu';
   piu.innerHTML = '<i class="ph ph-plus" aria-hidden="true"></i>';
-  // Il piu' segna una giornata intera: e' l'unita' con cui si lavora.
   piu.title = `Segna ${passo} ${nomeUnita(piano.unita, passo)} fatte`;
   piu.setAttribute('aria-label', `Segna una giornata di ${fase.nome}`);
   piu.disabled = fase.fatte >= totale;
@@ -273,8 +347,7 @@ function rigaFase(piano, calcolo, fase) {
   meno.addEventListener('click', () => cambia(-passo));
   piu.addEventListener('click', () => cambia(passo));
 
-  azioni.appendChild(meno);
-  azioni.appendChild(piu);
+  azioni.append(meno, piu);
   riga.appendChild(azioni);
 
   return riga;
@@ -286,10 +359,10 @@ function apriMateria(piano) {
   const calcolo = calcolaPiano(piano, oggiIso());
 
   document.getElementById('materia-nome').textContent = piano.materia;
-  document.getElementById('materia-riassunto').textContent =
-    `${piano.quantita} ${nomeUnita(piano.unita, piano.quantita)} · ` +
-    `${dataBreve(piano.inizio)} - ${dataBreve(piano.fine)} · ` +
-    `${calcolo.giorniDisponibili} giorni utili`;
+
+  const scheda = document.getElementById('materia-riassunto');
+  scheda.innerHTML = '';
+  scheda.appendChild(schedaMateria(piano, calcolo));
 
   const oggi = document.getElementById('materia-oggi');
   oggi.className = 'materia-oggi';
@@ -324,7 +397,16 @@ function apriMateria(piano) {
 
   const elenco = document.getElementById('materia-fasi');
   elenco.innerHTML = '';
-  elenco.className = 'fasi-elenco';
+  elenco.className = 'passate-elenco';
+
+  const titolo = document.createElement('p');
+  titolo.className = 'passate-titolo';
+  const fatte = calcolo.fasi.filter(
+    (f) => f.fatte >= (piano.unita === 'giorni' ? f.giorni : piano.quantita)
+  ).length;
+  titolo.textContent = `Le passate · ${fatte} finite su ${calcolo.fasi.length}`;
+  elenco.appendChild(titolo);
+
   calcolo.fasi.forEach((f) => elenco.appendChild(rigaFase(piano, calcolo, f)));
 
   const nota = document.getElementById('materia-nota');
@@ -609,7 +691,16 @@ finestra.addEventListener('close', () => {
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+  try {
+    await salvaMateria();
+  } catch (errore) {
+    esito.className = 'esito-form ko';
+    esito.textContent = `Qualcosa e andato storto: ${errore.message}`;
+    console.error(errore);
+  }
+});
 
+async function salvaMateria() {
   const liberi = [...document.querySelectorAll('#giorni-liberi input:checked')].map((c) =>
     Number(c.value)
   );
@@ -678,7 +769,7 @@ form.addEventListener('submit', async (e) => {
 
     if (!salvato) {
       esito.className = 'esito-form ko';
-      esito.textContent = 'Non sono riuscita a salvare le modifiche.';
+      esito.textContent = `Non sono riuscita a salvare le modifiche. ${ultimoErroreDb() || ''}`.trim();
       return;
     }
 
@@ -700,7 +791,7 @@ form.addEventListener('submit', async (e) => {
 
   if (!salvato) {
     esito.className = 'esito-form ko';
-    esito.textContent = 'Non sono riuscita a creare il piano.';
+    esito.textContent = `Non sono riuscita a creare la materia. ${ultimoErroreDb() || ''}`.trim();
     return;
   }
 
@@ -708,13 +799,13 @@ form.addEventListener('submit', async (e) => {
   piani.sort((a, b) => a.fine.localeCompare(b.fine));
   finestra.close();
   disegna();
-});
+}
 
 /* ---------- Avvio ---------- */
 
 async function avvia() {
   try {
-    [piani, date] = await Promise.all([getPiani(), getDateEsame()]);
+    [piani, date, esami] = await Promise.all([getPiani(), getDateEsame(), getEsami()]);
 
     preparaFinestra();
     disegna();

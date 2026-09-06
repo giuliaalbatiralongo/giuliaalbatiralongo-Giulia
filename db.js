@@ -7,6 +7,30 @@ export const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Z63kjtRjfEV5SC15wK4hNA_z
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
+let ultimoErrore = null;
+
+/* L'ultimo errore arrivato dal database, gia' scritto in modo leggibile.
+   Le pagine lo mostrano accanto al messaggio di fallimento: senza,
+   capire un guasto richiede la console del browser, che sul telefono
+   non si apre. */
+export function ultimoErroreDb() {
+  return ultimoErrore;
+}
+
+function segnaErrore(dove, errore) {
+  console.error(dove, errore);
+  if (!errore) {
+    ultimoErrore = null;
+    return;
+  }
+  const pezzi = [];
+  if (errore.message) pezzi.push(errore.message);
+  if (errore.details) pezzi.push(errore.details);
+  if (errore.hint) pezzi.push(errore.hint);
+  ultimoErrore = pezzi.join(' — ') || 'errore sconosciuto';
+  if (errore.code) ultimoErrore += ` [${errore.code}]`;
+}
+
 let idUtenteInCache = null;
 
 async function idUtente() {
@@ -598,7 +622,7 @@ export async function creaEsame(nome, note) {
     .single();
 
   if (error) {
-    console.error('Errore nella creazione dell esame:', error);
+    segnaErrore('Errore nella creazione dell esame:', error);
     return null;
   }
   return { ...data, appelli: [], scelto: null };
@@ -638,7 +662,7 @@ export async function aggiungiAppello(esame, voce) {
     .single();
 
   if (error) {
-    console.error('Errore nel salvataggio dell appello:', error);
+    segnaErrore('Errore nel salvataggio dell appello:', error);
     return null;
   }
   return data;
@@ -651,7 +675,7 @@ export async function scegliAppello(esameId, dataId, precedenteId = null) {
     .eq('id', esameId);
 
   if (error) {
-    console.error('Errore nella scelta dell appello:', error);
+    segnaErrore('Errore nella scelta dell appello:', error);
     return false;
   }
 
@@ -681,7 +705,7 @@ export async function inserisciDataEsame(voce) {
   const { data, error } = await supabase.from('date_esame').insert([voce]).select('*').single();
 
   if (error) {
-    console.error('Errore nel salvataggio della data:', error);
+    segnaErrore('Errore nel salvataggio della data:', error);
     return null;
   }
   return data;
@@ -696,7 +720,7 @@ export async function aggiornaDataEsame(id, voce) {
     .single();
 
   if (error) {
-    console.error('Errore nella modifica della data:', error);
+    segnaErrore('Errore nella modifica della data:', error);
     return null;
   }
   return data;
@@ -858,7 +882,7 @@ export async function inserisciPiano(piano, fasi) {
   const { data, error } = await supabase.from('piani').insert([piano]).select('*').single();
 
   if (error) {
-    console.error('Errore nel salvataggio del piano:', error);
+    segnaErrore('Errore nel salvataggio del piano:', error);
     return null;
   }
 
@@ -881,7 +905,7 @@ export async function inserisciPiano(piano, fasi) {
   // Un piano senza fasi non dice niente: se le fasi non entrano, si
   // toglie anche lui invece di restare monco.
   if (erroreFasi) {
-    console.error('Errore nel salvataggio delle fasi:', erroreFasi);
+    segnaErrore('Errore nel salvataggio delle fasi:', erroreFasi);
     await supabase.from('piani').delete().eq('id', data.id);
     return null;
   }
@@ -900,7 +924,7 @@ export async function aggiornaPiano(id, piano, fasi) {
   const { error } = await supabase.from('piani').update(piano).eq('id', id);
 
   if (error) {
-    console.error('Errore nella modifica del piano:', error);
+    segnaErrore('Errore nella modifica del piano:', error);
     return null;
   }
 
@@ -931,7 +955,7 @@ export async function aggiornaPiano(id, piano, fasi) {
         .update({ nome: fase.nome, giorni: fase.giorni, ordine: i + 1, fatte })
         .eq('id', fase.id);
       if (e) {
-        console.error('Errore nella modifica di una passata:', e);
+        segnaErrore('Errore nella modifica di una passata:', e);
         return null;
       }
     } else {
@@ -939,7 +963,7 @@ export async function aggiornaPiano(id, piano, fasi) {
         .from('piano_fasi')
         .insert([{ piano_id: id, nome: fase.nome, giorni: fase.giorni, ordine: i + 1, fatte }]);
       if (e) {
-        console.error('Errore nell aggiunta di una passata:', e);
+        segnaErrore('Errore nell aggiunta di una passata:', e);
         return null;
       }
     }
@@ -1113,7 +1137,7 @@ export async function inserisciSuggerimento(titolo, dettaglio) {
     .single();
 
   if (error) {
-    console.error('Errore nel salvataggio del suggerimento:', error);
+    segnaErrore('Errore nel salvataggio del suggerimento:', error);
     return null;
   }
   return data;

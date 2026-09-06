@@ -170,6 +170,41 @@ Un appello appeso a un esame non si corregge da qui: la finestra lo
 dice e rimanda alla scheda dell'esame. Due strade per la stessa cosa
 sono un modo sicuro di creare disallineamenti.
 
+### Gli errori si vedono a schermo (7 settembre)
+
+Le pagine dicevano solo "non sono riuscita", e per sapere perche'
+serviva la console del browser, che sul telefono non si apre. Ora c'e'
+`ultimoErroreDb()` in `db.js`: un posto solo dove finisce l'ultimo
+errore, messaggio piu' dettaglio piu' codice, e le pagine lo scrivono
+accanto al fallimento. Il salvataggio di una materia e' anche dentro un
+try/catch: se qualcosa esplode invece di tornare `null`, prima il
+pulsante restava piantato su "Creazione" senza dire niente.
+
+### Organizzazione studio: rifatta di nuovo (7 settembre)
+
+Giulia: "ci sono troppe informazioni a primo impatto". Tre correzioni:
+
+1. **Le tessere sono uguali fra loro.** Prima ognuna scriveva "450
+   pagine" o "32 lezioni" o "9 giorni" secondo come era stata contata, e
+   non si somigliavano. Ora dicono tutte la stessa cosa: nome, **data
+   dell'esame** (o un trattino se non c'e' ancora), barra, percentuale.
+   La data si cerca prima fra gli esami della sessione, poi fra le date
+   sciolte con lo stesso titolo
+2. **Il "5/9" non si capiva.** Non diceva se erano giorni, pagine o
+   volte. Ora l'unita' e' sempre scritta: "180 pagine su 450", "6 giorni
+   su 9"
+3. **Si vede cosa hai gia' finito**, non solo dove sei adesso. Ogni
+   passata e' finita, in corso o da fare, con il suo segno; in cima "Le
+   passate: 2 finite su 3"
+
+Nel dettaglio le voci sono sempre le stesse cinque (Esame, Giorni di
+studio, Pagine, Lezioni, Passate) con un trattino dove non si applicano:
+cosi' due materie si confrontano invece di avere ognuna la sua forma.
+
+**Resta aperto:** Giulia vuole poter dire *cosa* ripassare, non solo
+quanto ("o se ci sono argomenti specifici che ho bisogno di ripassare").
+Da chiedere come lo vuole prima di costruirlo.
+
 ### Organizzazione studio: come si vede adesso
 
 **Rifatta il 6 settembre.** Giulia: "la schermata che si apre mi sembra
