@@ -12,8 +12,9 @@ import {
   getDateEsame,
   getEsami,
   titoloData,
+  misureDi,
   giorniMancanti,
-} from './db.js?v=31';
+} from './db.js?v=32';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -237,8 +238,21 @@ function schedaMateria(piano, calcolo) {
   const giorno = dataEsameDi(piano);
   box.appendChild(rigaScheda('Esame', giorno ? dataLunga(giorno) : null));
   box.appendChild(rigaScheda('Giorni di studio', calcolo.giorniDisponibili));
-  box.appendChild(rigaScheda('Pagine', piano.unita === 'pagine' ? piano.quantita : null));
-  box.appendChild(rigaScheda('Lezioni', piano.unita === 'lezioni' ? piano.quantita : null));
+
+  // Tutte e tre le misure, sempre scritte. Quella su cui si divide lo
+  // studio porta un segno, cosi' si sa da dove esce il conto del giorno.
+  misureDi(piano).forEach((m) => {
+    const riga = rigaScheda(m.nome, m.quanto);
+    if (m.quanto && m.chiave === piano.unita) {
+      riga.classList.add('scheda-riga-scelta');
+      const segno = document.createElement('span');
+      segno.className = 'scheda-riga-segno';
+      segno.textContent = 'divide lo studio';
+      riga.querySelector('.scheda-riga-etichetta').appendChild(segno);
+    }
+    box.appendChild(riga);
+  });
+
   const quante = (piano.fasi || []).length;
   box.appendChild(rigaScheda('Passate', quante === 1 ? 'una' : quante));
 
@@ -284,6 +298,19 @@ function rigaFase(piano, calcolo, fase) {
     stato.textContent = `Da fare · ${totale} ${unita}`;
   }
   testo.appendChild(stato);
+
+  // Cosa ripassare, se e' stato scritto: prima l'intervallo di pagine,
+  // poi gli argomenti a mano.
+  const cosa = [];
+  if (fase.da_pagina && fase.a_pagina) cosa.push(`pagine ${fase.da_pagina}-${fase.a_pagina}`);
+  if (fase.argomenti) cosa.push(fase.argomenti);
+
+  if (cosa.length > 0) {
+    const c = document.createElement('p');
+    c.className = 'passata-cosa';
+    c.textContent = cosa.join(' · ');
+    testo.appendChild(c);
+  }
 
   const quando = document.createElement('p');
   quando.className = 'passata-quando';
@@ -483,10 +510,14 @@ function aggiungiRigaFase(preimpostata) {
   if (preimpostata?.id) riga.dataset.faseId = preimpostata.id;
   riga.dataset.fatte = preimpostata?.fatte ?? 0;
 
+  const testa = document.createElement('div');
+  testa.className = 'riga-fase-testa';
+
   const nome = document.createElement('input');
   nome.type = 'text';
   nome.placeholder = 'Es. Prima lettura';
   nome.required = true;
+  nome.className = 'fase-nome-campo';
   nome.setAttribute('aria-label', 'Nome della passata');
   if (preimpostata?.nome) nome.value = preimpostata.nome;
 
@@ -496,6 +527,7 @@ function aggiungiRigaFase(preimpostata) {
   giorni.max = '365';
   giorni.required = true;
   giorni.placeholder = 'Giorni';
+  giorni.className = 'fase-giorni-campo';
   giorni.setAttribute('aria-label', 'Quanti giorni');
   if (preimpostata?.giorni) giorni.value = preimpostata.giorni;
   giorni.addEventListener('input', aggiornaConto);
@@ -511,7 +543,53 @@ function aggiungiRigaFase(preimpostata) {
     aggiornaConto();
   });
 
-  riga.append(nome, giorni, togli);
+  testa.append(nome, giorni, togli);
+  riga.appendChild(testa);
+
+  /* Cosa ripassare: facoltativo, e si apre solo se serve. Tenerlo
+     sempre aperto raddoppiava l'altezza del modulo per un campo che
+     spesso resta vuoto. */
+  const dettagli = document.createElement('details');
+  dettagli.className = 'fase-cosa';
+  if (preimpostata?.argomenti || preimpostata?.da_pagina) dettagli.open = true;
+
+  const riassunto = document.createElement('summary');
+  riassunto.textContent = 'Cosa ripassare';
+  dettagli.appendChild(riassunto);
+
+  const dentro = document.createElement('div');
+  dentro.className = 'fase-cosa-dentro';
+
+  const da = document.createElement('input');
+  da.type = 'number';
+  da.min = '1';
+  da.max = '20000';
+  da.placeholder = 'Da pagina';
+  da.className = 'fase-da';
+  da.setAttribute('aria-label', 'Da pagina');
+  if (preimpostata?.da_pagina) da.value = preimpostata.da_pagina;
+
+  const a = document.createElement('input');
+  a.type = 'number';
+  a.min = '1';
+  a.max = '20000';
+  a.placeholder = 'A pagina';
+  a.className = 'fase-a';
+  a.setAttribute('aria-label', 'A pagina');
+  if (preimpostata?.a_pagina) a.value = preimpostata.a_pagina;
+
+  const argomenti = document.createElement('input');
+  argomenti.type = 'text';
+  argomenti.maxLength = 300;
+  argomenti.placeholder = 'Oppure gli argomenti: capitoli 8-11, farmaci cardiovascolari';
+  argomenti.className = 'fase-argomenti';
+  argomenti.setAttribute('aria-label', 'Argomenti da ripassare');
+  if (preimpostata?.argomenti) argomenti.value = preimpostata.argomenti;
+
+  dentro.append(da, a, argomenti);
+  dettagli.appendChild(dentro);
+  riga.appendChild(dettagli);
+
   elRighe.appendChild(riga);
   aggiornaConto();
 }
@@ -553,6 +631,43 @@ function aggiornaConto() {
   el.className = 'conto-fasi' + (chiesti > disponibili ? ' stretto' : '');
 }
 
+const NOMI_MISURA = { pagine: 'Pagine', lezioni: 'Lezioni', giorni: 'Giorni' };
+
+/* Il menu offre solo le misure che hai davvero scritto: proporre
+   "lezioni" quando le lezioni non ci sono porta solo a un errore dopo. */
+function aggiornaMenuUnita() {
+  const menu = document.getElementById('piano-unita');
+  const prima = menu.value;
+
+  const scritte = [
+    ['pagine', document.getElementById('piano-pagine').value],
+    ['lezioni', document.getElementById('piano-lezioni').value],
+    ['giorni', document.getElementById('piano-giorni-materiale').value],
+  ].filter(([, v]) => v.trim() !== '');
+
+  menu.innerHTML = '';
+
+  if (scritte.length === 0) {
+    const vuota = document.createElement('option');
+    vuota.value = '';
+    vuota.textContent = 'Prima scrivi almeno una misura';
+    menu.appendChild(vuota);
+    menu.disabled = true;
+  } else {
+    menu.disabled = false;
+    scritte.forEach(([chiave]) => {
+      const o = document.createElement('option');
+      o.value = chiave;
+      o.textContent = NOMI_MISURA[chiave];
+      menu.appendChild(o);
+    });
+    menu.value = scritte.some(([c]) => c === prima) ? prima : scritte[0][0];
+  }
+
+  document.getElementById('aiuto-unita').hidden = menu.value !== 'giorni';
+  aggiornaConto();
+}
+
 function preparaFinestra() {
   const scelta = document.getElementById('giorni-liberi');
   scelta.innerHTML = '';
@@ -578,12 +693,11 @@ function preparaFinestra() {
   });
 
   /* Unita': l'etichetta e l'aiuto cambiano di conseguenza */
-  const unita = document.getElementById('piano-unita');
-  unita.addEventListener('change', () => {
-    document.getElementById('etichetta-unita').textContent = unita.value;
-    document.getElementById('aiuto-unita').hidden = unita.value !== 'giorni';
+  // Si puo' dividere lo studio solo per una misura che hai scritto:
+  // il menu si rifa' ogni volta che tocchi uno dei tre numeri.
+  ['piano-pagine', 'piano-lezioni', 'piano-giorni-materiale'].forEach((id) => {
+    document.getElementById(id).addEventListener('input', aggiornaMenuUnita);
   });
-  document.getElementById('aiuto-unita').hidden = true;
 
   /* Durata oppure data */
   form.querySelectorAll('input[name="modo"]').forEach((radio) => {
@@ -637,9 +751,11 @@ function apriFinestra(piano) {
     bottone.innerHTML = '<i class="ph ph-check" aria-hidden="true"></i> Salva le modifiche';
 
     document.getElementById('piano-materia').value = piano.materia;
+    document.getElementById('piano-pagine').value = piano.pagine ?? '';
+    document.getElementById('piano-lezioni').value = piano.lezioni ?? '';
+    document.getElementById('piano-giorni-materiale').value = piano.giorni_materiale ?? '';
+    aggiornaMenuUnita();
     document.getElementById('piano-unita').value = piano.unita;
-    document.getElementById('piano-quantita').value = piano.quantita;
-    document.getElementById('etichetta-unita').textContent = piano.unita;
     document.getElementById('aiuto-unita').hidden = piano.unita !== 'giorni';
 
     // Di una materia gia' avviata si mostra la data vera di fine: e' il
@@ -663,8 +779,7 @@ function apriFinestra(piano) {
     document.querySelectorAll('#giorni-liberi input').forEach((c) => {
       c.checked = Number(c.value) === 7;
     });
-    document.getElementById('etichetta-unita').textContent = 'pagine';
-    document.getElementById('aiuto-unita').hidden = true;
+    aggiornaMenuUnita();
     scegliModo('durata');
   }
 
@@ -733,15 +848,26 @@ async function salvaMateria() {
     }
   }
 
-  const fasi = [...elRighe.querySelectorAll('.riga-fase')].map((riga) => {
-    const campi = riga.querySelectorAll('input');
-    return {
-      id: riga.dataset.faseId ? Number(riga.dataset.faseId) : null,
-      nome: campi[0].value.trim(),
-      giorni: Number(campi[1].value),
-      fatte: Number(riga.dataset.fatte) || 0,
-    };
-  });
+  const numero = (el) => (el && el.value.trim() ? Number(el.value) : null);
+
+  const fasi = [...elRighe.querySelectorAll('.riga-fase')].map((riga) => ({
+    id: riga.dataset.faseId ? Number(riga.dataset.faseId) : null,
+    nome: riga.querySelector('.fase-nome-campo').value.trim(),
+    giorni: Number(riga.querySelector('.fase-giorni-campo').value),
+    fatte: Number(riga.dataset.fatte) || 0,
+    da_pagina: numero(riga.querySelector('.fase-da')),
+    a_pagina: numero(riga.querySelector('.fase-a')),
+    argomenti: riga.querySelector('.fase-argomenti').value.trim() || null,
+  }));
+
+  const intervalloStorto = fasi.find(
+    (f) => (f.da_pagina === null) !== (f.a_pagina === null) || (f.da_pagina && f.a_pagina < f.da_pagina)
+  );
+  if (intervalloStorto) {
+    esito.className = 'esito-form ko';
+    esito.textContent = `In "${intervalloStorto.nome || 'una passata'}" l'intervallo di pagine non torna: servono sia la prima sia l'ultima, e l'ultima non puo' venire prima.`;
+    return;
+  }
 
   if (fasi.some((f) => !f.nome || !f.giorni)) {
     esito.className = 'esito-form ko';
@@ -749,10 +875,30 @@ async function salvaMateria() {
     return;
   }
 
+  const pagine = numero(document.getElementById('piano-pagine'));
+  const lezioni = numero(document.getElementById('piano-lezioni'));
+  const giorniMateriale = numero(document.getElementById('piano-giorni-materiale'));
+
+  if (pagine === null && lezioni === null && giorniMateriale === null) {
+    esito.className = 'esito-form ko';
+    esito.textContent = 'Scrivi almeno una misura: le pagine, le lezioni, o i giorni che ti prende.';
+    return;
+  }
+
+  const unita = document.getElementById('piano-unita').value;
+  const scelta = { pagine, lezioni, giorni: giorniMateriale }[unita];
+  if (!scelta) {
+    esito.className = 'esito-form ko';
+    esito.textContent = `Hai scelto di dividere lo studio per ${unita}, ma quel numero non l'hai scritto.`;
+    return;
+  }
+
   const dati = {
     materia: document.getElementById('piano-materia').value.trim(),
-    unita: document.getElementById('piano-unita').value,
-    quantita: Number(document.getElementById('piano-quantita').value),
+    unita,
+    pagine,
+    lezioni,
+    giorni_materiale: giorniMateriale,
     fine,
     giorni_liberi: liberi,
   };

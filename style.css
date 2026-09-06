@@ -4635,3 +4635,99 @@ a.oggi-riga {
   .passata { grid-template-columns: auto minmax(0, 1fr); }
   .passata-azioni { grid-row: auto; grid-column: 2 / 3; justify-content: flex-end; }
 }
+
+/* ---------- Organizzazione studio: le tre misure ---------- */
+
+.misure {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.misure .campo { margin-bottom: 0; }
+
+.misure .campo label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--testo-2);
+}
+
+.scheda-riga-segno {
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--accento-tenue);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--accento-su-tenue);
+  white-space: nowrap;
+}
+
+.scheda-riga-scelta .scheda-riga-etichetta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ---------- Organizzazione studio: cosa ripassare ---------- */
+
+.riga-fase {
+  display: block;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie-alt);
+}
+
+.riga-fase-testa {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px auto;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Facoltativo, quindi chiuso: tenerlo aperto raddoppiava l'altezza del
+   modulo per un campo che spesso resta vuoto. */
+.fase-cosa {
+  margin-top: 10px;
+}
+
+.fase-cosa summary {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--testo-2);
+  cursor: pointer;
+  list-style: none;
+}
+
+.fase-cosa summary::-webkit-details-marker { display: none; }
+
+.fase-cosa summary::before {
+  content: "+ ";
+  color: var(--accento);
+  font-weight: 700;
+}
+
+.fase-cosa[open] summary::before { content: "− "; }
+
+.fase-cosa-dentro {
+  display: grid;
+  grid-template-columns: 110px 110px minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.passata-cosa {
+  margin: 3px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--accento-su-tenue);
+}
+
+@media (max-width: 620px) {
+  .misure { grid-template-columns: 1fr 1fr; }
+  .fase-cosa-dentro { grid-template-columns: 1fr 1fr; }
+  .fase-cosa-dentro .fase-argomenti { grid-column: 1 / -1; }
+}

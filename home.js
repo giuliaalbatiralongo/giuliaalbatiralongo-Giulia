@@ -9,7 +9,7 @@ import {
   giorniMancanti,
   nomeTipoData,
   titoloData,
-} from './db.js?v=31';
+} from './db.js?v=32';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');

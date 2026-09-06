@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=49">
+  <link rel="stylesheet" href="style.css?v=50">
 </head>
 <body>
   <div class="app">
@@ -144,25 +144,33 @@
                  autocomplete="off" placeholder="Es. Farmacologia 2">
         </div>
 
-        <div class="campo-doppio">
-          <div class="campo">
-            <label for="piano-unita">Come la conti</label>
-            <select id="piano-unita" name="unita">
-              <option value="pagine" selected>Pagine</option>
-              <option value="lezioni">Lezioni</option>
-              <option value="giorni">Giorni</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label for="piano-quantita">Quante <span id="etichetta-unita">pagine</span></label>
-            <input type="number" id="piano-quantita" name="quantita" min="1" max="20000" required
-                   placeholder="450">
+        <div class="campo">
+          <label>Quanto materiale c&rsquo;e</label>
+          <p class="campo-aiuto">Riempi quello che sai. Anche solo una voce basta.</p>
+          <div class="misure">
+            <div class="campo">
+              <label for="piano-pagine">Pagine</label>
+              <input type="number" id="piano-pagine" name="pagine" min="1" max="20000" placeholder="450">
+            </div>
+            <div class="campo">
+              <label for="piano-lezioni">Lezioni</label>
+              <input type="number" id="piano-lezioni" name="lezioni" min="1" max="20000" placeholder="32">
+            </div>
+            <div class="campo">
+              <label for="piano-giorni-materiale">Giorni</label>
+              <input type="number" id="piano-giorni-materiale" name="giorni_materiale" min="1" max="20000" placeholder="9">
+            </div>
           </div>
         </div>
 
-        <p class="campo-aiuto" id="aiuto-unita">
-          Con "giorni" non si calcola niente al giorno: si dice solo quanto tempo porta via.
-        </p>
+        <div class="campo">
+          <label for="piano-unita">Dividi lo studio per</label>
+          <select id="piano-unita" name="unita"></select>
+          <p class="campo-aiuto" id="aiuto-unita">
+            E la misura su cui si calcola quanto fare ogni giorno. Con "giorni" non si
+            calcola niente al giorno: si dice solo quanto tempo porta via.
+          </p>
+        </div>
 
         <div class="campo">
           <label>Entro quando</label>
@@ -199,6 +207,10 @@
           <label>Passate</label>
           <p class="campo-aiuto">Ogni passata rifa tutto il materiale, nei giorni che le dai. Per questo le ripetizioni sono piu fitte.</p>
           <div id="righe-fasi"></div>
+          <p class="campo-aiuto">
+            Su ogni passata puoi dire anche <em>cosa</em> ripassare: un intervallo di
+            pagine, o gli argomenti scritti a mano. Sono facoltativi.
+          </p>
           <button type="button" class="btn btn-neutro btn-piccolo" id="aggiungi-fase">
             <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi una passata
           </button>
@@ -223,6 +235,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="piano.js?v=8"></script>
+  <script type="module" src="piano.js?v=9"></script>
 </body>
 </html>

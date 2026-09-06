@@ -851,6 +851,16 @@ export const UNITA = [
   { chiave: 'giorni', nome: 'Giorni', singolare: 'giorno', plurale: 'giorni' },
 ];
 
+/* Le misure scritte per una materia. Se ne puo' riempire piu' d'una:
+   450 pagine e 32 lezioni sono la stessa materia contata in due modi. */
+export function misureDi(piano) {
+  return [
+    { chiave: 'pagine', nome: 'Pagine', quanto: piano.pagine },
+    { chiave: 'lezioni', nome: 'Lezioni', quanto: piano.lezioni },
+    { chiave: 'giorni', nome: 'Giorni di materiale', quanto: piano.giorni_materiale },
+  ];
+}
+
 export function nomeUnita(chiave, quante) {
   const u = UNITA.find((x) => x.chiave === chiave) || UNITA[0];
   return quante === 1 ? u.singolare : u.plurale;
@@ -878,25 +888,50 @@ export async function getPiani() {
   return data.map((p) => ({ ...p, fasi: (p.fasi || []).sort((a, b) => a.ordine - b.ordine) }));
 }
 
+/* I campi di una materia, elencati a mano. `quantita` non si manda:
+   la ricava il database dall'unita' scelta. */
+function campiPiano(piano) {
+  return {
+    materia: piano.materia,
+    unita: piano.unita,
+    pagine: piano.pagine ?? null,
+    lezioni: piano.lezioni ?? null,
+    giorni_materiale: piano.giorni_materiale ?? null,
+    inizio: piano.inizio,
+    fine: piano.fine,
+    giorni_liberi: piano.giorni_liberi,
+  };
+}
+
+function campiFase(fase, pianoId, ordine) {
+  return {
+    piano_id: pianoId,
+    nome: fase.nome,
+    giorni: fase.giorni,
+    fatte: fase.fatte || 0,
+    ordine,
+    argomenti: fase.argomenti || null,
+    da_pagina: fase.da_pagina ?? null,
+    a_pagina: fase.a_pagina ?? null,
+  };
+}
+
 export async function inserisciPiano(piano, fasi) {
-  const { data, error } = await supabase.from('piani').insert([piano]).select('*').single();
+  const { data, error } = await supabase
+    .from('piani')
+    .insert([campiPiano(piano)])
+    .select('*')
+    .single();
 
   if (error) {
     segnaErrore('Errore nel salvataggio del piano:', error);
     return null;
   }
 
-  // Si scrivono solo i campi che ci interessano, uno per uno. Con
-  // `{...f}` finiva dentro anche l'id che le righe si portano dietro
-  // per la modifica: nullo alla creazione, e il database lo rifiuta
-  // perche' l'id se lo genera lui.
-  const righe = fasi.map((f, i) => ({
-    piano_id: data.id,
-    nome: f.nome,
-    giorni: f.giorni,
-    fatte: f.fatte || 0,
-    ordine: i + 1,
-  }));
+  // Campi elencati a mano: con `{...f}` finiva dentro anche l'id che le
+  // righe si portano dietro per la modifica, nullo alla creazione, e il
+  // database lo rifiuta perche' l'id se lo genera lui.
+  const righe = fasi.map((f, i) => campiFase(f, data.id, i + 1));
   const { data: salvate, error: erroreFasi } = await supabase
     .from('piano_fasi')
     .insert(righe)
@@ -921,7 +956,7 @@ export async function inserisciPiano(piano, fasi) {
    aggiornano, quelle nuove si aggiungono, e si cancellano solo quelle
    che Giulia ha davvero tolto dalla finestra. */
 export async function aggiornaPiano(id, piano, fasi) {
-  const { error } = await supabase.from('piani').update(piano).eq('id', id);
+  const { error } = await supabase.from('piani').update(campiPiano(piano)).eq('id', id);
 
   if (error) {
     segnaErrore('Errore nella modifica del piano:', error);
@@ -952,7 +987,7 @@ export async function aggiornaPiano(id, piano, fasi) {
     if (fase.id) {
       const { error: e } = await supabase
         .from('piano_fasi')
-        .update({ nome: fase.nome, giorni: fase.giorni, ordine: i + 1, fatte })
+        .update({ ...campiFase(fase, id, i + 1), fatte })
         .eq('id', fase.id);
       if (e) {
         segnaErrore('Errore nella modifica di una passata:', e);
@@ -961,7 +996,7 @@ export async function aggiornaPiano(id, piano, fasi) {
     } else {
       const { error: e } = await supabase
         .from('piano_fasi')
-        .insert([{ piano_id: id, nome: fase.nome, giorni: fase.giorni, ordine: i + 1, fatte }]);
+        .insert([{ ...campiFase(fase, id, i + 1), fatte }]);
       if (e) {
         segnaErrore('Errore nell aggiunta di una passata:', e);
         return null;

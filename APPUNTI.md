@@ -201,9 +201,33 @@ Nel dettaglio le voci sono sempre le stesse cinque (Esame, Giorni di
 studio, Pagine, Lezioni, Passate) con un trattino dove non si applicano:
 cosi' due materie si confrontano invece di avere ognuna la sua forma.
 
-**Resta aperto:** Giulia vuole poter dire *cosa* ripassare, non solo
-quanto ("o se ci sono argomenti specifici che ho bisogno di ripassare").
-Da chiedere come lo vuole prima di costruirlo.
+### Piu' misure per la stessa materia, e cosa ripassare (7 settembre)
+
+Giulia ha scelto: **piu' misure insieme** e **tutti i modi di dire cosa
+ripassare**.
+
+Una materia ora ha tre colonne facoltative (`pagine`, `lezioni`,
+`giorni_materiale`): 450 pagine E 32 lezioni sono la stessa materia
+contata in due modi. `unita` non dice piu' "come la conti" ma **su quale
+misura si divide lo studio giornaliero**, e `quantita` e' la copia di
+quella scelta, tenuta allineata da un trigger (`allinea_quantita`)
+perche' i due numeri non possano raccontare cose diverse. Il trigger
+rifiuta anche di dividere per una misura che non e' stata scritta.
+
+Nel modulo il menu "Dividi lo studio per" offre **solo le misure
+riempite**: proporre "lezioni" quando le lezioni non ci sono porta solo
+a un errore dopo. Nella scheda si vedono tutte e tre, con un segno su
+quella che comanda il conto.
+
+Ogni passata ha `argomenti` (testo libero) e `da_pagina`/`a_pagina`.
+Nel modulo stanno dentro un "Cosa ripassare" chiuso di default:
+tenerlo aperto raddoppiava l'altezza per campi che spesso restano
+vuoti. Nel dettaglio la passata scrive "pagine 120-300 · Farmaci
+cardiovascolari".
+
+**Resta da fare la terza strada:** l'elenco di argomenti della materia
+con le spunte per passata. Serve una tabella per gli argomenti e una
+per gli abbinamenti; le altre due funzionano gia' senza.
 
 ### Organizzazione studio: come si vede adesso
 
