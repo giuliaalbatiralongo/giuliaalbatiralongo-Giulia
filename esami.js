@@ -3,13 +3,13 @@ import {
   creaEsameCompleto,
   aggiornaEsame,
   eliminaEsame,
-  esamiPerAnno,
+  strutturaAnni,
   nomeAnno,
   nomeSemestre,
   nomeVoto,
   giorniMancanti,
   ultimoErroreDb,
-} from './db.js?v=35';
+} from './db.js?v=36';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -129,18 +129,45 @@ function disegna() {
   mostraRiepilogo();
 
   if (esami.length === 0) {
-    elElenco.innerHTML = `
-      <div class="stato-vuoto">
-        <i class="ph ph-graduation-cap" aria-hidden="true"></i>
-        <p>Nessun esame ancora. Scrivili una volta qui, e poi li ritrovi nel calendario e nell organizzazione studio.</p>
-      </div>
-    `;
-    return;
+    const invito = document.createElement('p');
+    invito.className = 'blocco-nota';
+    invito.textContent =
+      'Nessun esame ancora. Scrivili una volta qui, e poi li ritrovi nel calendario e nell organizzazione studio.';
+    elElenco.appendChild(invito);
   }
 
-  esamiPerAnno(esami).forEach((gruppo) => {
+  strutturaAnni(esami).forEach((gruppo) => {
     const sezione = document.createElement('section');
     sezione.className = 'anno';
+
+    const quanti = gruppo.semestri.reduce((s, x) => s + x.esami.length, 0);
+
+    // Un anno ancora vuoto sta in una riga sola. Aprirlo in due
+    // semestri con due pulsanti uguali, per quattro anni di fila, fa
+    // dodici righe identiche: la pagina diventa un muro e gli anni che
+    // contano qualcosa si perdono in mezzo.
+    if (quanti === 0 && gruppo.anno > 0) {
+      sezione.classList.add('vuoto');
+
+      const riga = document.createElement('button');
+      riga.type = 'button';
+      riga.className = 'anno-vuoto';
+      riga.addEventListener('click', () => apriFinestra(null, { anno: gruppo.anno, semestre: null }));
+
+      const nome = document.createElement('span');
+      nome.className = 'anno-vuoto-nome';
+      nome.textContent = nomeAnno(gruppo.anno);
+      riga.appendChild(nome);
+
+      const invito = document.createElement('span');
+      invito.className = 'anno-vuoto-invito';
+      invito.innerHTML = '<i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un esame';
+      riga.appendChild(invito);
+
+      sezione.appendChild(riga);
+      elElenco.appendChild(sezione);
+      return;
+    }
 
     const testa = document.createElement('div');
     testa.className = 'sezione-testa';
@@ -150,7 +177,6 @@ function disegna() {
     titolo.textContent = nomeAnno(gruppo.anno);
     testa.appendChild(titolo);
 
-    const quanti = gruppo.semestri.reduce((s, x) => s + x.esami.length, 0);
     const conto = document.createElement('span');
     conto.className = 'anno-conto';
     conto.textContent = `${quanti} ${quanti === 1 ? 'esame' : 'esami'}`;
@@ -168,6 +194,19 @@ function disegna() {
       blocco.appendChild(nome);
 
       s.esami.forEach((e) => blocco.appendChild(creaRiga(e)));
+
+      if (gruppo.anno > 0) {
+        const aggiungi = document.createElement('button');
+        aggiungi.type = 'button';
+        aggiungi.className = 'aggiungi-qui';
+        aggiungi.innerHTML =
+          '<i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un esame';
+        aggiungi.addEventListener('click', () =>
+          apriFinestra(null, { anno: gruppo.anno, semestre: s.semestre || null })
+        );
+        blocco.appendChild(aggiungi);
+      }
+
       sezione.appendChild(blocco);
     });
 
@@ -200,7 +239,7 @@ function aggiornaCampoVoto() {
 
 document.getElementById('esame-sostenuto').addEventListener('change', aggiornaCampoVoto);
 
-function apriFinestra(esame) {
+function apriFinestra(esame, casella = null) {
   inModifica = esame || null;
   form.reset();
   esito.textContent = '';
@@ -227,6 +266,12 @@ function apriFinestra(esame) {
     // dall'ultimo, cosi' non si riscrive trenta volte.
     const ultimo = esami.find((e) => e.corso);
     if (ultimo) document.getElementById('esame-corso').value = ultimo.corso;
+
+    // Aperta da un semestre preciso, la finestra ci nasce dentro
+    if (casella) {
+      document.getElementById('esame-anno').value = casella.anno || '';
+      document.getElementById('esame-semestre').value = casella.semestre || '';
+    }
   }
 
   aggiornaCampoVoto();

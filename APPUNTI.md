@@ -229,11 +229,27 @@ Dettagli:
   "Medicina e chirurgia" trenta volte
 - Chi non ha anno o semestre finisce in fondo, non sparisce
 
-**Da confermare con Giulia:** il quarto anno primo semestre l'ho
-riempito dal suo dettato, ma due nomi erano incerti. Ho messo
-"Organi di senso" e "Microbiologia"; lei aveva detto qualcosa come
-"microbiologia pubblica", che potrebbe essere due esami distinti o
-"Igiene e sanita' pubblica".
+**Tutti e sei gli anni ci sono sempre**, anche quelli vuoti: un anno
+che non compare sembra un anno che non esiste, e la casella vuota e' il
+posto dove mettere le materie quando si sanno.
+
+Un anno ancora vuoto pero' sta in **una riga sola**, non in due semestri
+con due pulsanti uguali: quattro anni vuoti aperti facevano dodici righe
+identiche, e gli anni che contano qualcosa si perdevano in mezzo.
+Cliccando la riga si apre la finestra gia' su quell'anno.
+
+Riempiti dal dettato di Giulia:
+
+- **Terzo anno.** Primo semestre: Fisiopatologia, Semeiotica. Secondo:
+  Anatopato 1, Cardiopneumo, Endonefro, Farmacologia 1, DIR. I nomi sono
+  le sue abbreviazioni, non i nomi per esteso: riconoscerli a colpo
+  d'occhio conta piu' della forma ufficiale
+- **Quarto anno, primo semestre.** Farmacologia 2, Gastroenterologia,
+  Malattie infettive, Organi di senso, Microbiologia
+
+**Da confermare:** su "microbiologia pubblica" del dettato ho messo
+"Microbiologia" da sola. Potrebbero essere due esami, o "Igiene e
+sanita' pubblica".
 
 ### L'esame e la materia sono la stessa cosa (7 settembre)
 

@@ -4912,3 +4912,93 @@ a.oggi-riga {
   outline: 2px solid var(--accento);
   outline-offset: 2px;
 }
+
+/* ---------- Esami: le caselle vuote ----------
+   Un anno senza esami resta scritto: e' il posto dove metterli quando
+   si sanno, e un anno che non compare sembra un anno che non esiste. */
+
+.anno.vuoto { opacity: 0.72; }
+
+.anno.vuoto .anno-conto { font-weight: 500; }
+
+.aggiungi-qui {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px dashed var(--linea-forte);
+  border-radius: var(--r-controllo);
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--testo-3);
+  cursor: pointer;
+  transition: border-color 160ms var(--curva), color 160ms var(--curva),
+    background 160ms var(--curva);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .aggiungi-qui:hover {
+    border-color: var(--accento);
+    background: var(--accento-tenue);
+    color: var(--accento-su-tenue);
+  }
+}
+
+.aggiungi-qui:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 2px;
+}
+
+/* Un anno ancora vuoto sta in una riga sola: aprirlo in due semestri
+   con due pulsanti uguali, per quattro anni di fila, fa un muro. */
+.anno-vuoto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 1px dashed var(--linea-forte);
+  border-radius: var(--r-controllo);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 160ms var(--curva), background 160ms var(--curva);
+}
+
+.anno-vuoto-nome {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--testo-2);
+}
+
+.anno-vuoto-invito {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--testo-3);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .anno-vuoto:hover {
+    border-color: var(--accento);
+    background: var(--accento-tenue);
+  }
+  .anno-vuoto:hover .anno-vuoto-invito { color: var(--accento-su-tenue); }
+}
+
+.anno-vuoto:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 2px;
+}
+
+.anno.vuoto { margin-bottom: 0; opacity: 1; }

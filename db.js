@@ -766,34 +766,39 @@ export function nomeVoto(voto) {
   return voto === 31 ? '30 e lode' : String(voto);
 }
 
-/* Gli esami raggruppati per anno e semestre, nell'ordine in cui si
-   studiano. Chi non ha anno o semestre finisce in fondo, non sparisce:
+/* Lo scheletro del corso: sei anni, due semestri ciascuno, sempre tutti.
+   Le caselle vuote restano visibili perche' sono il posto dove mettere
+   le materie quando si sanno: un anno che non compare sembra un anno
+   che non esiste.
+
+   In fondo, se serve, il gruppo di chi non ha anno o e' fuori dai sei:
    un esame senza etichetta e' comunque un esame da dare. */
-export function esamiPerAnno(esami) {
-  const gruppi = new Map();
+export function strutturaAnni(esami, quantiAnni = 6) {
+  const dentro = (anno, semestre) =>
+    esami
+      .filter((e) => (e.anno || 0) === anno && (e.semestre || 0) === semestre)
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
 
-  esami.forEach((e) => {
-    const anno = e.anno || 0;
-    if (!gruppi.has(anno)) gruppi.set(anno, new Map());
-    const semestri = gruppi.get(anno);
-    const semestre = e.semestre || 0;
-    if (!semestri.has(semestre)) semestri.set(semestre, []);
-    semestri.get(semestre).push(e);
-  });
+  const anni = [];
+  for (let anno = 1; anno <= quantiAnni; anno += 1) {
+    const semestri = [1, 2].map((semestre) => ({ semestre, esami: dentro(anno, semestre) }));
 
-  const ordinaChiavi = (a, b) => (a === 0 ? 1 : b === 0 ? -1 : a - b);
+    // Chi ha l'anno ma non il semestre finisce in coda a quell'anno
+    const orfani = dentro(anno, 0);
+    if (orfani.length > 0) semestri.push({ semestre: 0, esami: orfani });
 
-  return [...gruppi.keys()].sort(ordinaChiavi).map((anno) => ({
-    anno,
-    semestri: [...gruppi.get(anno).keys()].sort(ordinaChiavi).map((semestre) => ({
-      semestre,
-      esami: gruppi
-        .get(anno)
-        .get(semestre)
-        .slice()
-        .sort((a, b) => a.nome.localeCompare(b.nome, 'it')),
-    })),
-  }));
+    anni.push({ anno, semestri });
+  }
+
+  const fuori = esami
+    .filter((e) => !e.anno || e.anno > quantiAnni)
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
+
+  if (fuori.length > 0) {
+    anni.push({ anno: 0, semestri: [{ semestre: 0, esami: fuori }] });
+  }
+
+  return anni;
 }
 
 export async function eliminaEsame(id) {

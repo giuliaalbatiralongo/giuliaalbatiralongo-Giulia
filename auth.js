@@ -1,4 +1,4 @@
-import { supabase } from './db.js?v=35';
+import { supabase } from './db.js?v=36';
 
 /* Autenticazione e profilo.
    Il profilo esiste solo se l'utente ha riscattato un codice di invito:

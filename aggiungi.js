@@ -1,4 +1,4 @@
-import { inserisciCaso } from './db.js?v=35';
+import { inserisciCaso } from './db.js?v=36';
 import { proteggiPagina } from './auth.js?v=10';
 
 let profiloCorrente = null;
