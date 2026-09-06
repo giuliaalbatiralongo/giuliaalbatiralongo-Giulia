@@ -3884,106 +3884,140 @@ a.oggi-riga {
   color: var(--testo-2);
 }
 
-/* ---------- Home: le altre sezioni, come righe ----------
-   Non schede uguali in griglia: righe, sotto a quello che conta. */
+/* ---------- Home: le due tessere ----------
+   Solo le due cose che si aprono davvero mentre si studia. Verticali e
+   larghe: si prendono col pollice senza mirare. */
 
-.blocco-righe-titolo {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--testo-3);
-  margin: 0 0 12px;
-}
-
-.riga-sezione {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
-  border: 1px solid var(--linea);
-  border-radius: var(--r-controllo);
-  background: var(--superficie);
-  text-decoration: none;
-  color: inherit;
-  margin-bottom: 8px;
-  transition: border-color 160ms var(--curva), transform 120ms var(--curva),
-    box-shadow 160ms var(--curva);
-}
-
-.riga-sezione:last-child { margin-bottom: 0; }
-
-.riga-sezione-icona {
+.tessere-grandi {
   display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
-  border-radius: var(--r-controllo);
-  background: var(--superficie-alt);
-  border: 1px solid var(--linea);
-  color: var(--testo-2);
-  font-size: 19px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
-.riga-sezione-testo {
+.tessera-grande {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1 1 auto;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 168px;
+  padding: 20px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+  box-shadow: var(--ombra-1);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 160ms var(--curva), box-shadow 160ms var(--curva),
+    transform 120ms var(--curva);
 }
 
-.riga-sezione-testa {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
+.tessera-grande-icona {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  background: var(--accento-tenue);
+  color: var(--accento-su-tenue);
+  font-size: 21px;
 }
 
-.riga-sezione-nome {
-  font-size: 14.5px;
+.tessera-grande-nome {
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.014em;
 }
 
-.riga-sezione-conto {
-  font-size: 11.5px;
+.tessera-grande-conto {
+  font-size: 12px;
   font-weight: 600;
   color: var(--testo-3);
 }
 
-.riga-sezione-sotto {
+.tessera-grande-sotto {
+  margin-top: auto;
+  padding-top: 10px;
   font-size: 12.5px;
   line-height: 1.45;
   color: var(--testo-2);
 }
 
-.riga-sezione-freccia {
-  flex: 0 0 auto;
-  font-size: 15px;
-  color: var(--testo-3);
-}
-
-/* Il Test SSM non e' ancora aperto: si vede, ma non invita. */
-.riga-sezione.spenta { opacity: 0.58; }
-
 @media (hover: hover) and (pointer: fine) {
-  .riga-sezione:hover {
+  .tessera-grande:hover {
     border-color: var(--linea-forte);
-    box-shadow: var(--ombra-1);
-  }
-  .riga-sezione:hover .riga-sezione-icona {
-    background: var(--accento-tenue);
-    border-color: transparent;
-    color: var(--accento);
+    box-shadow: var(--ombra-2);
   }
 }
 
-.riga-sezione:active { transform: translateY(1px); }
+.tessera-grande:active { transform: translateY(1px); }
 
-.riga-sezione:focus-visible {
+.tessera-grande:focus-visible {
   outline: 2px solid var(--accento);
   outline-offset: 2px;
+}
+
+/* ---------- Home: l'invito ai quiz ----------
+   Non e' un compito del giorno: lo studio si misura in pagine, non in
+   quiz. Quindi sta fuori da "Cosa studi oggi", ed e' un invito. */
+
+.invito-quiz {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px dashed var(--linea-forte);
+  border-radius: var(--r-card);
+  background: transparent;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 160ms var(--curva), background 160ms var(--curva),
+    transform 120ms var(--curva);
+}
+
+.invito-quiz-testo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.invito-quiz-titolo {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.024em;
+  color: var(--accento);
+}
+
+.invito-quiz-riga {
+  font-size: 13px;
+  color: var(--testo-2);
+}
+
+.invito-quiz i {
+  flex: 0 0 auto;
+  font-size: 17px;
+  color: var(--accento);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .invito-quiz:hover {
+    border-color: var(--accento);
+    background: var(--accento-tenue);
+  }
+}
+
+.invito-quiz:active { transform: translateY(1px); }
+
+.invito-quiz:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .tessere-grandi { grid-template-columns: 1fr; }
+  .tessera-grande { min-height: 0; }
 }
 
 /* ---------- Home: le tue scadenze ----------

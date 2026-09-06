@@ -14,7 +14,7 @@ import {
   tipoData,
   TIPI_DATA,
   creaIcs,
-} from './db.js?v=27';
+} from './db.js?v=28';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');

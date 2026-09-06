@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=44">
+  <link rel="stylesheet" href="style.css?v=45">
 </head>
 <body>
   <div class="app">
@@ -81,10 +81,15 @@
               <div class="oggi-blocco-corpo" id="oggi-corpo"></div>
             </section>
 
-            <section class="blocco-righe">
-              <h2 class="blocco-righe-titolo">Tutto quello che ti serve</h2>
-              <div id="righe-sezioni"></div>
-            </section>
+            <div class="tessere-grandi" id="tessere-grandi"></div>
+
+            <a class="invito-quiz" href="quiz.html">
+              <span class="invito-quiz-testo">
+                <span class="invito-quiz-titolo">Quiz?</span>
+                <span class="invito-quiz-riga">Se ti avanzano dieci minuti.</span>
+              </span>
+              <i class="ph ph-arrow-right" aria-hidden="true"></i>
+            </a>
 
           </div>
 
@@ -92,7 +97,7 @@
 
             <section class="pannello" id="scadenze">
               <div class="sezione-testa">
-                <h2 class="sezione-titolo">Le tue scadenze</h2>
+                <h2 class="sezione-titolo">Prossimamente</h2>
                 <a href="calendario.html" class="link-testo">Calendario</a>
               </div>
               <div id="scadenze-elenco"></div>
@@ -100,7 +105,7 @@
 
             <section class="pannello" id="materie">
               <div class="sezione-testa">
-                <h2 class="sezione-titolo">Come ti sei organizzata</h2>
+                <h2 class="sezione-titolo">Organizzazione</h2>
                 <a href="piano.html" class="link-testo">Apri</a>
               </div>
               <div id="materie-elenco"></div>
@@ -135,6 +140,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="home.js?v=22"></script>
+  <script type="module" src="home.js?v=24"></script>
 </body>
 </html>

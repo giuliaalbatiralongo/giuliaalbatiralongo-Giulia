@@ -1,5 +1,4 @@
 import {
-  getCasiClinici,
   getDomandeEsame,
   getMateriali,
   getCasiInAttesa,
@@ -7,13 +6,12 @@ import {
   getDateEsame,
   getPiani,
   studioDiOggi,
-  casiDaRipassareOggi,
   calcolaPiano,
   nomeUnita,
   giorniMancanti,
   nomeTipoData,
   titoloData,
-} from './db.js?v=27';
+} from './db.js?v=28';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -21,7 +19,7 @@ const elGriglia = document.getElementById('griglia');
 const elData = document.getElementById('oggi-data');
 const elSaluto = document.getElementById('saluto');
 const elOggiCorpo = document.getElementById('oggi-corpo');
-const elRighe = document.getElementById('righe-sezioni');
+const elTessere = document.getElementById('tessere-grandi');
 const elScadenzeElenco = document.getElementById('scadenze-elenco');
 const elMaterieElenco = document.getElementById('materie-elenco');
 const elAttesa = document.getElementById('attesa');
@@ -63,7 +61,7 @@ function dataDiOggi() {
 /* ---------- Cosa studi oggi ----------
    E' la domanda che si fa aprendo l'app, quindi sta in cima e in
    grande. Ogni riga e' una cosa da fare oggi, con il numero davanti:
-   quaranta pagine, otto casi. Il numero e' l'informazione, il resto e'
+   quaranta pagine, tre lezioni. Il numero e' l'informazione, il resto e'
    contorno. */
 
 function rigaOggi({ numero, unita, titolo, sotto, indirizzo, azione }) {
@@ -108,7 +106,7 @@ function rigaOggi({ numero, unita, titolo, sotto, indirizzo, azione }) {
   return riga;
 }
 
-function mostraOggi(piani, casi, date) {
+function mostraOggi(piani, date) {
   const oggi = oggiIso();
   elOggiCorpo.innerHTML = '';
   let quante = 0;
@@ -133,10 +131,13 @@ function mostraOggi(piani, casi, date) {
 
   studioDiOggi(piani, oggi).forEach((voce) => {
     const q = voce.quantita === null ? null : arrotonda(voce.quantita);
+    // Chi conta in giorni non ha una quantita': gli si dice a che punto
+    // della passata e' arrivato, che e' comunque un numero.
+    const perGiorni = q === null && voce.giornoDiFase !== null;
     elOggiCorpo.appendChild(
       rigaOggi({
-        numero: q === null ? '·' : q,
-        unita: q === null ? null : nomeUnita(voce.unita, q),
+        numero: q !== null ? q : perGiorni ? voce.giornoDiFase : '—',
+        unita: q !== null ? nomeUnita(voce.unita, q) : perGiorni ? `di ${voce.giorniFase}` : null,
         titolo: voce.materia,
         sotto: voce.fase,
         indirizzo: 'piano.html',
@@ -145,21 +146,6 @@ function mostraOggi(piani, casi, date) {
     );
     quante += 1;
   });
-
-  const daRipassare = casiDaRipassareOggi(casi);
-  if (daRipassare.length > 0) {
-    elOggiCorpo.appendChild(
-      rigaOggi({
-        numero: daRipassare.length,
-        unita: daRipassare.length === 1 ? 'caso' : 'casi',
-        titolo: 'Da ripassare',
-        sotto: 'Tornano oggi secondo la scala dei ripassi',
-        indirizzo: 'quiz.html',
-        azione: 'Ripassa',
-      })
-    );
-    quante += 1;
-  }
 
   if (quante > 0) return;
 
@@ -192,87 +178,56 @@ function mostraOggi(piani, casi, date) {
   elOggiCorpo.appendChild(vuoto);
 }
 
-/* ---------- Tutto quello che ti serve ----------
-   Non sei schede uguali: righe strette, sotto a quello che conta. Ogni
-   riga risponde a una domanda vera ("dov'e' il materiale?", "ho dieci
-   minuti, cosa faccio?"). */
+/* ---------- Le due tessere ----------
+   Solo le due cose che si aprono davvero mentre si studia: dov'e' il
+   materiale e cosa hanno chiesto ai colleghi. Grandi, per prenderle al
+   volo anche col pollice. */
 
-function rigaSezione(voce) {
+function tesseraGrande(voce) {
   const a = document.createElement('a');
-  a.className = 'riga-sezione';
+  a.className = 'tessera-grande';
   a.href = voce.indirizzo;
-  if (voce.spenta) a.classList.add('spenta');
 
   const icona = document.createElement('span');
-  icona.className = 'riga-sezione-icona';
+  icona.className = 'tessera-grande-icona';
   icona.innerHTML = `<i class="ph ${voce.icona}" aria-hidden="true"></i>`;
   a.appendChild(icona);
 
-  const testo = document.createElement('span');
-  testo.className = 'riga-sezione-testo';
-
-  const testa = document.createElement('span');
-  testa.className = 'riga-sezione-testa';
-
   const nome = document.createElement('span');
-  nome.className = 'riga-sezione-nome';
+  nome.className = 'tessera-grande-nome';
   nome.textContent = voce.nome;
-  testa.appendChild(nome);
+  a.appendChild(nome);
 
   const conto = document.createElement('span');
-  conto.className = 'riga-sezione-conto';
+  conto.className = 'tessera-grande-conto';
   conto.textContent = voce.conto;
-  testa.appendChild(conto);
-
-  testo.appendChild(testa);
+  a.appendChild(conto);
 
   const sotto = document.createElement('span');
-  sotto.className = 'riga-sezione-sotto';
+  sotto.className = 'tessera-grande-sotto';
   sotto.textContent = voce.sotto;
-  testo.appendChild(sotto);
-
-  a.appendChild(testo);
-
-  const freccia = document.createElement('i');
-  freccia.className = 'ph ph-caret-right riga-sezione-freccia';
-  freccia.setAttribute('aria-hidden', 'true');
-  a.appendChild(freccia);
+  a.appendChild(sotto);
 
   return a;
 }
 
-function mostraRighe(materiali, casi, domande) {
+function mostraTessere(materiali, domande) {
   [
     {
       nome: 'Materiali',
       indirizzo: 'materiali.html',
       icona: 'ph-folder',
-      conto: materiali.length ? plurale(materiali.length, 'documento', 'documenti') : '',
+      conto: materiali.length ? plurale(materiali.length, 'documento', 'documenti') : 'ancora niente',
       sotto: 'Sbobine, dispense e appunti, divisi per materia.',
-    },
-    {
-      nome: 'Quiz',
-      indirizzo: 'quiz.html',
-      icona: 'ph-cards',
-      conto: casi.length ? plurale(casi.length, 'caso', 'casi') : '',
-      sotto: 'Hai un ritaglio di tempo? Casi clinici per tenere la mente allenata.',
     },
     {
       nome: 'Domande esami',
       indirizzo: 'domande.html',
       icona: 'ph-exam',
-      conto: domande.length ? plurale(domande.length, 'domanda', 'domande') : '',
+      conto: domande.length ? plurale(domande.length, 'domanda', 'domande') : 'ancora niente',
       sotto: 'Quello che i professori hanno chiesto davvero, e chi l\'ha chiesto.',
     },
-    {
-      nome: 'Test SSM',
-      indirizzo: 'ssm.html',
-      icona: 'ph-target',
-      conto: 'in preparazione',
-      sotto: 'Le domande dei concorsi di specializzazione.',
-      spenta: true,
-    },
-  ].forEach((v) => elRighe.appendChild(rigaSezione(v)));
+  ].forEach((v) => elTessere.appendChild(tesseraGrande(v)));
 }
 
 /* ---------- Le tue scadenze ---------- */
@@ -451,16 +406,15 @@ async function avvia(profilo) {
   elSaluto.textContent = saluto(profilo.nome);
 
   try {
-    const [casi, domande, materiali, date, piani] = await Promise.all([
-      getCasiClinici(),
+    const [domande, materiali, date, piani] = await Promise.all([
       getDomandeEsame(),
       getMateriali(),
       getDateEsame(),
       getPiani(),
     ]);
 
-    mostraOggi(piani, casi, date);
-    mostraRighe(materiali, casi, domande);
+    mostraOggi(piani, date);
+    mostraTessere(materiali, domande);
     mostraScadenze(date);
     mostraMaterie(piani);
 

@@ -1021,12 +1021,18 @@ export function studioDiOggi(piani, oggiIso) {
   return piani
     .map((piano) => ({ piano, calcolo: calcolaPiano(piano, oggi) }))
     .filter((v) => v.calcolo.faseOggi)
-    .map((v) => ({
-      materia: v.piano.materia,
-      unita: v.piano.unita,
-      fase: v.calcolo.faseOggi.nome,
-      quantita: v.calcolo.quantitaOggi,
-    }));
+    .map((v) => {
+      const fase = v.calcolo.faseOggi;
+      const dentro = (fase.giorniVeri || []).indexOf(oggi);
+      return {
+        materia: v.piano.materia,
+        unita: v.piano.unita,
+        fase: fase.nome,
+        quantita: v.calcolo.quantitaOggi,
+        giornoDiFase: dentro >= 0 ? dentro + 1 : null,
+        giorniFase: fase.giorni,
+      };
+    });
 }
 
 /* ---------- Interesse per i servizi non ancora attivi ---------- */

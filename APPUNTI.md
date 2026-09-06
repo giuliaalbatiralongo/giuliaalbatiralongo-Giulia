@@ -33,11 +33,22 @@ pagina risponde a una di quelle, in quell'ordine di urgenza:
   numeri grandi. Ci finiscono dentro, in quest'ordine: le date di oggi,
   quanto studiare per ogni materia, i casi da ripassare. Se e' vuoto,
   invita invece di rimproverare
-- **Quattro righe strette** (Materiali, Quiz, Domande esami, Test SSM)
-  con il conteggio vero accanto. Righe, non schede: sono subordinate
-- **A destra**, le scadenze con quanti giorni mancano (non la data: "fra
-  12 giorni" si capisce a colpo d'occhio, "17 settembre" no) e le materie
-  organizzate con la loro barra
+- **Due tessere grandi e verticali**, Materiali e Domande esami: le sole
+  due cose che si aprono davvero mentre si studia. Comode da prendere
+  col pollice
+- **L'invito ai quiz** e' una striscia a parte, con il bordo
+  tratteggiato: "Quiz? Se ti avanzano dieci minuti". **Non e' un compito
+  del giorno.** Deciso da Giulia il 6 settembre: lo studio universitario
+  si misura in pagine e lezioni, non in quiz, quindi i casi da ripassare
+  sono usciti da "Cosa studi oggi"
+- Quiz e Test SSM non stanno piu' nel corpo della home: restano nel menu
+- **A destra**, **Prossimamente** con quanti giorni mancano (non la data:
+  "fra 12 giorni" si capisce a colpo d'occhio, "17 settembre" no) e
+  **Organizzazione** con le materie e la loro barra. I titoli sono questi
+  perche' "Le tue scadenze" metteva ansia
+- Chi conta in **giorni** non ha una quantita' giornaliera: al posto del
+  numero vede a che punto della passata e' ("8 di 9"). Prima usciva un
+  puntino, che sembrava un guasto
 
 Dalla prima versione discende comunque:
 
@@ -362,13 +373,41 @@ della settimana.
 
 ## Dati di prova ancora in giro
 
-Giulia ha chiesto di **non cancellare niente** finche' non lo dice lei.
-Quando lo dira', da togliere:
+Giulia ha detto di **riempire pure di dati finti** per poter provare le
+cose ("tanto poi bisognera' togliere tutto per inserire quelle vere").
+Tutto quello che ho aggiunto io porta la scritta `[prova]` nelle note,
+tranne i piani, che non hanno un campo dove metterla.
+
+**Quello che ha creato lei, e che non va toccato:**
+
+- L'esame `Farmacologia 2` (nota: "Esame orale. Lungo, si passa da due
+  docenti") con i suoi tre appelli
+- La data `Inizio lezioni medicina`
+- I piani `Farmaco 2` (32 lezioni) e `Gastroenterologia` (450 pagine)
+- I 6 materiali, le 14 domande, i 10 casi clinici
+
+**Quello che ho aggiunto io, da togliere quando lo dice:**
+
+```sql
+delete from date_esame where note like '%[prova]%';
+delete from esami where note like '%[prova]%';
+delete from piani where id = 6;  -- "Anatomia patologica", contato in giorni
+```
+
+L'ordine conta: prima le date, poi gli esami (le date appese a un esame
+se ne andrebbero comunque in cascata, ma quelle sciolte no).
+
+Restano da togliere, quando lo dira' lei:
 
 - Account `prova.studente@akesis.test` (profilo "Prova01")
 - 14 domande d'esame inventate e le loro note
 - 4 proposte di materiale in coda di revisione, senza file vero dietro
 - Il materiale "Prova 1" e il PDF "CORSIE"
+- I 17 suggerimenti che ho scritto io nella pagina Suggerimenti
+
+**Nota sui trigger:** riempire da SQL richiede di spegnere i trigger che
+scrivono `autore := auth.uid()` (nullo fuori dal browser) e riaccenderli
+subito dopo. Vale per `esami`, `date_esame`, `piani`, `suggerimenti`.
 
 ---
 
