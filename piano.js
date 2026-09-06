@@ -8,13 +8,13 @@ import {
   calcolaPiano,
   studioDiOggi,
   nomeUnita,
-  FASI_PROPOSTE,
+  proponiPassate,
   getDateEsame,
   getEsami,
   titoloData,
   misureDi,
   giorniMancanti,
-} from './db.js?v=32';
+} from './db.js?v=33';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -38,6 +38,8 @@ let esami = [];
 let inModifica = null;
 // La materia di cui e' aperto il dettaglio.
 let materiaAperta = null;
+// L'ultima divisione proposta, pronta da applicare.
+let propostaCorrente = null;
 
 function oggiIso() {
   const d = new Date();
@@ -520,6 +522,7 @@ function aggiungiRigaFase(preimpostata) {
   nome.className = 'fase-nome-campo';
   nome.setAttribute('aria-label', 'Nome della passata');
   if (preimpostata?.nome) nome.value = preimpostata.nome;
+  nome.addEventListener('input', aggiornaProposta);
 
   const giorni = document.createElement('input');
   giorni.type = 'number';
@@ -594,41 +597,95 @@ function aggiungiRigaFase(preimpostata) {
   aggiornaConto();
 }
 
-/* Dice subito se le passate stanno nella finestra, mentre si scrive:
-   scoprirlo dopo aver salvato sarebbe inutile. */
-function aggiornaConto() {
-  const chiesti = [...elRighe.querySelectorAll('.riga-fase')].reduce((s, r) => {
-    const v = Number(r.querySelectorAll('input')[1].value);
-    return s + (Number.isFinite(v) ? v : 0);
-  }, 0);
-
-  const el = document.getElementById('conto-fasi');
+/* Quanti giorni di studio ci sono davvero nella finestra scelta, letti
+   dal modulo mentre lo compili. Serve sia al conto sotto le passate sia
+   alla proposta di come dividerle. */
+function giorniDisponibiliNelModulo() {
+  const liberi = [...document.querySelectorAll('#giorni-liberi input:checked')].length;
   const modo = form.querySelector('input[name="modo"]:checked')?.value;
 
-  let disponibili = null;
-  const liberi = [...document.querySelectorAll('#giorni-liberi input:checked')].length;
-
+  let giorni = null;
   if (modo === 'durata') {
-    const durata = Number(document.getElementById('piano-durata').value) || 0;
-    disponibili = Math.round(durata * ((7 - liberi) / 7));
+    giorni = Number(document.getElementById('piano-durata').value) || 0;
   } else {
     const data = document.getElementById('piano-data').value;
     if (data) {
-      const giorni = Math.round(
-        (new Date(data + 'T00:00:00') - new Date(oggiIso() + 'T00:00:00')) / 86400000
+      giorni = Math.max(
+        Math.round(
+          (new Date(data + 'T00:00:00') - new Date(oggiIso() + 'T00:00:00')) / 86400000
+        ),
+        0
       );
-      disponibili = Math.round(Math.max(giorni, 0) * ((7 - liberi) / 7));
     }
   }
+
+  if (giorni === null) return null;
+  return Math.round(giorni * ((7 - liberi) / 7));
+}
+
+function passateNelModulo() {
+  return [...elRighe.querySelectorAll('.riga-fase')].map((riga) => ({
+    nome: riga.querySelector('.fase-nome-campo').value.trim(),
+    giorni: Number(riga.querySelector('.fase-giorni-campo').value) || 0,
+  }));
+}
+
+/* La proposta si mostra solo se dice qualcosa di diverso da quello che
+   c'e' gia' scritto: un banner che ripete il modulo e' solo rumore. */
+function aggiornaProposta() {
+  const box = document.getElementById('proposta');
+  const disponibili = giorniDisponibiliNelModulo();
+
+  if (!disponibili || disponibili < 2) {
+    box.hidden = true;
+    return;
+  }
+
+  const proposta = proponiPassate(disponibili);
+  propostaCorrente = proposta;
+
+  const adesso = passateNelModulo();
+  const uguali =
+    adesso.length === proposta.length &&
+    adesso.every((f, i) => f.nome === proposta[i].nome && f.giorni === proposta[i].giorni);
+
+  if (uguali) {
+    box.hidden = true;
+    return;
+  }
+
+  document.getElementById('proposta-titolo').textContent =
+    `Con ${disponibili} giorni di studio potresti dividere cosi`;
+  document.getElementById('proposta-righe').textContent = proposta
+    .map((f) => `${f.nome} ${f.giorni}`)
+    .join(' · ');
+
+  box.hidden = false;
+}
+
+function applicaProposta() {
+  if (!propostaCorrente) return;
+  elRighe.innerHTML = '';
+  propostaCorrente.forEach((f) => aggiungiRigaFase(f));
+  aggiornaProposta();
+}
+
+/* Dice subito se le passate stanno nella finestra, mentre si scrive:
+   scoprirlo dopo aver salvato sarebbe inutile. */
+function aggiornaConto() {
+  const chiesti = passateNelModulo().reduce((s, f) => s + f.giorni, 0);
+  const el = document.getElementById('conto-fasi');
+  const disponibili = giorniDisponibiliNelModulo();
 
   if (disponibili === null) {
     el.textContent = `Le passate chiedono ${chiesti} giorni.`;
     el.className = 'conto-fasi';
-    return;
+  } else {
+    el.textContent = `Le passate chiedono ${chiesti} giorni di studio, nella finestra ce ne sono circa ${disponibili}.`;
+    el.className = 'conto-fasi' + (chiesti > disponibili ? ' stretto' : '');
   }
 
-  el.textContent = `Le passate chiedono ${chiesti} giorni di studio, nella finestra ce ne sono circa ${disponibili}.`;
-  el.className = 'conto-fasi' + (chiesti > disponibili ? ' stretto' : '');
+  aggiornaProposta();
 }
 
 const NOMI_MISURA = { pagine: 'Pagine', lezioni: 'Lezioni', giorni: 'Giorni' };
@@ -725,6 +782,7 @@ function preparaFinestra() {
 }
 
 document.getElementById('aggiungi-fase').addEventListener('click', () => aggiungiRigaFase());
+document.getElementById('usa-proposta').addEventListener('click', applicaProposta);
 
 function scegliModo(quale) {
   form.querySelectorAll('input[name="modo"]').forEach((r) => {
@@ -775,12 +833,20 @@ function apriFinestra(piano) {
     titolo.textContent = 'Una materia';
     bottone.innerHTML = '<i class="ph ph-check" aria-hidden="true"></i> Crea';
 
-    FASI_PROPOSTE.forEach((f) => aggiungiRigaFase(f));
+    // Prima la finestra e i giorni liberi, poi le passate: la proposta
+    // si calcola su quei numeri, e generarla prima voleva dire proporre
+    // subito qualcosa di diverso da quello che si era appena scritto.
     document.querySelectorAll('#giorni-liberi input').forEach((c) => {
       c.checked = Number(c.value) === 7;
     });
     aggiornaMenuUnita();
     scegliModo('durata');
+
+    // Si parte gia' divisa: e' quasi sempre la divisione giusta, e resta
+    // comunque modificabile riga per riga.
+    const proposta = proponiPassate(giorniDisponibiliNelModulo() || 0);
+    if (proposta.length > 0) proposta.forEach((f) => aggiungiRigaFase(f));
+    else aggiungiRigaFase();
   }
 
   document.getElementById('nota-modifica').hidden = !piano;

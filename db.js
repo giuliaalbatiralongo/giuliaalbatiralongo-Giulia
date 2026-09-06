@@ -868,11 +868,81 @@ export function nomeUnita(chiave, quante) {
 
 /* Le fasi che si propongono di partenza: sono quelle che Giulia ha
    descritto, una lettura e due ripassi sempre piu' rapidi. */
-export const FASI_PROPOSTE = [
-  { nome: 'Prima lettura', giorni: 10 },
-  { nome: 'Prima ripetizione', giorni: 7 },
-  { nome: 'Seconda ripetizione', giorni: 7 },
+/* ---------- La proposta delle passate ----------
+   Dati i giorni di studio disponibili, propone come dividerli. La prima
+   lettura si prende circa un terzo; quello che resta va alle ripetizioni
+   e ai ripassi, in pezzi via via piu' corti, perche' rileggere una cosa
+   gia' vista costa meno della prima volta.
+
+   Quante passate dipende dal tempo: in cinque giorni non ha senso
+   promettere quattro giri, in cinquanta si'. */
+
+const NOMI_PASSATE = [
+  'Prima lettura',
+  'Prima ripetizione',
+  'Seconda ripetizione',
+  'Ripasso',
+  'Ripasso finale',
 ];
+
+/* I pesi sono scritti a mano, non calcolati: con tre passate "un terzo
+   alla prima lettura" e "le altre sempre piu' corte" non possono valere
+   tutti e due insieme, e allora la prima lettura si prende un po' di
+   piu'. Con quattro o cinque tornano entrambi. */
+const PESI = {
+  1: [1],
+  2: [0.55, 0.45],
+  3: [0.42, 0.33, 0.25],
+  4: [0.35, 0.27, 0.21, 0.17],
+  5: [0.33, 0.24, 0.18, 0.14, 0.11],
+};
+
+function quantePassate(giorni) {
+  if (giorni <= 3) return 1;
+  if (giorni <= 9) return 2;
+  if (giorni <= 20) return 3;
+  if (giorni <= 35) return 4;
+  return 5;
+}
+
+export function proponiPassate(giorniDisponibili) {
+  const giorni = Math.floor(giorniDisponibili);
+  if (!Number.isFinite(giorni) || giorni < 1) return [];
+
+  const quante = Math.min(quantePassate(giorni), giorni);
+  const pesi = PESI[quante];
+
+  // Prima si prende la parte intera, poi gli avanzi vanno a chi ha
+  // perso di piu' nell'arrotondamento: cosi' il totale torna esatto.
+  const esatti = pesi.map((p) => giorni * p);
+  const interi = esatti.map((x) => Math.max(Math.floor(x), 1));
+  let restano = giorni - interi.reduce((a, b) => a + b, 0);
+
+  const ordine = esatti
+    .map((x, i) => ({ i, resto: x - Math.floor(x) }))
+    .sort((a, b) => b.resto - a.resto);
+
+  let k = 0;
+  while (restano > 0) {
+    interi[ordine[k % ordine.length].i] += 1;
+    restano -= 1;
+    k += 1;
+  }
+  while (restano < 0) {
+    // Se gli arrotondamenti hanno sforato, si toglie dalla piu' lunga
+    // che puo' permetterselo.
+    const piuLunga = interi.indexOf(Math.max(...interi));
+    if (interi[piuLunga] <= 1) break;
+    interi[piuLunga] -= 1;
+    restano += 1;
+  }
+
+  // Le passate devono accorciarsi, mai allungarsi: dopo gli
+  // arrotondamenti si rimettono in ordine.
+  interi.sort((a, b) => b - a);
+
+  return interi.map((giorniFase, i) => ({ nome: NOMI_PASSATE[i], giorni: giorniFase }));
+}
 
 export async function getPiani() {
   const { data, error } = await supabase

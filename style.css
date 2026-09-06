@@ -4731,3 +4731,37 @@ a.oggi-riga {
   .fase-cosa-dentro { grid-template-columns: 1fr 1fr; }
   .fase-cosa-dentro .fase-argomenti { grid-column: 1 / -1; }
 }
+
+/* ---------- Organizzazione studio: la proposta ----------
+   Compare solo quando ha qualcosa da dire di diverso da quello che c'e'
+   gia' scritto: un banner che ripete il modulo e' solo rumore. */
+
+.proposta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: var(--r-controllo);
+  background: var(--accento-tenue);
+}
+
+.proposta-testo { min-width: 0; }
+
+.proposta-titolo {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--accento-su-tenue);
+}
+
+.proposta-righe {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--testo-2);
+}
+
+.proposta .btn { flex: 0 0 auto; }

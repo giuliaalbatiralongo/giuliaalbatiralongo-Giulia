@@ -1,4 +1,4 @@
-import { getMioInteresse, lasciaInteresse, ritiraInteresse } from './db.js?v=32';
+import { getMioInteresse, lasciaInteresse, ritiraInteresse } from './db.js?v=33';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');

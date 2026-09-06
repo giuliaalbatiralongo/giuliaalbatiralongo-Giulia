@@ -201,6 +201,34 @@ Nel dettaglio le voci sono sempre le stesse cinque (Esame, Giorni di
 studio, Pagine, Lezioni, Passate) con un trattino dove non si applicano:
 cosi' due materie si confrontano invece di avere ognuna la sua forma.
 
+### La divisione proposta (7 settembre)
+
+Creando una materia non si parte piu' da tre passate fisse: `db.js`
+propone come dividere i giorni. La regola, chiesta da Giulia:
+
+- **La prima lettura si prende circa un terzo** del tempo di studio
+- **Il resto va alle ripetizioni e ai ripassi, in pezzi sempre piu'
+  corti**: rileggere una cosa gia' vista costa meno della prima volta
+- **Quante passate dipende dal tempo**: in cinque giorni non ha senso
+  promettere quattro giri, in cinquanta si'
+
+Trenta giorni danno 11, 8, 6, 5. Cinquanta danno 17, 12, 9, 7, 5.
+
+I pesi sono scritti a mano, non calcolati: con tre passate "un terzo
+alla prima lettura" e "le altre sempre piu' corte" non possono valere
+tutti e due insieme, e allora la prima lettura si prende un po' di piu'.
+Con quattro o cinque tornano entrambi.
+
+La proposta compare come **banner dentro il modulo**, ma solo quando
+dice qualcosa di diverso da quello che c'e' gia' scritto: un banner che
+ripete il modulo e' solo rumore. Si applica con un tasto e resta
+modificabile riga per riga.
+
+**Un errore di ordine, trovato dalle prove:** all'apertura le passate
+venivano generate prima di impostare i giorni liberi, quindi la proposta
+nasceva su un numero di giorni sbagliato e il banner compariva subito
+per contraddire quello che aveva appena scritto lui stesso.
+
 ### Piu' misure per la stessa materia, e cosa ripassare (7 settembre)
 
 Giulia ha scelto: **piu' misure insieme** e **tutti i modi di dire cosa
@@ -485,6 +513,8 @@ altrimenti si collauda roba vecchia. Le suite:
 - `sessione.mjs` - esami e appelli
 - `giorno.mjs` - la finestra di un giorno nel calendario e la striscia
   delle materie
+- `proposta.mjs` - il conto della divisione proposta, con numeri fissi
+- `proposta-ui.mjs` - il banner della proposta nel modulo
 - `livello-dati.mjs` - cosa scrive davvero `db.js` nel database
 - `sweep.mjs` - tutte le pagine si aprono senza errori
 - `contrasto.mjs` - leggibilita' del testo, chiaro e scuro

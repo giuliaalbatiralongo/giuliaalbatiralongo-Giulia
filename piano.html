@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=50">
+  <link rel="stylesheet" href="style.css?v=51">
 </head>
 <body>
   <div class="app">
@@ -206,6 +206,16 @@
         <div class="campo">
           <label>Passate</label>
           <p class="campo-aiuto">Ogni passata rifa tutto il materiale, nei giorni che le dai. Per questo le ripetizioni sono piu fitte.</p>
+          <div class="proposta" id="proposta" hidden>
+            <div class="proposta-testo">
+              <p class="proposta-titolo" id="proposta-titolo"></p>
+              <p class="proposta-righe" id="proposta-righe"></p>
+            </div>
+            <button type="button" class="btn btn-neutro btn-piccolo" id="usa-proposta">
+              <i class="ph ph-magic-wand" aria-hidden="true"></i> Usa questa
+            </button>
+          </div>
+
           <div id="righe-fasi"></div>
           <p class="campo-aiuto">
             Su ogni passata puoi dire anche <em>cosa</em> ripassare: un intervallo di
@@ -235,6 +245,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="piano.js?v=9"></script>
+  <script type="module" src="piano.js?v=10"></script>
 </body>
 </html>
