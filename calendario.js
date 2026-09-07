@@ -580,7 +580,7 @@ function disegnaSessione() {
 
 /* ---------- La scheda di un esame ---------- */
 
-function rigaAppello(esame, appello, conTasti = true) {
+function rigaAppello(esame, appello) {
   const riga = document.createElement('div');
   const scelto = esame.appello_scelto === appello.id;
   riga.className = 'riga-appello' + (scelto ? ' scelto' : '');
@@ -637,24 +637,30 @@ function rigaAppello(esame, appello, conTasti = true) {
   });
   azioni.appendChild(scegli);
 
-  if (conTasti) {
-    const togli = document.createElement('button');
-    togli.type = 'button';
-    togli.className = 'btn-piu';
-    togli.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
-    togli.setAttribute('aria-label', `Togli l'appello del ${dataLunga(appello.giorno)}`);
-    togli.addEventListener('click', async () => {
-      if (!window.confirm(`Togliere l'appello del ${dataLunga(appello.giorno)}?`)) return;
-      togli.disabled = true;
-      if (await eliminaDataEsame(appello.id)) {
-        await ricarica();
-        apriScheda(tuttiGliEsami.find((e) => e.id === esame.id));
-      } else {
-        togli.disabled = false;
-      }
-    });
-    azioni.appendChild(togli);
-  }
+  /* La X c'e' sempre, anche sull'appello a cui hai deciso di
+     presentarti. Prima li' spariva, e per togliere una data messa per
+     sbaglio bisognava prima togliere la scelta e poi aprire "Cambia
+     appello": due passaggi che nessuno indovina. */
+  const togli = document.createElement('button');
+  togli.type = 'button';
+  togli.className = 'btn-piu';
+  togli.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
+  togli.setAttribute('aria-label', `Togli la data del ${dataLunga(appello.giorno)}`);
+  togli.title = 'Togli questa data';
+  togli.addEventListener('click', async () => {
+    if (!window.confirm(`Togliere la data del ${dataLunga(appello.giorno)}?`)) return;
+    togli.disabled = true;
+    if (await eliminaDataEsame(appello.id)) {
+      await ricarica();
+      apriScheda(tuttiGliEsami.find((e) => e.id === esame.id));
+    } else {
+      togli.disabled = false;
+      esitoAppello.className = 'esito-form ko';
+      esitoAppello.textContent =
+        `Non sono riuscita a togliere questa data. ${ultimoErroreDb() || ''}`.trim();
+    }
+  });
+  azioni.appendChild(togli);
 
   riga.appendChild(azioni);
   return riga;
@@ -692,7 +698,7 @@ function apriScheda(esame, apriTutti = false) {
     vuoto.textContent = 'Ancora nessuna data. Aggiungi qui sotto quelle che ti propongono.';
     elSchedaAppelli.appendChild(vuoto);
   } else if (stretta) {
-    elSchedaAppelli.appendChild(rigaAppello(esame, esame.scelto, false));
+    elSchedaAppelli.appendChild(rigaAppello(esame, esame.scelto));
 
     const altri = esame.appelli.length - 1;
     if (altri > 0) {

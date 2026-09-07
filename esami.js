@@ -3,6 +3,7 @@ import {
   creaEsameCompleto,
   aggiornaEsame,
   eliminaEsame,
+  eliminaDataEsame,
   strutturaAnni,
   nomeAnno,
   nomeSemestre,
@@ -526,6 +527,68 @@ function aggiornaCampoVoto() {
 
 document.getElementById('esame-sostenuto').addEventListener('change', aggiornaCampoVoto);
 
+/* Le date di un esame, dentro la sua scheda.
+
+   Qui si tolgono soltanto: e' qui che le cerchi quando ti accorgi che
+   una data e' sbagliata. Aggiungerne una e decidere a quale appello ti
+   presenti resta lavoro del calendario, perche' due strade per la stessa
+   cosa finiscono sempre per non dire la stessa cosa. */
+function mostraDate(esame) {
+  const campo = document.getElementById('campo-date');
+  const elenco = document.getElementById('esame-date');
+  elenco.innerHTML = '';
+
+  if (!esame || esame.appelli.length === 0) {
+    campo.hidden = true;
+    return;
+  }
+
+  esame.appelli.forEach((d) => {
+    const riga = document.createElement('div');
+    riga.className = 'data-esame-riga' + (esame.appello_scelto === d.id ? ' scelta' : '');
+
+    const testo = document.createElement('span');
+    testo.className = 'data-esame-quando';
+    const quando = new Date(d.giorno + 'T00:00:00').toLocaleDateString('it-IT', {
+      day: 'numeric', month: 'long', year: 'numeric',
+    });
+    testo.textContent = d.ora ? `${quando}, ${d.ora.slice(0, 5)}` : quando;
+    riga.appendChild(testo);
+
+    const tipo = document.createElement('span');
+    tipo.className = 'data-esame-tipo';
+    tipo.textContent = esame.appello_scelto === d.id ? 'ti presenti a questa' : d.tipo;
+    riga.appendChild(tipo);
+
+    const togli = document.createElement('button');
+    togli.type = 'button';
+    togli.className = 'btn-piu';
+    togli.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
+    togli.setAttribute('aria-label', `Togli la data del ${quando}`);
+    togli.title = 'Togli questa data';
+    togli.addEventListener('click', async () => {
+      if (!window.confirm(`Togliere la data del ${quando}?`)) return;
+      togli.disabled = true;
+      if (await eliminaDataEsame(d.id)) {
+        await ricarica();
+        const fresco = esami.find((e) => e.id === esame.id);
+        inModifica = fresco || null;
+        mostraDate(fresco);
+      } else {
+        togli.disabled = false;
+        esito.className = 'esito-form ko';
+        esito.textContent =
+          `Non sono riuscita a togliere questa data. ${ultimoErroreDb() || ''}`.trim();
+      }
+    });
+    riga.appendChild(togli);
+
+    elenco.appendChild(riga);
+  });
+
+  campo.hidden = false;
+}
+
 function apriFinestra(esame, casella = null) {
   inModifica = esame || null;
   form.reset();
@@ -562,6 +625,7 @@ function apriFinestra(esame, casella = null) {
   }
 
   aggiornaCampoVoto();
+  mostraDate(esame);
   finestra.showModal();
   document.getElementById('esame-nome').focus();
 }

@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=42527559">
+  <link rel="stylesheet" href="style.css?v=15234683">
 </head>
 <body>
   <div class="app">
@@ -192,6 +192,18 @@
           <label for="esame-voto">Voto</label>
           <select id="esame-voto" name="voto"></select>
         </div>
+
+        <!-- Le date di questo esame. Si tolgono da qui, perche' e' qui
+             che le cerchi; ad aggiungerle e a scegliere a quale ti
+             presenti ci pensa il calendario, una strada sola. -->
+        <div class="campo" id="campo-date" hidden>
+          <label>Date di questo esame</label>
+          <div id="esame-date"></div>
+          <p class="campo-aiuto">
+            Per aggiungerne una o scegliere a quale ti presenti,
+            <a href="calendario.html">vai al calendario</a>.
+          </p>
+        </div>
       </div>
 
       <div class="finestra-fondo">
@@ -235,6 +247,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="esami.js?v=16004914"></script>
+  <script type="module" src="esami.js?v=23337136"></script>
 </body>
 </html>
