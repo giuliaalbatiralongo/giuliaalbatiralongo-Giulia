@@ -6,9 +6,9 @@ import {
   approvaMateriale,
   eliminaMateriale,
   linkMateriali,
-} from './db.js?v=41';
-import { proteggiPagina } from './auth.js?v=12';
-import { iconaPerMateria } from './materie.js?v=3';
+} from './db.js?v=21892961';
+import { proteggiPagina } from './auth.js?v=20053468';
+import { iconaPerMateria } from './materie.js?v=71987087';
 
 const elScheletro = document.getElementById('scheletro');
 const elProposte = document.getElementById('proposte');

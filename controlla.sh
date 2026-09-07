@@ -12,3 +12,6 @@ echo "   a posto"
 
 echo "2. nomi importati che dall'altra parte non ci sono"
 node controlla-nomi.mjs
+
+echo "3. numeri di versione (la cache del browser)"
+python3 versioni.py
