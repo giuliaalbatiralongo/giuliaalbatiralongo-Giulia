@@ -1,5 +1,6 @@
-import { inserisciDomandaEsame } from './db.js?v=21892961';
-import { proteggiPagina } from './auth.js?v=20053468';
+import { inserisciDomandaEsame, getEsami, gruppiDiMaterie } from './db.js?v=23456944';
+import { preparaSceltaMateria } from './scelta-materia.js?v=16848224';
+import { proteggiPagina } from './auth.js?v=75215613';
 
 const form = document.getElementById('form-domanda');
 const elEsito = document.getElementById('esito');
@@ -38,4 +39,11 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-proteggiPagina();
+proteggiPagina().then(async () => {
+  const esami = await getEsami();
+  preparaSceltaMateria({
+    input: document.getElementById('materia'),
+    gruppi: gruppiDiMaterie(esami),
+    etichettaAltro: 'Altro (non e nel manifesto)',
+  });
+});

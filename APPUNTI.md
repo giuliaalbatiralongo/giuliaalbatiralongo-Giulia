@@ -179,6 +179,43 @@ elenco scritto a mano, e controlla anche la versione stretta.
 nome per esteso l'aveva pero' lasciato scegliere a me, e la voce e'
 rimasta **Libretto**. Se lo rivuole lungo e' una parola.
 
+### F. Le materie vengono dal libretto, ovunque (7 settembre)
+
+Giulia: *"le materie devono poter essere selezionate dal manifesto,
+quindi dal libretto, le stesse materie devono corrispondere, perche'
+quelle sono le materie ufficiali"*. E, per l'organizzazione studio,
+**solo l'anno in corso** con i suoi due semestri, piu' gli arretrati.
+
+Prima ogni pagina aveva il suo campo "Materia": testo libero con accanto
+un elenco di suggerimenti **scritto a mano dentro l'HTML**. Quell'elenco
+era rimasto ai nomi degli esami finti, cancellati due giorni fa. E
+soprattutto niente garantiva che il nome scritto in un caso clinico
+fosse lo stesso del libretto: bastava una maiuscola diversa e i puntini
+non si univano piu'.
+
+Adesso c'e' **un campo solo, condiviso** (`scelta-materia.js`), che
+prende le materie da `gruppiDiMaterie` in db.js:
+
+| Dove | Cosa vede |
+|---|---|
+| Organizzazione studio | l'anno in corso, diviso per semestre, piu' gli **arretrati** (esami degli anni prima non ancora dati) |
+| Casi clinici | tutte, divise per anno |
+| Domande esami | tutte, divise per anno |
+
+Due cose tenute apposta:
+
+- **si puo' sempre scrivere una materia che nel manifesto non c'e'**:
+  la voce "Altro" apre il campo libero. Giulia l'ha chiesto
+  esplicitamente, e serve per i corsi a scelta
+- **il campo di testo resta nel modulo** e continua a contenere il
+  valore vero. Cosi' il codice che legge i moduli non e' cambiato, e se
+  il menu non si carica si puo' comunque scrivere a mano
+
+Nell'organizzazione, se l'anno non e' ancora stato scelto nel libretto
+si indovina dagli esami dati, **con lo stesso conto del libretto**: due
+pagine che indovinano in modo diverso sarebbero peggio di due pagine che
+non indovinano.
+
 ### A. Il Libretto (era la pagina Esami)
 
 1. **Il nome.** Non piu' "Esami". Giulia ha lasciato scegliere a me fra

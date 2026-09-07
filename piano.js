@@ -11,20 +11,26 @@ import {
   proponiPassate,
   getDateEsame,
   getEsami,
+  gruppiDiMaterie,
+  mieImpostazioni,
+  annoIndovinato,
   assicuraEsameDiMateria,
   titoloData,
   misureDi,
   giorniMancanti,
   FAMIGLIE,
   famigliaDiFase,
-} from './db.js?v=21892961';
-import { proteggiPagina } from './auth.js?v=20053468';
+} from './db.js?v=23456944';
+import { proteggiPagina } from './auth.js?v=75215613';
+import { preparaSceltaMateria } from './scelta-materia.js?v=16848224';
 
 const elScheletro = document.getElementById('scheletro');
 const elPiani = document.getElementById('piani');
 const elStriscia = document.getElementById('materie-striscia');
 const elConto = document.getElementById('materie-conto');
 const finestraMateria = document.getElementById('finestra-materia');
+// Il menu delle materie: serve per rimetterlo a posto riaprendo la finestra
+let sceltaMateria = null;
 const elOggi = document.getElementById('oggi');
 const elOggiElenco = document.getElementById('oggi-elenco');
 const finestra = document.getElementById('finestra-piano');
@@ -952,6 +958,10 @@ function apriFinestra(piano) {
 
   document.getElementById('nota-modifica').hidden = !piano;
 
+  // Il menu delle materie va rimesso su quella giusta: `form.reset()`
+  // svuota il campo di testo, ma il menu resterebbe dov'era.
+  if (sceltaMateria) sceltaMateria.allinea();
+
   aggiornaConto();
   finestra.showModal();
 }
@@ -1146,7 +1156,25 @@ async function allineaEsame(materia, giorno) {
 
 async function avvia() {
   try {
-    [piani, date, esami] = await Promise.all([getPiani(), getDateEsame(), getEsami()]);
+    let impostazioni;
+    [piani, date, esami, impostazioni] = await Promise.all([
+      getPiani(), getDateEsame(), getEsami(), mieImpostazioni(),
+    ]);
+
+    /* Le materie da scegliere sono quelle dell'anno che stai facendo,
+       divise per semestre, piu' gli arretrati. Quelle degli anni dopo
+       non si vedono: adesso non ti riguardano e confondono soltanto.
+
+       Se l'anno non l'hai ancora detto, ci sono tutte: meglio troppe
+       che nessuna. */
+    sceltaMateria = preparaSceltaMateria({
+      input: document.getElementById('piano-materia'),
+      // Se l'anno non l'hai ancora scelto nel libretto, si indovina dagli
+      // esami che risultano dati: e' lo stesso conto che fa il libretto,
+      // e le due pagine devono dire la stessa cosa.
+      gruppi: gruppiDiMaterie(esami, { anno: impostazioni.anno_corso ?? annoIndovinato(esami) }),
+      etichettaAltro: 'Altro (non e nel manifesto)',
+    });
 
     preparaFinestra();
     disegna();

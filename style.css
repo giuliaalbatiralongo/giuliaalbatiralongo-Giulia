@@ -5117,6 +5117,11 @@ a.oggi-riga {
 
 .scelta-anno-nota { font-size: 12px; color: var(--testo-3); }
 
+/* Il menu delle materie: sta sopra al campo di testo, che compare solo
+   quando scegli "Altro". */
+.scelta-materia { margin-bottom: 8px; }
+.scelta-materia + input[type="text"][hidden] { display: none; }
+
 /* ---------- Libretto: le date dentro la scheda dell'esame ---------- */
 
 .data-esame-riga {

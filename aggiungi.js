@@ -1,5 +1,6 @@
-import { inserisciCaso } from './db.js?v=21892961';
-import { proteggiPagina } from './auth.js?v=20053468';
+import { inserisciCaso, getEsami, gruppiDiMaterie } from './db.js?v=23456944';
+import { preparaSceltaMateria } from './scelta-materia.js?v=16848224';
+import { proteggiPagina } from './auth.js?v=75215613';
 
 let profiloCorrente = null;
 
@@ -44,6 +45,16 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-proteggiPagina().then((profilo) => {
+proteggiPagina().then(async (profilo) => {
   profiloCorrente = profilo;
+
+  /* Le materie da scegliere sono gli esami del libretto: cosi' un caso
+     clinico e il suo esame si chiamano allo stesso modo. Ci sono tutti
+     gli anni, perche' un caso puo' riguardare qualunque materia. */
+  const esami = await getEsami();
+  preparaSceltaMateria({
+    input: document.getElementById('materia'),
+    gruppi: gruppiDiMaterie(esami),
+    etichettaAltro: 'Altro (non e nel manifesto)',
+  });
 });

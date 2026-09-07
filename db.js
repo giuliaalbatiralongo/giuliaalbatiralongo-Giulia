@@ -842,6 +842,50 @@ export function statoAnno(gruppo, annoCorso) {
   return { quando, dati, mancano, quanti: esami.length, vuoto: esami.length === 0, testo };
 }
 
+/* ---------- Le materie, prese dal libretto ----------
+
+   Le materie non si riscrivono a mano in ogni pagina: sono gli esami
+   del libretto, che vengono dal manifesto. Cosi' un caso clinico, una
+   domanda d'esame, un piano di studio e una data sul calendario parlano
+   tutti della stessa cosa con lo stesso nome.
+
+   Con `anno` si guarda solo l'anno che stai facendo, diviso per
+   semestre, piu' gli **arretrati**: gli esami degli anni prima che non
+   risultano ancora dati. Senza `anno` ci sono tutti, divisi per anno.
+
+   Chi e' gia' stato dato non compare: e' roba chiusa. */
+
+export function gruppiDiMaterie(esami, { anno = null } = {}) {
+  const perNome = (a, b) => a.localeCompare(b, 'it');
+  const nomi = (righe) => [...new Set(righe.map((e) => e.nome))].sort(perNome);
+  const gruppi = [];
+
+  if (anno) {
+    const diQuestAnno = esami.filter((e) => e.anno === anno);
+    [1, 2].forEach((sem) => {
+      const suoi = nomi(diQuestAnno.filter((e) => e.semestre === sem && !e.sostenuto));
+      if (suoi.length > 0) gruppi.push({ etichetta: nomeSemestre(sem), materie: suoi });
+    });
+    const annuali = nomi(diQuestAnno.filter((e) => !e.semestre && !e.sostenuto));
+    if (annuali.length > 0) gruppi.push({ etichetta: 'Annuali', materie: annuali });
+
+    // Quello che ti sei lasciata indietro resta a portata di mano
+    const arretrati = nomi(esami.filter((e) => e.anno && e.anno < anno && !e.sostenuto));
+    if (arretrati.length > 0) gruppi.push({ etichetta: 'Arretrati', materie: arretrati });
+
+    return gruppi;
+  }
+
+  ANNI.forEach((a) => {
+    const suoi = nomi(esami.filter((e) => e.anno === a));
+    if (suoi.length > 0) gruppi.push({ etichetta: nomeAnno(a), materie: suoi });
+  });
+  const sciolti = nomi(esami.filter((e) => !e.anno));
+  if (sciolti.length > 0) gruppi.push({ etichetta: 'Senza anno', materie: sciolti });
+
+  return gruppi;
+}
+
 /* ---------- Le due medie ----------
 
    Aritmetica: tutti gli esami pesano uguale.

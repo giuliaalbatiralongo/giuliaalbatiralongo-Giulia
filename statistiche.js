@@ -9,8 +9,8 @@ import {
   sommaPerSezione,
   formattaDurata,
   casiDaRipassareOggi,
-} from './db.js?v=21892961';
-import { proteggiPagina } from './auth.js?v=20053468';
+} from './db.js?v=23456944';
+import { proteggiPagina } from './auth.js?v=75215613';
 
 const elScheletro = document.getElementById('scheletro');
 const elTutto = document.getElementById('statistiche');
