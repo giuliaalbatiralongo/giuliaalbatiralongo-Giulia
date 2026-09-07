@@ -179,6 +179,50 @@ elenco scritto a mano, e controlla anche la versione stretta.
 nome per esteso l'aveva pero' lasciato scegliere a me, e la voce e'
 rimasta **Libretto**. Se lo rivuole lungo e' una parola.
 
+### G. Il cestino (7 settembre)
+
+Giulia ha cancellato un esame per sbaglio: *"non posso perdere tutto
+quello che faccio se clicco le cose per sbaglio"*.
+
+**Cancellare non toglie piu' la riga: le mette sopra una data.** Le
+pagine leggono solo le righe senza quella data, il cestino solo quelle
+che ce l'hanno. Dopo **trenta giorni** si cancella davvero, e lo
+svuotamento dei vecchi si fa aprendo il cestino: non c'e' nessuno che
+gira di notte, e va bene cosi'.
+
+Ci finisce dentro **tutto quello che si cancella**: esami, date del
+calendario, materie dell'organizzazione, casi clinici, domande d'esame,
+materiali, suggerimenti. Restano cancellazioni vere solo i pezzi interni
+di una modifica (le passate di un piano che si riscrivono, le note di
+una domanda): non sono "cose cancellate", sono parti di un salvataggio.
+
+`eliminato_con` tiene insieme quello che se n'e' andato **nello stesso
+gesto**: un esame e le sue date se ne vanno insieme e insieme tornano.
+Prima le date se le portava via il database (`on delete cascade`) e non
+sarebbero mai tornate.
+
+**Due reti, non una:**
+
+1. la **striscia "Annulla"** che compare subito dopo, in basso, e sparisce
+   da sola dopo otto secondi. Prende il caso vero -- te ne accorgi un
+   secondo dopo il clic -- senza doverti spostare
+2. il **cestino** vero e proprio, sotto "Altro", con Ripristina su ogni
+   voce e "Svuota il cestino"
+
+**Le freccette avanti/indietro non ci sono, ed e' una scelta.** Akesis e'
+fatto di pagine separate che scrivono su un database condiviso: una
+freccia potrebbe disfare una cancellazione, ma non un voto scritto, un
+piano rifatto, o una data spostata dal telefono mentre eri sul portatile.
+Sarebbe una freccia che a volte funziona e a volte no, che e' peggio di
+non averla. Detto a Giulia, che ha scelto cestino + Annulla.
+
+**Il file di un materiale non si cancella** quando la scheda va nel
+cestino: una scheda che torna senza il suo file sarebbe tornata morta.
+
+Nel finto database il cestino tiene **le righe**, non una funzione che
+le rimette a posto: cosi' si puo' salvare e sopravvive al cambio pagina.
+Con la funzione dentro il collaudo del cestino sarebbe stato finto.
+
 ### F. Le materie vengono dal libretto, ovunque (7 settembre)
 
 Giulia: *"le materie devono poter essere selezionate dal manifesto,

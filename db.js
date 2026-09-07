@@ -46,7 +46,7 @@ async function idUtente() {
 export async function getCasiClinici(materia, opzioni = {}) {
   const { includiInAttesa = false } = opzioni;
 
-  let query = supabase.from('casi_clinici').select('*').order('id', { ascending: true });
+  let query = vive(supabase.from('casi_clinici').select('*')).order('id', { ascending: true });
   if (materia) query = query.eq('materia', materia);
   if (!includiInAttesa) query = query.eq('pubblicazione', 'pubblicato');
 
@@ -80,6 +80,7 @@ export async function getCasiInAttesa() {
   const { data, error } = await supabase
     .from('casi_clinici')
     .select('*')
+    .is('eliminato_il', null)
     .eq('pubblicazione', 'in_attesa')
     .order('created_at', { ascending: true });
 
@@ -104,13 +105,7 @@ export async function approvaCaso(id) {
 }
 
 export async function eliminaCaso(id) {
-  const { error } = await supabase.from('casi_clinici').delete().eq('id', id);
-
-  if (error) {
-    console.error('Errore nell eliminazione del caso:', error);
-    return false;
-  }
-  return true;
+  return nelCestino([{ tabella: 'casi_clinici', ids: [id] }]);
 }
 
 /* Registra il ripasso di un caso. La nuova data e il nuovo stato li
@@ -191,6 +186,7 @@ export async function getMateriali(materia, opzioni = {}) {
   let query = supabase
     .from('materiali')
     .select(CAMPI_MATERIALE)
+    .is('eliminato_il', null)
     .order('created_at', { ascending: false });
 
   if (materia) query = query.eq('materia', materia);
@@ -308,6 +304,7 @@ export async function getMaterialiInAttesa() {
   const { data, error } = await supabase
     .from('materiali')
     .select(CAMPI_MATERIALE)
+    .is('eliminato_il', null)
     .eq('pubblicazione', 'in_attesa')
     .order('created_at', { ascending: true });
 
@@ -335,16 +332,11 @@ export async function approvaMateriale(id) {
 
 /* Prima la scheda, poi il file: se togliessimo prima il file, un errore
    sulla scheda lascerebbe un documento che compare ma non si apre. */
-export async function eliminaMateriale(id, percorso) {
-  const { error } = await supabase.from('materiali').delete().eq('id', id);
-
-  if (error) {
-    console.error('Errore nell eliminazione del materiale:', error);
-    return false;
-  }
-
-  if (percorso) await supabase.storage.from(ARCHIVIO).remove([percorso]);
-  return true;
+/* Il file NON si tocca: la scheda va nel cestino e da li' puo' tornare,
+   e un documento senza il suo file sarebbe una scheda morta. Il file se
+   ne va quando il cestino si svuota davvero. */
+export async function eliminaMateriale(id) {
+  return nelCestino([{ tabella: 'materiali', ids: [id] }]);
 }
 
 /* ---------- Domande d'esame ---------- */
@@ -353,6 +345,7 @@ export async function getDomandeEsame(materia) {
   let query = supabase
     .from('domande_esame')
     .select('*')
+    .is('eliminato_il', null)
     .order('volte', { ascending: false })
     .order('created_at', { ascending: false });
 
@@ -543,9 +536,10 @@ export async function getDateEsame() {
     supabase
       .from('date_esame')
       .select('*')
+      .is('eliminato_il', null)
       .order('giorno', { ascending: true })
       .order('ora', { ascending: true, nullsFirst: true }),
-    supabase.from('esami').select('id, nome, appello_scelto'),
+    supabase.from('esami').select('id, nome, appello_scelto').is('eliminato_il', null),
   ]);
 
   const { data, error } = risposta;
@@ -584,10 +578,8 @@ export async function getDateEsame() {
 
 export async function getEsami() {
   const [esami, date] = await Promise.all([
-    supabase.from('esami').select('*').order('created_at', { ascending: true }),
-    supabase
-      .from('date_esame')
-      .select('*')
+    vive(supabase.from('esami').select('*')).order('created_at', { ascending: true }),
+    vive(supabase.from('date_esame').select('*'))
       .not('esame_id', 'is', null)
       .order('giorno', { ascending: true }),
   ]);
@@ -842,6 +834,155 @@ export function statoAnno(gruppo, annoCorso) {
   return { quando, dati, mancano, quanti: esami.length, vuoto: esami.length === 0, testo };
 }
 
+/* ---------- Il cestino ----------
+
+   Cancellare non toglie la riga: le mette sopra una data. Le pagine
+   guardano solo le righe senza quella data, il cestino solo quelle che
+   ce l'hanno. Dopo trenta giorni si cancella davvero.
+
+   Serve perche' un clic sbagliato non deve costare il lavoro di un
+   pomeriggio, e perche' il database non ha un tasto "torna indietro".
+
+   `eliminato_con` tiene insieme le cose buttate nello stesso gesto: un
+   esame e le sue date se ne vanno insieme e insieme devono tornare. */
+
+export const GIORNI_NEL_CESTINO = 30;
+
+const CESTINABILI = [
+  { tabella: 'esami', nome: 'Esame', campo: 'nome' },
+  { tabella: 'date_esame', nome: 'Data', campo: 'materia' },
+  { tabella: 'piani', nome: 'Materia da studiare', campo: 'materia' },
+  { tabella: 'casi_clinici', nome: 'Caso clinico', campo: 'domanda' },
+  { tabella: 'domande_esame', nome: 'Domanda d esame', campo: 'domanda' },
+  { tabella: 'materiali', nome: 'Materiale', campo: 'titolo' },
+  { tabella: 'suggerimenti', nome: 'Suggerimento', campo: 'titolo' },
+];
+
+/* Le righe vive: quelle che non stanno nel cestino. Da mettere in ogni
+   lettura, altrimenti quello che hai buttato continua a comparire. */
+function vive(query) {
+  return query.is('eliminato_il', null);
+}
+
+function adesso() {
+  return new Date().toISOString();
+}
+
+function nuovoGesto() {
+  // randomUUID non c'e' sui browser molto vecchi: meglio un ripiego che
+  // un errore.
+  return crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+/* Butta nel cestino. Ritorna il gesto, che serve a rimettere tutto
+   com'era: e' quello che riceve il tasto "Annulla". */
+async function nelCestino(pezzi) {
+  const gesto = nuovoGesto();
+  const quando = adesso();
+
+  for (const { tabella, ids } of pezzi) {
+    if (!ids || ids.length === 0) continue;
+    const { error } = await supabase
+      .from(tabella)
+      .update({ eliminato_il: quando, eliminato_con: gesto })
+      .in('id', ids);
+    if (error) {
+      segnaErrore(`Errore nel buttare via da ${tabella}:`, error);
+      return null;
+    }
+  }
+  return gesto;
+}
+
+/* Rimette com'era tutto quello che se n'era andato nello stesso gesto. */
+export async function annullaEliminazione(gesto) {
+  if (!gesto) return false;
+  for (const { tabella } of CESTINABILI) {
+    const { error } = await supabase
+      .from(tabella)
+      .update({ eliminato_il: null, eliminato_con: null })
+      .eq('eliminato_con', gesto);
+    if (error) {
+      segnaErrore(`Errore nel rimettere a posto ${tabella}:`, error);
+      return false;
+    }
+  }
+  return true;
+}
+
+/* Cosa c'e' nel cestino, dal piu' recente. Le cose buttate insieme
+   stanno insieme, cosi' si rimettono a posto in un colpo. */
+export async function getCestino() {
+  await svuotaIVecchi();
+
+  const voci = [];
+  for (const c of CESTINABILI) {
+    const { data, error } = await supabase
+      .from(c.tabella)
+      .select('*')
+      .not('eliminato_il', 'is', null)
+      .order('eliminato_il', { ascending: false });
+    if (error) {
+      segnaErrore(`Errore nella lettura del cestino (${c.tabella}):`, error);
+      continue;
+    }
+    (data || []).forEach((riga) => {
+      voci.push({
+        tipo: c.nome,
+        tabella: c.tabella,
+        id: riga.id,
+        titolo: String(riga[c.campo] || '(senza nome)').slice(0, 120),
+        quando: riga.eliminato_il,
+        gesto: riga.eliminato_con,
+        riga,
+      });
+    });
+  }
+
+  // Raggruppate per gesto: un esame e le sue date sono una voce sola
+  const gruppi = new Map();
+  voci.forEach((v) => {
+    const chiave = v.gesto || `${v.tabella}-${v.id}`;
+    if (!gruppi.has(chiave)) {
+      gruppi.set(chiave, { gesto: v.gesto, chiave, quando: v.quando, voci: [] });
+    }
+    gruppi.get(chiave).voci.push(v);
+  });
+
+  return [...gruppi.values()]
+    .map((g) => ({ ...g, voci: g.voci.sort((a, b) => a.tipo.localeCompare(b.tipo, 'it')) }))
+    .sort((a, b) => String(b.quando).localeCompare(String(a.quando)));
+}
+
+export function giorniNelCestino(quando) {
+  const passati = Math.floor((Date.now() - new Date(quando).getTime()) / 86400000);
+  return Math.max(GIORNI_NEL_CESTINO - passati, 0);
+}
+
+/* Dopo trenta giorni si cancella davvero. Si fa aprendo il cestino:
+   non c'e' nessuno che gira di notte, e va bene cosi'. */
+async function svuotaIVecchi() {
+  const limite = new Date(Date.now() - GIORNI_NEL_CESTINO * 86400000).toISOString();
+  for (const { tabella } of CESTINABILI) {
+    const { error } = await supabase.from(tabella).delete().lt('eliminato_il', limite);
+    if (error) console.error(`Errore nello svuotare i vecchi da ${tabella}:`, error);
+  }
+}
+
+/* Svuota adesso, per scelta. Da qui si cancella sul serio. */
+export async function svuotaCestino() {
+  for (const { tabella } of CESTINABILI) {
+    const { error } = await supabase.from(tabella).delete().not('eliminato_il', 'is', null);
+    if (error) {
+      segnaErrore(`Errore nello svuotare il cestino (${tabella}):`, error);
+      return false;
+    }
+  }
+  return true;
+}
+
 /* ---------- Le materie, prese dal libretto ----------
 
    Le materie non si riscrivono a mano in ogni pagina: sono gli esami
@@ -982,16 +1123,19 @@ export function strutturaAnni(esami, quantiAnni = 6) {
 }
 
 export async function eliminaEsame(id) {
-  // Le date appese all'esame se ne vanno con lui: e' il database a
-  // farlo (on delete cascade), non una seconda chiamata che puo'
-  // fallire a meta'.
-  const { error } = await supabase.from('esami').delete().eq('id', id);
+  /* Le date appese all'esame se ne vanno con lui, e nello stesso gesto:
+     cosi' rimettendo a posto l'esame tornano anche loro. Prima ci
+     pensava il database (on delete cascade) e non tornavano piu'. */
+  const { data } = await supabase
+    .from('date_esame')
+    .select('id')
+    .eq('esame_id', id)
+    .is('eliminato_il', null);
 
-  if (error) {
-    console.error('Errore nell eliminazione dell esame:', error);
-    return false;
-  }
-  return true;
+  return nelCestino([
+    { tabella: 'esami', ids: [id] },
+    { tabella: 'date_esame', ids: (data || []).map((d) => d.id) },
+  ]);
 }
 
 export async function aggiungiAppello(esame, voce) {
@@ -1080,13 +1224,7 @@ export async function aggiornaDataEsame(id, voce) {
 }
 
 export async function eliminaDataEsame(id) {
-  const { error } = await supabase.from('date_esame').delete().eq('id', id);
-
-  if (error) {
-    console.error('Errore nell eliminazione della data:', error);
-    return false;
-  }
-  return true;
+  return nelCestino([{ tabella: 'date_esame', ids: [id] }]);
 }
 
 /* Quanti giorni mancano. I numeri negativi vogliono dire che e' passata. */
@@ -1336,6 +1474,7 @@ export async function getPiani() {
   const { data, error } = await supabase
     .from('piani')
     .select('*, fasi:piano_fasi(*)')
+    .is('eliminato_il', null)
     .order('fine', { ascending: true });
 
   if (error) {
@@ -1514,13 +1653,9 @@ export async function aggiornaFatteFase(id, fatte) {
 }
 
 export async function eliminaPiano(id) {
-  const { error } = await supabase.from('piani').delete().eq('id', id);
-
-  if (error) {
-    console.error('Errore nell eliminazione del piano:', error);
-    return false;
-  }
-  return true;
+  // Le passate restano attaccate al piano: non si vedono perche' non si
+  // vede lui, e tornano tutte insieme se lo rimetti a posto.
+  return nelCestino([{ tabella: 'piani', ids: [id] }]);
 }
 
 function giorniDiStudio(dal, al, giorniLiberi) {
@@ -1639,6 +1774,7 @@ export async function getSuggerimenti() {
   const { data, error } = await supabase
     .from('suggerimenti')
     .select('*')
+    .is('eliminato_il', null)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -1674,13 +1810,7 @@ export async function cambiaStatoSuggerimento(id, stato) {
 }
 
 export async function eliminaSuggerimento(id) {
-  const { error } = await supabase.from('suggerimenti').delete().eq('id', id);
-
-  if (error) {
-    console.error('Errore nell eliminazione del suggerimento:', error);
-    return false;
-  }
-  return true;
+  return nelCestino([{ tabella: 'suggerimenti', ids: [id] }]);
 }
 
 export async function getMioInteresse() {

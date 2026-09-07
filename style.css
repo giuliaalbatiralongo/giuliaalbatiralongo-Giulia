@@ -5122,6 +5122,127 @@ a.oggi-riga {
 .scelta-materia { margin-bottom: 8px; }
 .scelta-materia + input[type="text"][hidden] { display: none; }
 
+/* ---------- Il cestino ---------- */
+
+.cestino-conto {
+  margin-bottom: 12px;
+  font-size: 12.5px;
+  color: var(--testo-3);
+}
+
+.cestino-voce {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+}
+
+.cestino-testo { flex: 1 1 auto; min-width: 0; }
+
+.cestino-riga {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin: 0 0 2px;
+}
+
+.cestino-tipo {
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--testo-3);
+}
+
+.cestino-nome {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.cestino-meta {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--testo-3);
+}
+
+@media (max-width: 560px) {
+  .cestino-voce { flex-direction: column; align-items: stretch; gap: 12px; }
+}
+
+/* ---------- La striscia "Annulla" ----------
+   Sta in basso, sopra tutto il resto. Compare dopo una cancellazione e
+   se ne va da sola: non e' un avviso da leggere, e' una via d'uscita
+   per chi se n'e' accorto subito. */
+
+.annulla-striscia {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 12px 12px 12px 18px;
+  border-radius: 12px;
+  background: var(--testo);
+  color: var(--sfondo);
+  box-shadow: var(--ombra-3);
+  transform: translate(-50%, 16px);
+  opacity: 0;
+  transition: transform 200ms var(--curva), opacity 200ms var(--curva);
+}
+
+.annulla-striscia.dentro { transform: translate(-50%, 0); opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .annulla-striscia { transition: opacity 200ms var(--curva); transform: translate(-50%, 0); }
+}
+
+.annulla-testo {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13.5px;
+}
+
+.annulla-tasto {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--sfondo);
+  color: var(--testo);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.annulla-tasto:disabled { opacity: 0.6; cursor: default; }
+
+.annulla-chiudi {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.annulla-chiudi:hover { opacity: 1; }
+
 /* ---------- Libretto: le date dentro la scheda dell'esame ---------- */
 
 .data-esame-riga {

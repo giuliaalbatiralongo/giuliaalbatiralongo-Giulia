@@ -20,8 +20,9 @@ import {
   giorniMancanti,
   FAMIGLIE,
   famigliaDiFase,
-} from './db.js?v=23456944';
-import { proteggiPagina } from './auth.js?v=75215613';
+} from './db.js?v=60572282';
+import { proteggiPagina } from './auth.js?v=16234204';
+import { offriAnnulla } from './annulla.js?v=23580464';
 import { preparaSceltaMateria } from './scelta-materia.js?v=16848224';
 
 const elScheletro = document.getElementById('scheletro');
@@ -555,7 +556,10 @@ document.getElementById('elimina-materia').addEventListener('click', async () =>
   if (!window.confirm(`Eliminare l'organizzazione di ${materiaAperta.materia}?`)) return;
 
   const id = materiaAperta.id;
-  if (await eliminaPiano(id)) {
+  const nome = (piani.find((p) => p.id === id) || {}).materia || 'La materia';
+  const gesto = await eliminaPiano(id);
+  if (gesto) {
+    offriAnnulla(`${nome}`, gesto, () => window.location.reload());
     piani = piani.filter((p) => p.id !== id);
     finestraMateria.close();
     disegna();

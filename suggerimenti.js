@@ -5,8 +5,9 @@ import {
   cambiaStatoSuggerimento,
   eliminaSuggerimento,
   STATI_SUGGERIMENTO,
-} from './db.js?v=23456944';
-import { proteggiPagina } from './auth.js?v=75215613';
+} from './db.js?v=60572282';
+import { proteggiPagina } from './auth.js?v=16234204';
+import { offriAnnulla } from './annulla.js?v=23580464';
 
 const elScheletro = document.getElementById('scheletro');
 const elElenco = document.getElementById('suggerimenti');
@@ -92,7 +93,9 @@ function creaScheda(voce) {
     togli.addEventListener('click', async () => {
       if (!window.confirm(`Eliminare "${voce.titolo}"?`)) return;
       togli.disabled = true;
-      if (await eliminaSuggerimento(voce.id)) {
+      const gesto = await eliminaSuggerimento(voce.id);
+      if (gesto) {
+        offriAnnulla(`Il suggerimento "${voce.titolo}"`, gesto, () => window.location.reload());
         suggerimenti = suggerimenti.filter((s) => s.id !== voce.id);
         disegna();
       } else {

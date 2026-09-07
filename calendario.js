@@ -15,8 +15,9 @@ import {
   tipoData,
   TIPI_DATA,
   creaIcs,
-} from './db.js?v=23456944';
-import { proteggiPagina } from './auth.js?v=75215613';
+} from './db.js?v=60572282';
+import { proteggiPagina } from './auth.js?v=16234204';
+import { offriAnnulla } from './annulla.js?v=23580464';
 
 const elScheletro = document.getElementById('scheletro');
 const elTutto = document.getElementById('calendario');
@@ -258,7 +259,9 @@ function creaVoce(voce, dentroPannello) {
     togli.addEventListener('click', async () => {
       if (!window.confirm(`Eliminare ${titoloData(voce)} del ${voce.giorno}?`)) return;
       togli.disabled = true;
-      if (await eliminaDataEsame(voce.id)) {
+      const gesto = await eliminaDataEsame(voce.id);
+      if (gesto) {
+        offriAnnulla(`${titoloData(voce)} del ${voce.giorno}`, gesto, ricarica);
         await ricarica();
         if (giornoAperto) apriGiorno(giornoAperto);
       } else {
@@ -650,7 +653,9 @@ function rigaAppello(esame, appello) {
   togli.addEventListener('click', async () => {
     if (!window.confirm(`Togliere la data del ${dataLunga(appello.giorno)}?`)) return;
     togli.disabled = true;
-    if (await eliminaDataEsame(appello.id)) {
+    const gesto = await eliminaDataEsame(appello.id);
+    if (gesto) {
+      offriAnnulla(`La data del ${dataLunga(appello.giorno)}`, gesto, ricarica);
       await ricarica();
       apriScheda(tuttiGliEsami.find((e) => e.id === esame.id));
     } else {
@@ -742,7 +747,10 @@ document.getElementById('elimina-esame').addEventListener('click', async () => {
       : `Eliminare ${esameAperto.nome}? Se ne vanno anche le sue ${quanti} date.`;
   if (!window.confirm(avviso)) return;
 
-  if (await eliminaEsame(esameAperto.id)) {
+  const nomeEsame = esameAperto.nome;
+  const gesto = await eliminaEsame(esameAperto.id);
+  if (gesto) {
+    offriAnnulla(`L esame ${nomeEsame}`, gesto, ricarica);
     finestraScheda.close();
     await ricarica();
   }

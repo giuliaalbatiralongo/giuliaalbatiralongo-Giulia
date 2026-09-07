@@ -6,8 +6,9 @@ import {
   approvaMateriale,
   eliminaMateriale,
   linkMateriali,
-} from './db.js?v=23456944';
-import { proteggiPagina } from './auth.js?v=75215613';
+} from './db.js?v=60572282';
+import { proteggiPagina } from './auth.js?v=16234204';
+import { offriAnnulla } from './annulla.js?v=23580464';
 import { iconaPerMateria } from './materie.js?v=71987087';
 
 const elScheletro = document.getElementById('scheletro');
@@ -108,7 +109,9 @@ function creaProposta(caso) {
     if (!window.confirm('Eliminare definitivamente questa proposta?')) return;
     approva.disabled = true;
     rifiuta.disabled = true;
-    if (await eliminaCaso(caso.id)) {
+    const gesto = await eliminaCaso(caso.id);
+    if (gesto) {
+      offriAnnulla('Il caso clinico', gesto, () => window.location.reload());
       card.remove();
       aggiornaConteggi();
     } else {
@@ -229,7 +232,7 @@ function creaPropostaMateriale(materiale, indirizzo) {
     if (!window.confirm(`Eliminare definitivamente "${materiale.titolo}" e il suo file?`)) return;
     approva.disabled = true;
     rifiuta.disabled = true;
-    if (await eliminaMateriale(materiale.id, materiale.percorso)) {
+    if (await eliminaMateriale(materiale.id)) {
       card.remove();
       aggiornaConteggi();
     } else {

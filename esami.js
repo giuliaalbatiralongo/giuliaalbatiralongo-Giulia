@@ -17,8 +17,9 @@ import {
   statoAnno,
   calcolaMedie,
   ANNI,
-} from './db.js?v=23456944';
-import { proteggiPagina } from './auth.js?v=75215613';
+} from './db.js?v=60572282';
+import { proteggiPagina } from './auth.js?v=16234204';
+import { offriAnnulla } from './annulla.js?v=23580464';
 
 const elScheletro = document.getElementById('scheletro');
 const elElenco = document.getElementById('elenco');
@@ -569,7 +570,9 @@ function mostraDate(esame) {
     togli.addEventListener('click', async () => {
       if (!window.confirm(`Togliere la data del ${quando}?`)) return;
       togli.disabled = true;
-      if (await eliminaDataEsame(d.id)) {
+      const gesto = await eliminaDataEsame(d.id);
+      if (gesto) {
+        offriAnnulla(`La data del ${quando}`, gesto, ricarica);
         await ricarica();
         const fresco = esami.find((e) => e.id === esame.id);
         inModifica = fresco || null;
@@ -657,7 +660,10 @@ document.getElementById('elimina-esame').addEventListener('click', async () => {
       : `Eliminare ${inModifica.nome}? Se ne vanno anche le sue ${quanti} date dal calendario.`;
   if (!window.confirm(avviso)) return;
 
-  if (await eliminaEsame(inModifica.id)) {
+  const nome = inModifica.nome;
+  const gesto = await eliminaEsame(inModifica.id);
+  if (gesto) {
+    offriAnnulla(`L esame ${nome}`, gesto, ricarica);
     finestra.close();
     await ricarica();
   }
