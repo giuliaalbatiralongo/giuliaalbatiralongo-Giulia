@@ -15,7 +15,9 @@ import {
   titoloData,
   misureDi,
   giorniMancanti,
-} from './db.js?v=40';
+  FAMIGLIE,
+  famigliaDiFase,
+} from './db.js?v=41';
 import { proteggiPagina } from './auth.js?v=10';
 
 const elScheletro = document.getElementById('scheletro');
@@ -235,28 +237,74 @@ function rigaScheda(etichetta, valore) {
 /* Quanto materiale c'e', detto sempre con la stessa griglia. Le voci
    che non si applicano restano scritte, con un trattino: cosi' le
    materie si confrontano fra loro invece di avere ognuna la sua forma. */
-function schedaMateria(piano, calcolo) {
+function schedaMateria(piano) {
   const box = document.createElement('div');
   box.className = 'scheda-materia';
 
   const giorno = dataEsameDi(piano);
-  box.appendChild(rigaScheda('Esame', giorno ? dataLunga(giorno) : null));
-  box.appendChild(rigaScheda('Giorni di studio', calcolo.giorniDisponibili));
+  box.appendChild(rigaScheda('Data esame', giorno ? dataLunga(giorno) : null));
 
-  // Tutte e tre le misure, sempre scritte. Quella su cui si divide lo
-  // studio porta un segno, cosi' si sa da dove esce il conto del giorno.
-  misureDi(piano).forEach((m) => {
-    const riga = rigaScheda(m.nome, m.quanto);
-    if (m.quanto && m.chiave === piano.unita) {
-      riga.classList.add('scheda-riga-scelta');
-      const segno = document.createElement('span');
-      segno.className = 'scheda-riga-segno';
-      segno.textContent = 'divide lo studio';
-      riga.querySelector('.scheda-riga-etichetta').appendChild(segno);
-    }
-    box.appendChild(riga);
+  /* Solo pagine e lezioni. "Giorni di studio" e "Giorni di materiale"
+     se ne sono andati: erano poco chiari, e diventano superflui dal
+     momento in cui sei tu a scegliere in quanti giorni dividere. */
+  misureDi(piano)
+    .filter((m) => m.chiave !== 'giorni')
+    .forEach((m) => {
+      const riga = rigaScheda(m.nome, m.quanto);
+      if (m.quanto && m.chiave === piano.unita) {
+        riga.classList.add('scheda-riga-scelta');
+        const segno = document.createElement('span');
+        segno.className = 'scheda-riga-segno';
+        segno.textContent = 'divide lo studio';
+        riga.querySelector('.scheda-riga-etichetta').appendChild(segno);
+      }
+      box.appendChild(riga);
+    });
+
+  return box;
+}
+
+/* Il collegamento ai materiali di questa materia. Sta qui perche' e'
+   qui che ti viene in mente: stai guardando cosa studiare oggi, e i
+   file di quella materia devono essere a un clic. */
+function bottoneMateriale(piano) {
+  const a = document.createElement('a');
+  a.className = 'materia-link-materiale';
+  a.href = `materiali.html?materia=${encodeURIComponent(piano.materia)}`;
+  a.innerHTML =
+    '<i class="ph ph-folder-open" aria-hidden="true"></i>'
+    + '<span class="materia-link-testo">Materiale</span>'
+    + '<span class="materia-link-nota">dispense, sbobine e appunti di questa materia</span>'
+    + '<i class="ph ph-arrow-right materia-link-freccia" aria-hidden="true"></i>';
+  return a;
+}
+
+/* La legenda dei colori: tre lavori diversi, tre colori. Serve a capire
+   che cosa tocca oggi senza leggere il nome della passata. */
+function legendaFamiglie() {
+  const box = document.createElement('div');
+  box.className = 'legenda';
+
+  FAMIGLIE.forEach((f) => {
+    const v = document.createElement('span');
+    v.className = `legenda-voce fam-${f.chiave}`;
+
+    const punto = document.createElement('span');
+    punto.className = 'legenda-punto';
+    v.appendChild(punto);
+
+    const nome = document.createElement('span');
+    nome.className = 'legenda-nome';
+    nome.textContent = f.nome;
+    v.appendChild(nome);
+
+    const es = document.createElement('span');
+    es.className = 'legenda-esempi';
+    es.textContent = f.esempi;
+    v.appendChild(es);
+
+    box.appendChild(v);
   });
-
 
   return box;
 }
@@ -270,8 +318,11 @@ function rigaFase(piano, calcolo, fase) {
   const finita = fase.fatte >= totale;
   const corrente = fase === calcolo.faseOggi;
 
+  const famiglia = famigliaDiFase(fase);
   const riga = document.createElement('div');
-  riga.className = 'passata' + (finita ? ' finita' : corrente ? ' corrente' : '');
+  riga.className = 'passata'
+    + (finita ? ' finita' : corrente ? ' corrente' : '')
+    + (famiglia ? ` fam-${famiglia}` : '');
 
   const segno = document.createElement('span');
   segno.className = 'passata-segno';
@@ -391,7 +442,8 @@ function apriMateria(piano) {
 
   const scheda = document.getElementById('materia-riassunto');
   scheda.innerHTML = '';
-  scheda.appendChild(schedaMateria(piano, calcolo));
+  scheda.appendChild(schedaMateria(piano));
+  scheda.appendChild(bottoneMateriale(piano));
 
   const oggi = document.getElementById('materia-oggi');
   oggi.className = 'materia-oggi';
@@ -406,6 +458,10 @@ function apriMateria(piano) {
     oggi.classList.add('spento');
     oggi.textContent = 'La finestra di questa materia e passata.';
   } else if (calcolo.faseOggi) {
+    // Il blocco di oggi prende il colore del lavoro che tocca: si capisce
+    // se e' da leggere, ripetere o ripassare prima ancora di leggerlo.
+    const fam = famigliaDiFase(calcolo.faseOggi);
+    if (fam) oggi.classList.add(`fam-${fam}`);
     const q = calcolo.quantitaOggi === null ? null : arrotonda(calcolo.quantitaOggi);
     const t = document.createElement('p');
     t.className = 'materia-oggi-titolo';
@@ -428,13 +484,24 @@ function apriMateria(piano) {
   elenco.innerHTML = '';
   elenco.className = 'passate-elenco';
 
-  const titolo = document.createElement('p');
-  titolo.className = 'passate-titolo';
+  const intestazione = document.createElement('div');
+  intestazione.className = 'programma-testa';
+
+  const nome = document.createElement('h3');
+  nome.className = 'programma-nome';
+  nome.textContent = 'Programma di studio';
+  intestazione.appendChild(nome);
+
   const fatte = calcolo.fasi.filter(
     (f) => f.fatte >= (piano.unita === 'giorni' ? f.giorni : piano.quantita)
   ).length;
+  const titolo = document.createElement('p');
+  titolo.className = 'passate-titolo';
   titolo.textContent = `${fatte} finite su ${calcolo.fasi.length}`;
-  elenco.appendChild(titolo);
+  intestazione.appendChild(titolo);
+
+  elenco.appendChild(intestazione);
+  elenco.appendChild(legendaFamiglie());
 
   calcolo.fasi.forEach((f) => elenco.appendChild(rigaFase(piano, calcolo, f)));
 
@@ -554,8 +621,30 @@ function aggiungiRigaFase(preimpostata) {
     aggiornaConto();
   });
 
+  /* Che tipo di lavoro e': si legge, si ripete, si ripassa. Da qui esce
+     il colore. Si sceglie invece di indovinarlo dal nome, perche' il
+     nome lo scrivi tu e "1a lettura" o "riletturina" non li indovina
+     nessuno. Se non scegli, si prova comunque a capirlo dal nome. */
+  const famiglia = document.createElement('select');
+  famiglia.className = 'fase-famiglia';
+  famiglia.setAttribute('aria-label', 'Che tipo di lavoro e questa parte');
+  const indovinata = preimpostata ? famigliaDiFase(preimpostata) : null;
+  FAMIGLIE.forEach((f) => {
+    const o = document.createElement('option');
+    o.value = f.chiave;
+    o.textContent = f.nome;
+    o.selected = f.chiave === indovinata;
+    famiglia.appendChild(o);
+  });
+  if (!indovinata) famiglia.value = 'lettura';
+  famiglia.addEventListener('change', () => {
+    riga.className = `riga-fase fam-${famiglia.value}`;
+  });
+  riga.classList.add(`fam-${famiglia.value}`);
+
   testa.append(nome, giorni, togli);
   riga.appendChild(testa);
+  riga.appendChild(famiglia);
 
   /* Cosa ripassare: facoltativo, e si apre solo se serve. Tenerlo
      sempre aperto raddoppiava l'altezza del modulo per un campo che
@@ -634,6 +723,7 @@ function giorniDisponibiliNelModulo() {
 function passateNelModulo() {
   return [...elRighe.querySelectorAll('.riga-fase')].map((riga) => ({
     nome: riga.querySelector('.fase-nome-campo').value.trim(),
+    famiglia: riga.querySelector('.fase-famiglia').value,
     giorni: Number(riga.querySelector('.fase-giorni-campo').value) || 0,
   }));
 }
@@ -930,6 +1020,7 @@ async function salvaMateria() {
   const fasi = [...elRighe.querySelectorAll('.riga-fase')].map((riga) => ({
     id: riga.dataset.faseId ? Number(riga.dataset.faseId) : null,
     nome: riga.querySelector('.fase-nome-campo').value.trim(),
+    famiglia: riga.querySelector('.fase-famiglia').value,
     giorni: Number(riga.querySelector('.fase-giorni-campo').value),
     fatte: Number(riga.dataset.fatte) || 0,
     da_pagina: numero(riga.querySelector('.fase-da')),

@@ -194,14 +194,34 @@ lavorazione, e si spuntano una alla volta.
 11. **Solo tre voci**: "Data esame" (era "Esame"), "Pagine", "Lezioni".
     Via "Giorni di studio" e via "Giorni di materiale": poco chiare, e
     inutili dal momento in cui si sceglie in quanti giorni dividere.
+    **FATTO**
 12. **Un pulsante "Materiale"** che porta dritto ai materiali di quella
-    materia, per caricare e ritrovare i file.
+    materia, per caricare e ritrovare i file. **FATTO** — la pagina
+    Materiali adesso capisce anche `?materia=`, e mostra tutti i
+    documenti di quella materia raggruppati per categoria.
 13. **"Programma di studio"** sotto, con i compiti del giorno e una
     **legenda a colori** in tre famiglie:
     - **colore 1, si legge:** prima lettura (o prima lettura con
       sottolineatura), seconda lettura
     - **colore 2, si ripete:** prima, seconda e terza ripetizione
     - **colore 3, si ripassa:** ripasso 1, 2 e 3
+
+    **FATTO.** La famiglia e' una colonna vera (`piano_fasi.famiglia`) e
+    **si sceglie** quando crei la passata, con un menu accanto al nome:
+    indovinarla dal nome non basta, perche' il nome lo scrive lei e "1a
+    lettura" o "riletturina" non li indovina nessuno. Le passate
+    proposte nascono gia' con la famiglia giusta.
+
+    Per quelle scritte prima che la colonna esistesse c'e' comunque un
+    tentativo dal nome (`famigliaDiFase`), con "ripasso" controllato
+    **prima** di "ripetizione", altrimenti "rip" le prenderebbe tutte e
+    due. Se non si capisce **resta grigia**: meglio grigio che colorato
+    a caso.
+
+    Il colore sta sul **bordo sinistro** della passata, un filo, non un
+    riempimento: riempire dieci righe di colore le rende tutte uguali.
+    Il blocco di **oggi** invece si tinge tutto, perche' e' uno solo ed
+    e' quello che devi vedere entrando.
 
 ### Due difetti trovati facendo A (7 settembre)
 
@@ -219,15 +239,15 @@ lavorazione, e si spuntano una alla volta.
 
 ### Cosa chiedere prima di partire
 
-- **punto 4:** l'anno in corso lo scrive una volta nel profilo, o si
-  ricava dal fatto che gli esami risultino sostenuti?
-- **punto 6:** la media pesata sui CFU e' lo standard, ma la lode conta
-  30 o 31? Cambia il numero, e i due modi si usano entrambi
+- ~~**punto 4:** l'anno in corso~~ **RISPOSTO:** sta sul profilo, e se
+  non c'e' lo si indovina dicendolo. Giulia sta per iniziare il
+  **quarto anno, primo semestre** (gia' scritto nel suo profilo).
+- ~~**punto 6:** la lode~~ **RISPOSTO:** tutte e due, con un
+  interruttore. Parte da 30.
 - **punto 10:** quali cose della pagina Organizzazione studio non le
   piacciono
-- **punto 13:** i nomi delle fasi oggi li scrive lei a mano, quindi la
-  legenda deve indovinare la famiglia dal nome. Meglio far scegliere la
-  famiglia quando si crea la fase
+- ~~**punto 13:** la famiglia~~ **FATTO:** si sceglie da un menu, con il
+  tentativo dal nome come rete per le passate vecchie.
 
 ## Da fare quando sara' il momento
 

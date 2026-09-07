@@ -1,10 +1,13 @@
-import { getMateriali, linkMateriali, linkMateriale, sbloccaMateriale } from './db.js?v=40';
+import { getMateriali, linkMateriali, linkMateriale, sbloccaMateriale } from './db.js?v=41';
 import { iconaPerMateria } from './materie.js?v=3';
 import { TIPI_MATERIALE, tipoPerChiave } from './tipi.js?v=1';
 import { proteggiPagina } from './auth.js?v=10';
 
 const parametri = new URLSearchParams(window.location.search);
 const tipoScelto = parametri.get('tipo');
+// Si arriva qui anche dalla finestra di una materia, col suo nome nel
+// link: allora si mostrano i suoi documenti, di qualunque tipo siano.
+const materiaScelta = parametri.get('materia');
 
 const elScheletro = document.getElementById('scheletro');
 const elContenuto = document.getElementById('contenuto-materiali');
@@ -279,6 +282,44 @@ function mostraCategoria(materiali, indirizzi) {
   });
 }
 
+/* ---------- Tutti i documenti di una materia ----------
+   Ci si arriva dall'organizzazione studio: stai guardando cosa studiare
+   oggi e vuoi il materiale di quella materia, non di una categoria. */
+
+function mostraMateria(materiali, indirizzi) {
+  const suoi = materiali.filter(
+    (m) => (m.materia || '').toLowerCase() === materiaScelta.toLowerCase()
+  );
+
+  elTitolo.textContent = materiaScelta;
+  elSottotitolo.textContent =
+    suoi.length === 0
+      ? 'Non c\u2019\u00e8 ancora niente per questa materia.'
+      : `${suoi.length} ${suoi.length === 1 ? 'documento' : 'documenti'} di questa materia.`;
+  elAzioni.innerHTML =
+    '<a href="materiali.html" class="link-testo"><i class="ph ph-arrow-left" aria-hidden="true"></i> Tutte le categorie</a>';
+
+  if (suoi.length === 0) {
+    elContenuto.innerHTML = `
+      <div class="stato-vuoto">
+        <i class="ph ph-file-dashed" aria-hidden="true"></i>
+        <p>Nessun documento per ${materiaScelta}.</p>
+        <a class="btn" href="carica-materiale.html"><i class="ph ph-upload-simple" aria-hidden="true"></i> Carica un PDF</a>
+      </div>
+    `;
+    return;
+  }
+
+  // Raggruppati per categoria, cosi' le sbobine non si mescolano ai libri
+  const tipi = [...new Set(suoi.map((m) => m.tipo || 'altro'))];
+  tipi.forEach((chiave) => {
+    const tipo = tipoPerChiave(chiave);
+    elContenuto.appendChild(
+      creaGruppoMateria(tipo.etichetta, suoi.filter((m) => (m.tipo || 'altro') === chiave), indirizzi)
+    );
+  });
+}
+
 /* ---------- Avvio ---------- */
 
 async function avvia() {
@@ -286,7 +327,7 @@ async function avvia() {
     const materiali = await getMateriali();
     elScheletro.remove();
 
-    if (!tipoScelto) {
+    if (!tipoScelto && !materiaScelta) {
       mostraIndice(materiali);
       return;
     }
@@ -297,7 +338,8 @@ async function avvia() {
       materiali.filter((m) => m.sbloccato).map((m) => m.percorso)
     );
 
-    mostraCategoria(materiali, indirizzi);
+    if (materiaScelta) mostraMateria(materiali, indirizzi);
+    else mostraCategoria(materiali, indirizzi);
   } catch (errore) {
     elScheletro.innerHTML = `<p class="messaggio-errore"><i class="ph ph-warning-circle" aria-hidden="true"></i> Errore nel caricamento: ${errore.message}</p>`;
     console.error(errore);

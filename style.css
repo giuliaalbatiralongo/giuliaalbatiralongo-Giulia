@@ -71,6 +71,16 @@
   --tipo-altro: #6b6f7d;
 
   /* Stati di ripasso */
+  /* Le tre famiglie di passate: si legge, si ripete, si ripassa.
+     Tre lavori diversi, tre colori, presi lontani fra loro e lontani
+     dal viola dell'accento. */
+  --fam-lettura: #2563b0;
+  --fam-lettura-tenue: #e8f0fb;
+  --fam-ripetizione: #b5730d;
+  --fam-ripetizione-tenue: #fdf3dd;
+  --fam-ripasso: #0f7f72;
+  --fam-ripasso-tenue: #e2f4f1;
+
   --st-nuovo: #6b6f7d;
   --st-ripassare: #b4700f;
   --st-consolidato: #1a7f48;
@@ -110,6 +120,13 @@
     --accento-hover: #a294f5;
     --accento-tenue: rgba(139, 124, 240, 0.14);
     --accento-su-tenue: #a294f5;
+
+    --fam-lettura: #7aa9e8;
+    --fam-lettura-tenue: rgba(37, 99, 176, 0.18);
+    --fam-ripetizione: #e0a54a;
+    --fam-ripetizione-tenue: rgba(181, 115, 13, 0.20);
+    --fam-ripasso: #56c4b4;
+    --fam-ripasso-tenue: rgba(15, 127, 114, 0.20);
     --banner-fondo: #4334a8;
 
     /* Al buio i colori non si ribaltano: sono valori loro, verificati
@@ -4532,6 +4549,162 @@ a.oggi-riga {
    Le stesse voci per tutte, con un trattino dove non si applicano:
    cosi' due materie si confrontano invece di avere ognuna la sua
    forma. */
+
+/* ---------- Materia: il collegamento ai materiali ----------
+   Sta subito sotto i tre numeri, perche' e' li' che ti viene in mente:
+   stai guardando cosa studiare oggi, e i file devono essere a un clic. */
+
+.materia-link-materiale {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-controllo);
+  background: var(--superficie);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 160ms var(--curva), background 160ms var(--curva);
+}
+
+.materia-link-materiale > .ph-folder-open {
+  flex: 0 0 auto;
+  font-size: 19px;
+  color: var(--accento-su-tenue);
+}
+
+.materia-link-testo {
+  flex: 0 0 auto;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.materia-link-nota {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--testo-3);
+}
+
+.materia-link-freccia {
+  flex: 0 0 auto;
+  font-size: 14px;
+  color: var(--testo-3);
+  transition: transform 160ms var(--curva);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .materia-link-materiale:hover {
+    border-color: var(--accento);
+    background: var(--accento-tenue);
+  }
+  .materia-link-materiale:hover .materia-link-freccia { transform: translateX(3px); }
+}
+
+.materia-link-materiale:focus-visible {
+  outline: 2px solid var(--accento);
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .materia-link-nota { display: none; }
+}
+
+/* ---------- Le tre famiglie di passate ---------- */
+
+.fam-lettura { --fam: var(--fam-lettura); --fam-tenue: var(--fam-lettura-tenue); }
+.fam-ripetizione { --fam: var(--fam-ripetizione); --fam-tenue: var(--fam-ripetizione-tenue); }
+.fam-ripasso { --fam: var(--fam-ripasso); --fam-tenue: var(--fam-ripasso-tenue); }
+
+.programma-testa {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.programma-nome {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.014em;
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: var(--r-controllo);
+  background: var(--superficie-alt);
+}
+
+.legenda-voce {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 12px;
+}
+
+.legenda-punto {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  background: var(--fam, var(--testo-3));
+  transform: translateY(-1px);
+}
+
+.legenda-nome { font-weight: 600; color: var(--testo-2); }
+.legenda-esempi { color: var(--testo-3); }
+
+/* Il colore sta sul bordo sinistro della passata: un filo, non un
+   riempimento. Riempire dieci righe di colore le rende tutte uguali. */
+.passata.fam-lettura,
+.passata.fam-ripetizione,
+.passata.fam-ripasso {
+  border-left: 3px solid var(--fam);
+}
+
+.passata.fam-lettura .passata-segno,
+.passata.fam-ripetizione .passata-segno,
+.passata.fam-ripasso .passata-segno { color: var(--fam); }
+
+/* Il blocco di oggi si tinge tutto: e' uno solo, ed e' quello che devi
+   vedere entrando. */
+.materia-oggi.fam-lettura,
+.materia-oggi.fam-ripetizione,
+.materia-oggi.fam-ripasso {
+  border-color: var(--fam);
+  background: var(--fam-tenue);
+}
+
+.materia-oggi.fam-lettura .materia-oggi-titolo,
+.materia-oggi.fam-ripetizione .materia-oggi-titolo,
+.materia-oggi.fam-ripasso .materia-oggi-titolo { color: var(--fam); }
+
+/* Nel modulo, la scelta della famiglia sotto nome e giorni */
+.fase-famiglia {
+  width: auto;
+  margin-top: 8px;
+  padding: 5px 28px 5px 9px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--fam, var(--testo-2));
+  border-color: var(--linea);
+  background-position: right 9px center;
+}
+
+.riga-fase.fam-lettura,
+.riga-fase.fam-ripetizione,
+.riga-fase.fam-ripasso {
+  border-left: 3px solid var(--fam);
+  padding-left: 11px;
+}
 
 .scheda-materia {
   margin-bottom: 18px;

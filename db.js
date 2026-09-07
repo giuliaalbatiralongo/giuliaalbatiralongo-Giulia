@@ -1170,6 +1170,39 @@ export function misureDi(piano) {
   ];
 }
 
+/* ---------- Le tre famiglie di passate ----------
+
+   Leggere, ripetere, ripassare sono tre lavori diversi: la prima volta
+   si scopre, la seconda si fissa, la terza si controlla di ricordare.
+   Il colore serve a capire a colpo d'occhio che lavoro tocca oggi,
+   senza dover leggere il nome della passata. */
+
+export const FAMIGLIE = [
+  { chiave: 'lettura', nome: 'Si legge', esempi: 'prima e seconda lettura' },
+  { chiave: 'ripetizione', nome: 'Si ripete', esempi: 'prima, seconda, terza ripetizione' },
+  { chiave: 'ripasso', nome: 'Si ripassa', esempi: 'ripasso 1, 2, 3' },
+];
+
+/* Se la famiglia non e' scritta si prova a indovinarla dal nome: le
+   passate create prima che esistessero non ce l'hanno, e non e' il caso
+   di lasciarle grigie per sempre.
+
+   L'ordine conta: "ripasso" prima di "ripetizione", altrimenti "rip"
+   prenderebbe tutte e due. Se non si capisce resta null, e il colore
+   resta neutro: meglio grigio che colorato a caso. */
+export function famigliaDiFase(fase) {
+  if (fase.famiglia) return fase.famiglia;
+  const n = (fase.nome || '').toLowerCase();
+  if (/ripass/.test(n)) return 'ripasso';
+  if (/ripet/.test(n)) return 'ripetizione';
+  if (/lettur|legg|sottoline/.test(n)) return 'lettura';
+  return null;
+}
+
+export function nomeFamiglia(chiave) {
+  return (FAMIGLIE.find((f) => f.chiave === chiave) || {}).nome || null;
+}
+
 export function nomeUnita(chiave, quante) {
   const u = UNITA.find((x) => x.chiave === chiave) || UNITA[0];
   return quante === 1 ? u.singolare : u.plurale;
@@ -1186,12 +1219,14 @@ export function nomeUnita(chiave, quante) {
    Quante passate dipende dal tempo: in cinque giorni non ha senso
    promettere quattro giri, in cinquanta si'. */
 
+/* Ogni passata proposta nasce gia' con la sua famiglia: cosi' il colore
+   e' giusto dal primo momento, senza doverlo indovinare dal nome. */
 const NOMI_PASSATE = [
-  'Prima lettura',
-  'Prima ripetizione',
-  'Seconda ripetizione',
-  'Ripasso',
-  'Ripasso finale',
+  { nome: 'Prima lettura', famiglia: 'lettura' },
+  { nome: 'Prima ripetizione', famiglia: 'ripetizione' },
+  { nome: 'Seconda ripetizione', famiglia: 'ripetizione' },
+  { nome: 'Ripasso', famiglia: 'ripasso' },
+  { nome: 'Ripasso finale', famiglia: 'ripasso' },
 ];
 
 /* I pesi sono scritti a mano, non calcolati: con tre passate "un terzo
@@ -1250,7 +1285,7 @@ export function proponiPassate(giorniDisponibili) {
   // arrotondamenti si rimettono in ordine.
   interi.sort((a, b) => b - a);
 
-  return interi.map((giorniFase, i) => ({ nome: NOMI_PASSATE[i], giorni: giorniFase }));
+  return interi.map((giorniFase, i) => ({ ...NOMI_PASSATE[i], giorni: giorniFase }));
 }
 
 export async function getPiani() {
@@ -1292,6 +1327,7 @@ function campiFase(fase, pianoId, ordine) {
     argomenti: fase.argomenti || null,
     da_pagina: fase.da_pagina ?? null,
     a_pagina: fase.a_pagina ?? null,
+    famiglia: fase.famiglia || null,
   };
 }
 
