@@ -286,6 +286,57 @@ i[class*="ph-"] {
   font-weight: 600;
 }
 
+/* ---------- Il menu: una voce che si apre ----------
+
+   Quiz, Statistiche e Test SSM sono la stessa cosa vista da tre lati:
+   ti eserciti, guardi com'e' andata, provi la simulazione. Stavano su
+   tre righe sparse; adesso sono una riga sola che si apre.
+
+   Aperta solo quando ci sei dentro. Altrove resta chiusa, e il menu
+   torna corto. */
+
+.nav-apribile { display: block; }
+
+.nav-testa {
+  list-style: none;
+  cursor: pointer;
+}
+
+.nav-testa::-webkit-details-marker { display: none; }
+.nav-testa::marker { content: ''; }
+
+.nav-testa span { flex: 1 1 auto; }
+
+.nav-freccia {
+  flex: 0 0 auto;
+  font-size: 13px !important;
+  width: 13px !important;
+  color: var(--testo-3);
+  transition: transform 200ms var(--curva);
+}
+
+.nav-apribile[open] .nav-freccia { transform: rotate(90deg); }
+
+/* Sei dentro il gruppo, ma la pagina vera e' una delle tre sotto:
+   il capogruppo lo segnala senza rubare il colore pieno a chi ce l'ha. */
+.nav-testa.dentro { color: var(--testo); font-weight: 600; }
+
+.nav-sotto {
+  display: flex;
+  flex-direction: column;
+  /* Il filo verticale dice fin dove arriva il gruppo. */
+  margin: 2px 0 4px 19px;
+  padding-left: 10px;
+  border-left: 1px solid var(--linea);
+}
+
+.nav-sottovoce {
+  height: 36px;
+  font-size: 13.5px;
+}
+
+.nav-sottovoce i { font-size: 17px; width: 18px; }
+
 .sidebar-fondo {
   margin-top: auto;
   padding-top: 14px;

@@ -121,6 +121,30 @@ Mandate tutte insieme: *"Queste idee ora le sviluppiamo passo passo.
 Intanto te le mando."* Quindi qui stanno per intero, in ordine di
 lavorazione, e si spuntano una alla volta.
 
+### E. Il menu: Quiz diventa una voce sola (7 settembre)
+
+Giulia: *"le sezioni relative alle valutazioni... dovranno essere
+accorpate in un'unica voce principale chiamata Quiz"*, con dentro Quiz,
+Statistiche e Test SSM.
+
+**FATTO.** Quiz, Statistiche e Test SSM sono la stessa cosa vista da tre
+lati: ti eserciti, guardi com'e' andata, provi la simulazione. Stavano
+su tre righe sparse fra le altre; adesso sono **una riga sola che si
+apre**, e il gruppo "Studio" e' passato da nove voci a sette.
+
+- **aperta solo quando ci sei dentro** (anche dai figli: casi, aggiungi,
+  sessione). Altrove resta chiusa e il menu torna corto, che era il
+  punto
+- il capogruppo, quando sei dentro, si segna **senza rubare il colore
+  pieno** alla pagina in cui ti trovi davvero
+- sono `<details>`/`<summary>` veri, come gli anni del libretto: si
+  aprono senza JavaScript e la tastiera ci arriva da sola
+- un filo verticale a sinistra dice fin dove arriva il gruppo
+
+Il collaudo (`menu.mjs`) gira su **tutte** le pagine lette dalla
+cartella, non su un elenco scritto a mano: se domani ne nasce una nuova
+col menu vecchio, se ne accorge.
+
 ### A. Il Libretto (era la pagina Esami)
 
 1. **Il nome.** Non piu' "Esami". Giulia ha lasciato scegliere a me fra
@@ -1024,6 +1048,9 @@ non da SQL, altrimenti il file resta indietro.
 - Un solo colore d'accento, nessuna sfumatura
 - Alzare il numero di versione (`?v=`) di **ogni** riferimento a un file
   condiviso che cambia: e' stata la fonte piu' frequente di guasti
+- Ogni finestra deve avere il modo di uscire **anche in fondo**, non
+  solo la X in alto: sul telefono la X e' piccola e sta lontana da dove
+  finisci di leggere
 - **Dentro Akesis non entra niente di inventato.** Niente casi clinici
   verosimili, niente domande d'esame plausibili, niente appelli finti per
   far vedere come viene. Per provare c'e' il finto database del

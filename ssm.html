@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=59">
+  <link rel="stylesheet" href="style.css?v=60">
 </head>
 <body>
   <div class="app">
@@ -28,10 +28,18 @@
         <a href="calendario.html" class="nav-voce"><i class="ph ph-calendar-dots" aria-hidden="true"></i><span>Calendario</span></a>
         <a href="esami.html" class="nav-voce"><i class="ph ph-graduation-cap" aria-hidden="true"></i><span>Libretto</span></a>
         <a href="piano.html" class="nav-voce"><i class="ph ph-path" aria-hidden="true"></i><span>Organizzazione studio</span></a>
-        <a href="quiz.html" class="nav-voce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
+        <details class="nav-apribile" open>
+          <summary class="nav-voce nav-testa dentro">
+            <i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span>
+            <i class="ph ph-caret-right nav-freccia" aria-hidden="true"></i>
+          </summary>
+          <div class="nav-sotto">
+            <a href="quiz.html" class="nav-voce nav-sottovoce"><i class="ph ph-cards" aria-hidden="true"></i><span>Quiz</span></a>
+            <a href="statistiche.html" class="nav-voce nav-sottovoce"><i class="ph ph-chart-line" aria-hidden="true"></i><span>Statistiche</span></a>
+            <a href="ssm.html" class="nav-voce nav-sottovoce attivo"><i class="ph-fill ph-target" aria-hidden="true"></i><span>Test SSM</span></a>
+          </div>
+        </details>
         <a href="domande.html" class="nav-voce"><i class="ph ph-exam" aria-hidden="true"></i><span>Domande esami</span></a>
-        <a href="ssm.html" class="nav-voce attivo"><i class="ph-fill ph-target" aria-hidden="true"></i><span>Test SSM</span></a>
-        <a href="statistiche.html" class="nav-voce"><i class="ph ph-chart-line" aria-hidden="true"></i><span>Statistiche</span></a>
         <a href="materiali.html" class="nav-voce"><i class="ph ph-folder" aria-hidden="true"></i><span>Materiali</span></a>
         <p class="nav-gruppo" data-solo-admin hidden>Gestione</p>
         <a href="revisione.html" class="nav-voce" data-solo-admin hidden><i class="ph ph-seal-check" aria-hidden="true"></i><span>Revisione</span></a>
