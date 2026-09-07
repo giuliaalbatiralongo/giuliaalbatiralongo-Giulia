@@ -16,7 +16,7 @@ import {
   TIPI_DATA,
   creaIcs,
 } from './db.js?v=41';
-import { proteggiPagina } from './auth.js?v=11';
+import { proteggiPagina } from './auth.js?v=12';
 
 const elScheletro = document.getElementById('scheletro');
 const elTutto = document.getElementById('calendario');

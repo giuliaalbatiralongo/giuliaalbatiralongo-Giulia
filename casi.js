@@ -1,6 +1,6 @@
 import { getCasiClinici } from './db.js?v=41';
 import { iconaPerMateria } from './materie.js?v=3';
-import { proteggiPagina } from './auth.js?v=11';
+import { proteggiPagina } from './auth.js?v=12';
 
 const ETICHETTE_STATO = {
   nuovo: 'nuovo',
