@@ -987,12 +987,23 @@ finestra.addEventListener('close', () => {
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  /* Il pulsante si spegne finche' il salvataggio non ha finito.
+     Senza, premendolo due volte partivano due salvataggi: Giulia si e'
+     ritrovata la stessa materia due volte, perche' la prima volta
+     sembrava non fosse successo niente e ha rifatto. */
+  const bottone = document.getElementById('piano-salva');
+  if (bottone.disabled) return;
+  bottone.disabled = true;
+
   try {
     await salvaMateria();
   } catch (errore) {
     esito.className = 'esito-form ko';
     esito.textContent = `Qualcosa e andato storto: ${errore.message}`;
     console.error(errore);
+  } finally {
+    bottone.disabled = false;
   }
 });
 
@@ -1111,6 +1122,23 @@ async function salvaMateria() {
     disegna();
     // Si era arrivati qui dal dettaglio: ci si torna, aggiornato.
     if (materiaAperta) apriMateria(piani.find((p) => p.id === salvato.id));
+    return;
+  }
+
+  /* Una materia sola per nome. Due organizzazioni della stessa materia
+     non vogliono dire niente, e sono quasi sempre un salvataggio partito
+     due volte. Se ce n'e' gia' una, si apre quella invece di farne
+     un'altra. */
+  const gia = piani.find(
+    (p) => p.materia.trim().toLowerCase() === dati.materia.trim().toLowerCase()
+  );
+  if (gia) {
+    esito.className = 'esito-form ko';
+    esito.textContent = `${gia.materia} ce l'hai gia' nell'organizzazione. Ti apro quella.`;
+    setTimeout(() => {
+      finestra.close();
+      apriMateria(piani.find((p) => p.id === gia.id));
+    }, 1200);
     return;
   }
 

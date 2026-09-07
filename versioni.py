@@ -74,7 +74,6 @@ def main(solo_verifica: bool) -> int:
         return 1
 
     diversi = [n for n in prima if prima[n] != dopo[n]]
-    html_diversi = 0  # gli html li conta il git, qui basta sapere se si e' mosso qualcosa
 
     if solo_verifica:
         import subprocess
@@ -88,8 +87,17 @@ def main(solo_verifica: bool) -> int:
         print('Versioni a posto.')
         return 0
 
+    # Anche gli html cambiano, quando cambia il numero di un file che
+    # citano: contarli evita il messaggio bugiardo "niente da fare"
+    # mentre in realta' qualcosa si e' mosso.
+    import subprocess
+    sporchi = [l[3:] for l in subprocess.run(
+        ['git', 'status', '--porcelain'], cwd=QUI, capture_output=True, text=True
+    ).stdout.splitlines() if l[3:].endswith('.html')]
     print(f'Versioni aggiornate. Rinumerati {len(diversi)} file'
-          + (': ' + ', '.join(diversi) if diversi else ' (niente da fare)'))
+          + (': ' + ', '.join(diversi) if diversi else '')
+          + (f'; {len(sporchi)} pagine aggiornate' if sporchi else '')
+          + ('' if diversi or sporchi else ' (niente da fare)'))
     return 0
 
 

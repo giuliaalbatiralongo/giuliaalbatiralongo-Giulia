@@ -179,6 +179,38 @@ elenco scritto a mano, e controlla anche la versione stretta.
 nome per esteso l'aveva pero' lasciato scegliere a me, e la voce e'
 rimasta **Libretto**. Se lo rivuole lungo e' una parola.
 
+### La materia comparsa due volte (7 settembre)
+
+Giulia: *"creando nell'organizzazione studio il piano di studio di
+farmaco, mi sono comparse due volte farmacologia 2"*.
+
+Nel database c'erano davvero due righe in `piani`, identiche, **a 24
+secondi di distanza**. Non un doppio clic: ha premuto Crea, non e'
+sembrato succedere niente, e ha rifatto.
+
+Perche' sembrava non succedere niente: il pulsante restava acceso, e la
+finestra restava aperta mentre finivano `inserisciPiano` e poi
+`allineaEsame`, che va a cercare l'esame corrispondente e all'occorrenza
+lo crea. Fra i due, sullo schermo c'era solo la scritta "Creazione".
+
+**Due protezioni, non una:**
+
+1. il pulsante **si spegne** finche' il salvataggio non ha finito, e si
+   riaccende in un `finally` anche se qualcosa va storto. Prende il
+   doppio clic
+2. **una materia sola per nome**: se ce n'e' gia' una con quel nome,
+   invece di farne un'altra lo dice e apre quella. Prende il caso vero,
+   cioe' il secondo tentativo a distanza di secondi -- e anche quello
+   fatto da due schede aperte insieme
+
+La seconda e' quella che serviva davvero: la prima da sola non l'avrebbe
+salvata. Due organizzazioni della stessa materia non vogliono dire
+niente, quindi tanto vale non poterle avere.
+
+Il doppione e' stato tolto davvero, non messo nel cestino: era la copia
+esatta dell'altro, con niente di fatto dentro, e nel cestino sarebbe
+stata una voce da guardare senza sapere quale delle due fosse.
+
 ### G. Il cestino (7 settembre)
 
 Giulia ha cancellato un esame per sbaglio: *"non posso perdere tutto
