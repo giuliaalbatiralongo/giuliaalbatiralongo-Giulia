@@ -571,6 +571,9 @@ document.getElementById('chiudi-finestra').addEventListener('click', () => fines
 
 document.getElementById('apri-media').addEventListener('click', apriMedia);
 document.getElementById('chiudi-media').addEventListener('click', () => finestraMedia.close());
+// La X in alto e' piccola e sul telefono si trova male: il modo per
+// uscire deve stare anche in fondo, dove finisce di leggere.
+document.getElementById('fatto-media').addEventListener('click', () => finestraMedia.close());
 finestraMedia.addEventListener('click', (e) => {
   if (e.target === finestraMedia) finestraMedia.close();
 });

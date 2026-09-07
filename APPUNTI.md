@@ -223,6 +223,19 @@ lavorazione, e si spuntano una alla volta.
     Il blocco di **oggi** invece si tinge tutto, perche' e' uno solo ed
     e' quello che devi vedere entrando.
 
+### Un difetto trovato da Giulia (7 settembre)
+
+*"il calcola la media non mi da il tasto fatto".* Vero: la finestra
+della media era nata senza `finestra-fondo`, quindi l'unico modo di
+uscire era la X in alto o il clic fuori. Sul telefono la X e' piccola e
+lontana da dove finisci di leggere.
+
+**Regola:** ogni finestra deve avere il modo di uscire **anche in
+fondo**, dove finisce il contenuto, non solo in alto. Le altre ce
+l'avevano tutte; questa l'avevo saltata perche' non ha un modulo da
+salvare, ma "non c'e' niente da salvare" non vuol dire "non c'e' niente
+da chiudere".
+
 ### Due difetti trovati facendo A (7 settembre)
 
 - **Un parametro che copriva la variabile di fuori.**
@@ -961,6 +974,11 @@ verificato e' peggio di un caso assente.
 - **5 date**: i tre appelli di Farmacologia II, l'iscrizione ad Anatomia
   patologica, l'inizio delle lezioni. Le ha messe lei
 - **1 materiale**: CORSIE, l'unico con un file vero dietro
+
+**Poi, il 7 settembre:** Giulia ha detto che **i primi due anni li ha
+gia' dati**. Segnati sostenuti tutti e tredici; il voto no, quello lo
+scrive lei dalla finestra della media. Con il terzo, che era gia'
+segnato, fanno **19 esami e 166 crediti su 362**.
 - **17 suggerimenti**: sono idee, non fatti sul suo corso. Restano
 
 Le date si portavano dietro il nome della materia scritto a mano dentro
