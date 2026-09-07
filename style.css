@@ -1707,9 +1707,29 @@ a.profilo-btn {
 
   .sidebar-nav { flex-direction: row; gap: 2px; }
 
+  /* Qui il menu e' una striscia di icone: i gruppi si sciolgono e le
+     loro voci entrano in fila con le altre. Il capogruppo sparisce,
+     perche' non porta da nessuna parte. (Ad aprirli ci pensa auth.js:
+     un <details> chiuso il CSS non lo riapre.) */
+  /* `display: contents` sul <details> non basta: il browser ci mette
+     dentro un contenitore suo che resta in mezzo. Quindi il gruppo
+     diventa lui stesso una riga di icone, e la striscia le allinea
+     tutte insieme alle altre. */
+  .nav-apribile { display: flex; gap: 2px; }
+  .nav-testa { display: none; }
+  .nav-sotto {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    border-left: none;
+  }
+
   .nav-voce { height: 36px; padding: 0 10px; }
   .nav-voce span { display: none; }
   .nav-voce i { font-size: 20px; }
+  .nav-sottovoce i { font-size: 20px; width: 20px; }
 
   .sidebar-fondo {
     margin: 0 0 0 auto;
@@ -2076,20 +2096,6 @@ a.profilo-btn {
 .contenuto-interno.largo { max-width: 1180px; }
 .contenuto-interno.pieno { max-width: 1460px; }
 
-/* Etichette di gruppo nella barra laterale. Servono adesso che le voci
-   sono cinque, e serviranno di piu' quando saranno dieci. */
-.nav-gruppo {
-  padding: 0 10px;
-  margin: 0 0 6px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--testo-3);
-}
-
-.nav-gruppo:not(:first-child) { margin-top: 22px; }
-
 /* ---------- Apertura ----------
    Niente lastra colorata: tre righe di testo e via. Lo spazio in alto
    serve a quello che devi fare oggi, non a una dichiarazione
@@ -2409,7 +2415,6 @@ body.barra-chiusa .contenuto {
    aprirla e chiuderla non avrebbe senso. */
 @media (max-width: 820px) {
   .btn-barra, .btn-barra-fuori { display: none; }
-  .nav-gruppo { display: none; }
 
   .sidebar-testa {
     margin: 0;

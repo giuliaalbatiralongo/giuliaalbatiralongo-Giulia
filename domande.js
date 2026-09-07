@@ -8,7 +8,7 @@ import {
   togliProfessore,
 } from './db.js?v=41';
 import { iconaPerMateria } from './materie.js?v=3';
-import { proteggiPagina } from './auth.js?v=10';
+import { proteggiPagina } from './auth.js?v=11';
 import { misuraTempo } from './tempo.js?v=2';
 
 const parametri = new URLSearchParams(window.location.search);

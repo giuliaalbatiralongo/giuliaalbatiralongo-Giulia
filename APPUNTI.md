@@ -121,29 +121,63 @@ Mandate tutte insieme: *"Queste idee ora le sviluppiamo passo passo.
 Intanto te le mando."* Quindi qui stanno per intero, in ordine di
 lavorazione, e si spuntano una alla volta.
 
-### E. Il menu: Quiz diventa una voce sola (7 settembre)
+### E. Il menu di fianco, sfoltito (7 settembre)
 
-Giulia: *"le sezioni relative alle valutazioni... dovranno essere
-accorpate in un'unica voce principale chiamata Quiz"*, con dentro Quiz,
-Statistiche e Test SSM.
+Due passaggi nello stesso giorno. Prima Quiz, Statistiche e Test SSM
+sotto una voce sola; poi Giulia ha rifatto lo schema per intero, ed e'
+questo che vale:
 
-**FATTO.** Quiz, Statistiche e Test SSM sono la stessa cosa vista da tre
-lati: ti eserciti, guardi com'e' andata, provi la simulazione. Stavano
-su tre righe sparse fra le altre; adesso sono **una riga sola che si
-apre**, e il gruppo "Studio" e' passato da nove voci a sette.
+**Quattro voci sempre in vista**, quelle di ogni giorno:
+Home, Calendario, Libretto, Organizzazione studio.
 
-- **aperta solo quando ci sei dentro** (anche dai figli: casi, aggiungi,
-  sessione). Altrove resta chiusa e il menu torna corto, che era il
-  punto
-- il capogruppo, quando sei dentro, si segna **senza rubare il colore
-  pieno** alla pagina in cui ti trovi davvero
-- sono `<details>`/`<summary>` veri, come gli anni del libretto: si
-  aprono senza JavaScript e la tastiera ci arriva da sola
-- un filo verticale a sinistra dice fin dove arriva il gruppo
+**Tre gruppi che si aprono**, per il resto:
 
-Il collaudo (`menu.mjs`) gira su **tutte** le pagine lette dalla
-cartella, non su un elenco scritto a mano: se domani ne nasce una nuova
-col menu vecchio, se ne accorge.
+| Gruppo | Dentro |
+|---|---|
+| Materiale | Materiali, Quiz, Domande esami |
+| Valutazioni | Test SSM, Statistiche, Revisione |
+| Altro | Servizi, Suggerimenti |
+
+Chiusi, il menu e' **sette righe** invece di dodici. Le vecchie
+etichette STUDIO / GESTIONE / ALTRO se ne sono andate: erano scritte
+che occupavano una riga senza portare da nessuna parte, e adesso i
+gruppi veri fanno il loro lavoro.
+
+Ogni gruppo si apre **da solo quando ci sei dentro**, figli compresi
+(carica-materiale sta sotto Materiali, casi e sessione sotto Quiz,
+aggiungi-domanda sotto Domande esami). Il capogruppo si segna in
+grassetto senza rubare il colore pieno alla pagina dove ti trovi
+davvero: due cose accese allo stesso modo si contendono l'occhio.
+
+Revisione tiene il suo `data-solo-admin`: chi non e' admin vede il
+gruppo Valutazioni con due voci invece di tre.
+
+**Su schermo stretto i gruppi si sciolgono.** Sotto gli 820px la barra
+diventa una striscia di sole icone in orizzontale: li' una tendina non
+ha senso, quindi i capigruppo spariscono e le loro voci entrano in fila
+con le altre. Due cose imparate facendolo:
+
+- `display: contents` su un `<details>` **non basta** per appiattirlo:
+  il browser ci mette dentro un contenitore suo che resta in mezzo e le
+  voci si impilano. Il gruppo deve diventare lui stesso una riga
+  (`display: flex`)
+- un `<details>` chiuso **il CSS non lo riapre**: il contenuto lo
+  nasconde il browser per conto suo e nessuna regola ci arriva. Ad
+  aprirli sotto gli 820px ci pensa `menu.js`, che ricorda lo stato e lo
+  rimette tornando largo
+
+**Perche' `menu.js` esiste.** Quella funzione era dentro `auth.js`, e il
+collaudo non la vedeva: nei collaudi `auth.js` viene sostituito da un
+finto, quindi il codice vero non veniva mai eseguito. Stessa trappola
+dei piani e della modifica. Adesso sta in un modulo suo che **il finto
+importa davvero**: se si rompe li', si rompe anche nel collaudo.
+
+`menu.mjs` gira su **tutte** le pagine lette dalla cartella, non su un
+elenco scritto a mano, e controlla anche la versione stretta.
+
+**Da confermare:** Giulia nell'elenco ha scritto "Libretto Esami". Il
+nome per esteso l'aveva pero' lasciato scegliere a me, e la voce e'
+rimasta **Libretto**. Se lo rivuole lungo e' una parola.
 
 ### A. Il Libretto (era la pagina Esami)
 

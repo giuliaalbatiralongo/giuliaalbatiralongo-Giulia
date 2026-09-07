@@ -158,6 +158,7 @@ export async function proteggiPagina() {
   mostraProfiloInSidebar(profilo);
   adeguaInterfacciaAlRuolo(profilo);
   preparaBarraLaterale();
+  preparaGruppiDelMenu();
   return profilo;
 }
 
