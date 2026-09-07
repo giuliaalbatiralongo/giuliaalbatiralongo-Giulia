@@ -958,7 +958,58 @@ sbagliati non c'e'. Da aggiungere se Giulia lo vuole.
 
 ---
 
+## Il guasto che ha spento tutto (7 settembre)
+
+Giulia: *"Non carica piu' nulla. Non riesco a vedere ne il libretto, ne
+il calendario ne la home."*
+
+Un'ora prima avevo spostato `preparaGruppiDelMenu` da `auth.js` a
+`menu.js`. Dovevo aggiungere in auth.js la riga che lo importa: l'ho
+scritta, ma ancorata a una `import { createClient }` che **in auth.js non
+c'e'** (li' si importa `supabase`). La sostituzione non ha trovato niente
+e non ha scritto niente, e non avevo messo l'assert che lo avrebbe detto.
+
+Risultato: auth.js chiamava una funzione che non aveva. `proteggiPagina`
+moriva li', e siccome **ogni pagina la aspetta**, non si apriva piu'
+niente.
+
+**Perche' i collaudi non l'hanno visto.** Perche' sostituiscono proprio
+`auth.js` con un finto: il codice vero non veniva eseguito. E' la stessa
+trappola dei due guasti dei piani, quella di cui avevo appena scritto
+negli appunti — e ci sono cascato **un commit dopo averla descritta**.
+
+**Due lezioni, tutte e due gia' pagate:**
+
+1. **Ogni sostituzione fatta a macchina va assertata.** `assert
+   s.count(vecchio) == 1` prima di sostituire. Dove l'avevo messo non e'
+   mai successo niente; dove l'ho saltato e' successo questo.
+2. **Un finto che copre un file intero e' un buco nero.** Tutto quello
+   che sta li' dentro non e' collaudato. Le cose che non c'entrano con
+   l'autenticazione devono stare fuori da auth.js — ed e' per questo che
+   `menu.js` esiste.
+
+**Le difese messe dopo** (`./controlla.sh`, da lanciare sempre prima di
+mandare online):
+
+1. **eslint con `no-undef`** sui file veri: prende ogni nome usato e mai
+   importato. E' esattamente questo guasto
+2. **`controlla-nomi.mjs`**: prende il caso gemello, cioe' importare un
+   nome che dall'altra parte non c'e'
+
+Tutte e due viste **fallire** rimettendo il guasto, e poi tornare verdi.
+
+---
+
 ## Come si collauda
+
+**Prima di tutto, e sempre prima di mandare online:**
+
+    ./controlla.sh
+
+Non serve il browser. Controlla i file **veri** del progetto, quelli che
+nei collaudi vengono sostituiti dai finti e quindi non verrebbero mai
+eseguiti. Ci vuole un secondo, e prende la classe di guasto che il 7
+settembre ha spento il sito.
 
 C'e' una copia di prova che gira in locale con un database finto, in
 `scratchpad/`. Si rifa' con `rifai-prova.sh` **dopo ogni modifica**,
@@ -1082,6 +1133,12 @@ non da SQL, altrimenti il file resta indietro.
 - Un solo colore d'accento, nessuna sfumatura
 - Alzare il numero di versione (`?v=`) di **ogni** riferimento a un file
   condiviso che cambia: e' stata la fonte piu' frequente di guasti
+- **Lanciare `./controlla.sh` prima di mandare online.** I collaudi nel
+  browser sostituiscono auth.js e db.js: quello che sta li' dentro non
+  lo vedono
+- **Assertare ogni sostituzione fatta a macchina** (`assert
+  s.count(vecchio) == 1`): una sostituzione che non trova niente e non
+  lo dice ha gia' spento il sito una volta
 - Ogni finestra deve avere il modo di uscire **anche in fondo**, non
   solo la X in alto: sul telefono la X e' piccola e sta lontana da dove
   finisci di leggere
