@@ -1,4 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { MANIFESTI, manifestoDi, contiManifesto } from './manifesti.js';
+
+export { MANIFESTI, manifestoDi, contiManifesto };
 
 // La "publishable key" e' pensata per stare nel codice pubblico: la sicurezza
 // vera e' data dalle policy di Row Level Security impostate su Supabase.
@@ -702,6 +705,46 @@ function campiEsame(esame) {
     sostenuto: esame.sostenuto ?? false,
     voto: esame.voto ?? null,
   };
+}
+
+/* Carica in blocco il piano di studi di un corso.
+
+   Serve a chi apre Akesis la prima volta: il Libretto vuoto chiede 46
+   esami digitati a mano, e nessuno li digita. Con un tasto ci sono
+   tutti, e poi ognuno li aggiusta come vuole.
+
+   Si rifiuta se il libretto non e' vuoto. Non e' una precauzione
+   teorica: caricarlo due volte farebbe 92 esami doppi, e disfare quel
+   pasticcio a mano sarebbe peggio del problema che risolve. */
+export async function caricaManifesto(chiave) {
+  const manifesto = manifestoDi(chiave);
+  if (!manifesto) return { ok: false, errore: 'Piano di studi non trovato' };
+
+  const { count, error: erroreConto } = await supabase
+    .from('esami')
+    .select('id', { count: 'exact', head: true })
+    .is('eliminato_il', null);
+
+  if (erroreConto) {
+    segnaErrore('Errore nel controllo del libretto:', erroreConto);
+    return { ok: false, errore: 'Non sono riuscita a leggere il libretto. Riprova.' };
+  }
+  if (count > 0) {
+    return { ok: false, errore: 'Il libretto non è vuoto: un piano di studi si carica solo su un libretto vuoto.' };
+  }
+
+  const righe = manifesto.esami.map((e) => campiEsame({
+    ...e,
+    corso: manifesto.corso,
+    note: [e.note, `[${manifesto.fonte}]`].filter(Boolean).join(' '),
+  }));
+
+  const { data, error } = await supabase.from('esami').insert(righe).select('id');
+  if (error) {
+    segnaErrore('Errore nel caricamento del piano di studi:', error);
+    return { ok: false, errore: 'Non sono riuscita a caricare il piano. Riprova.' };
+  }
+  return { ok: true, quanti: data.length, manifesto };
 }
 
 export async function creaEsame(nome, note) {

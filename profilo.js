@@ -1,4 +1,4 @@
-import { proteggiPagina, cambiaPassword, esci } from './auth.js?v=19355368';
+import { proteggiPagina, cambiaPassword, esci } from './auth.js?v=88595912';
 
 const elNome = document.getElementById('dato-nome');
 const elEmail = document.getElementById('dato-email');

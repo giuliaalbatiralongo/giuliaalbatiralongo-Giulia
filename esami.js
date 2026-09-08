@@ -17,9 +17,12 @@ import {
   statoAnno,
   calcolaMedie,
   ANNI,
-} from './db.js?v=14335439';
-import { proteggiPagina } from './auth.js?v=19355368';
-import { offriAnnulla } from './annulla.js?v=69847830';
+  MANIFESTI,
+  contiManifesto,
+  caricaManifesto,
+} from './db.js?v=19138326';
+import { proteggiPagina } from './auth.js?v=88595912';
+import { offriAnnulla } from './annulla.js?v=18911880';
 
 const elScheletro = document.getElementById('scheletro');
 const elElenco = document.getElementById('elenco');
@@ -389,14 +392,103 @@ function disegna() {
   mostraRiepilogo();
   mostraSceltaAnno();
   // Senza esami non c'e' niente di cui fare la media.
+/* Il libretto vuoto e' il muro di chi apre Akesis la prima volta: sei
+   anni "da riempire" e 46 esami da digitare uno per uno. Qui invece si
+   offre di caricarli tutti.
+
+   Il corso c'e' scritto grosso di proposito. Non tutti quelli che
+   useranno Akesis fanno Medicina a Genova, e uno che studia altrove
+   deve capire in un secondo che quel tasto non e' per lui, senza
+   provarlo e poi doversi disfare 46 esami sbagliati. */
+function propostaManifesto() {
+  const scatola = document.createElement('div');
+  scatola.className = 'primo-libretto';
+
+  const titolo = document.createElement('p');
+  titolo.className = 'primo-libretto-titolo';
+  titolo.textContent = 'Il tuo libretto è vuoto';
+  scatola.appendChild(titolo);
+
+  const spiega = document.createElement('p');
+  spiega.className = 'primo-libretto-testo';
+  spiega.textContent =
+    'Gli esami si scrivono una volta sola: poi li ritrovi nel calendario, '
+    + 'nell\'organizzazione studio e nella media. Se fai uno di questi corsi '
+    + 'te li carico io, e poi li aggiusti come vuoi.';
+  scatola.appendChild(spiega);
+
+  MANIFESTI.forEach((manifesto) => {
+    const conti = contiManifesto(manifesto);
+
+    const riga = document.createElement('div');
+    riga.className = 'primo-libretto-corso';
+
+    const testi = document.createElement('div');
+    const nome = document.createElement('p');
+    nome.className = 'primo-libretto-corso-nome';
+    nome.textContent = manifesto.nome;
+    const sotto = document.createElement('p');
+    sotto.className = 'primo-libretto-corso-sotto';
+    sotto.textContent =
+      `${conti.esami} esami, ${conti.cfu} crediti, ${manifesto.anni} anni \u00b7 ${manifesto.fonte}`;
+    testi.appendChild(nome);
+    testi.appendChild(sotto);
+    riga.appendChild(testi);
+
+    const tasto = document.createElement('button');
+    tasto.type = 'button';
+    tasto.className = 'btn btn-primario';
+    tasto.textContent = 'Carica questi esami';
+    riga.appendChild(tasto);
+
+    scatola.appendChild(riga);
+
+    const suoEsito = document.createElement('p');
+    suoEsito.className = 'esito-form';
+    scatola.appendChild(suoEsito);
+    tasto.addEventListener('click', () => caricaPiano(manifesto, tasto, suoEsito));
+  });
+
+  const altrove = document.createElement('p');
+  altrove.className = 'primo-libretto-altrove';
+  altrove.textContent =
+    'Fai un altro corso o un\'altra università? Usa "Nuovo esame" qui sopra '
+    + 'e scrivili tu: è più lungo, ma sono i tuoi.';
+  scatola.appendChild(altrove);
+
+  return scatola;
+}
+
+async function caricaPiano(manifesto, tasto, dove) {
+  // Il tasto si spegne subito: due clic facevano due piani doppi, ed e'
+  // gia' successo con i piani di studio.
+  tasto.disabled = true;
+  tasto.textContent = 'Carico';
+  dove.textContent = '';
+  dove.className = 'esito-form';
+
+  const fatto = await caricaManifesto(manifesto.chiave);
+
+  if (!fatto.ok) {
+    tasto.disabled = false;
+    tasto.textContent = 'Carica questi esami';
+    dove.className = 'esito-form ko';
+    dove.textContent = fatto.errore;
+    return;
+  }
+
+  // Nessun messaggio di riuscita: i 46 esami che compaiono al posto
+  // della scatola dicono da soli com'e' andata. Serve `ricarica`, non
+  // `disegna`: il secondo ridisegna la lista che gia' c'e' in memoria,
+  // e quella e' ancora vuota.
+  await ricarica();
+}
+
+
   document.getElementById('fondo-libretto').hidden = esami.length === 0;
 
   if (esami.length === 0) {
-    const invito = document.createElement('p');
-    invito.className = 'blocco-nota';
-    invito.textContent =
-      'Nessun esame ancora. Scrivili una volta qui, e poi li ritrovi nel calendario e nell organizzazione studio.';
-    elElenco.appendChild(invito);
+    elElenco.appendChild(propostaManifesto());
   }
 
   strutturaAnni(esami).forEach((gruppo) => {

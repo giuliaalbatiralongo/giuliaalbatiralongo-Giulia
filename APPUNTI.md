@@ -1292,6 +1292,24 @@ un link nuovo senza rimanere in un vicolo cieco.
 **La regola, adesso scritta:** una pagina che non sta in `sweep.mjs` non
 e' collaudata. Quando se ne aggiunge una, va aggiunta li'.
 
+### Il finto che mentiva sul vuoto (8 settembre)
+
+`?vuoto=1` nella copia di prova serviva a vedere le pagine senza dati.
+Era fatto filtrando le **letture**: `getEsami()` rispondeva `[]` sempre.
+Quindi il piano di studi si caricava davvero, i 46 esami finivano
+nell'elenco, e il finto continuava a rispondere "libretto vuoto".
+
+Un finto che mente per sempre sul vuoto non puo' collaudare **niente
+che riempia un vuoto**, che e' esattamente la cosa da collaudare. Adesso
+`vuoto` vuol dire "parti da zero" e non "rispondi sempre zero": gli
+elenchi nascono vuoti e quello che si scrive dopo resta.
+
+Cambiato quello, la prova ha subito trovato un guasto vero nel mio
+codice: dopo il caricamento chiamavo `disegna()`, che ridisegna la lista
+gia' in memoria -- ancora vuota. Ci voleva `ricarica()`, che prima
+rilegge. A schermo: cliccavi, non succedeva niente, e gli esami
+comparivano solo ricaricando la pagina.
+
 ---
 
 ## Come si collauda
@@ -1327,6 +1345,8 @@ altrimenti si collauda roba vecchia. Le suite:
   senza browser, e poi a schermo gli ingrandimenti, le frecce e le fasce
 - `conferma.mjs` - la strada per **entrare**: la schermata di accesso e
   la pagina dove atterra il link della mail
+- `primo.mjs` - il libretto vuoto della prima volta e il caricamento di
+  un piano di studi
 - `giorni.mjs` - il modulo e il piano contano i giorni allo stesso modo
 - `media.mjs`, `famiglie.mjs`, `menu.mjs`, `materie-scelta.mjs`,
   `cestino.mjs`, `inizio.mjs`, `conti.mjs`, `vuota.mjs`
@@ -1359,6 +1379,73 @@ della settimana.
   della password e i caratteri obbligatori: quelli si possono alzare.
 - **Protezione password compromesse** disattivata. E' una spunta che
   confronta le password scelte con quelle finite in fughe di dati note.
+
+---
+
+## La prima volta di chi non e' Giulia (8 settembre)
+
+Giulia: *"adesso andiamo a sistemare delle cose che serviranno ai miei
+amici che le utilizzeranno per la prima volta"*.
+
+Guardata Akesis con `?vuoto=1` pagina per pagina, con il ruolo `utente`.
+Nessun errore da nessuna parte e tutte le pagine vuote si spiegano: quel
+lavoro era gia' fatto. Ma il quadro era questo:
+
+| | Cosa trova chi entra |
+|---|---|
+| Libretto | vuoto, sei anni "da riempire" |
+| Calendario, Organizzazione studio | vuoti |
+| Domande esami, Casi clinici | **zero** |
+| Materiali | 1 |
+
+**Il muro e' il Libretto.** Per usare Akesis servono gli esami, e senza
+si resta fuori da tutto: niente calendario, niente piani, niente media.
+Chiederli a mano vuol dire 46 esami digitati uno per uno. Nessuno lo fa:
+chiude e non torna.
+
+### Il piano di studi che si carica da solo
+
+Nel Libretto vuoto adesso c'e' un'offerta: *"Medicina e chirurgia,
+Universita di Genova -- 46 esami, 363 crediti, 6 anni"* e un tasto. Un
+clic e ci sono tutti, poi ognuno li aggiusta.
+
+I dati stanno in `manifesti.js`, separati dal resto. Sono quelli del
+Manifesto degli Studi, non inventati: nome, anno, semestre, crediti e i
+moduli di cui e' fatto un esame. **Quello che aveva aggiunto Giulia e'
+stato tolto**: i voti, i "sostenuto", i "(la chiamavi Semeiotica)", il
+"Convalidato", e le sue note sugli orali ("lungo, si passa da due
+docenti"). Quelle sono cose sue, non del corso: una prova apposta
+controlla che non ne rientri nessuna.
+
+Tre decisioni che valeva la pena prendere cosi':
+
+- **Un tasto, non un caricamento automatico.** Giulia ha detto che non
+  tutti gli amici fanno Medicina a Genova. Automatico avrebbe riempito
+  il libretto di chi studia altrove con 46 esami sbagliati da disfare a
+  mano. Il nome del corso e' scritto grosso apposta, e sotto c'e' la via
+  d'uscita per chi fa altro
+- **Si carica solo su un libretto vuoto**, controllato in `db.js` e non
+  solo a schermo. Due clic avrebbero fatto 92 esami doppi
+- **Nessun messaggio di riuscita.** I 46 esami che compaiono al posto
+  della scatola lo dicono da soli
+
+Per aggiungere un altro corso: un'altra voce in `MANIFESTI`, con i dati
+presi dal suo manifesto ufficiale. Niente a memoria.
+
+**Da chiarire:** il conto dei crediti fa **363**, e Medicina ne dichiara
+360. Tre di scarto. Non e' un errore di somma, e' quello che c'e' scritto
+nel manifesto riga per riga: da guardare con Giulia.
+
+### Codici di invito
+
+Erano rimasti 3 liberi e gli amici sono 5. Creati altri 10 su richiesta
+di Giulia (`AKESIS-` piu' cinque caratteri, senza 0/O e 1/I/L: un codice
+si legge ad alta voce o si copia da un messaggio, e quelli si sbagliano
+sempre). Il riscatto ignora maiuscole, spazi e tipo di trattino.
+
+Il ruolo lo decide `riscatta_invito`: il **primo profilo in assoluto** e'
+admin, tutti quelli dopo sono `utente`. Giulia c'e' gia', quindi chi
+entra adesso non puo' diventare amministratore per sbaglio.
 
 ---
 
