@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=23835804">
+  <link rel="stylesheet" href="style.css?v=15302523">
 </head>
 <body>
   <div class="app">
@@ -98,6 +98,31 @@
             <h2 class="sezione-titolo">Oggi</h2>
           </div>
           <div id="oggi-elenco"></div>
+        </section>
+
+        <!-- Il calendario dello studio: come si distribuisce nel tempo
+             quello che hai deciso di studiare. -->
+        <section class="pannello nastro" id="nastro" hidden>
+          <div class="sezione-testa nastro-testa">
+            <h2 class="sezione-titolo">Il tuo programma nel tempo</h2>
+            <div class="nastro-comandi">
+              <div class="nastro-zoom" id="nastro-zoom" role="group" aria-label="Quanto tempo vedere"></div>
+              <div class="nastro-frecce">
+                <button type="button" class="btn-piu" id="nastro-indietro" aria-label="Indietro">
+                  <i class="ph ph-caret-left" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn btn-neutro btn-piccolo" id="nastro-oggi">Oggi</button>
+                <button type="button" class="btn-piu" id="nastro-avanti" aria-label="Avanti">
+                  <i class="ph ph-caret-right" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <p class="nastro-periodo" id="nastro-periodo"></p>
+          <div class="nastro-scorri">
+            <div class="nastro-griglia" id="nastro-griglia"></div>
+          </div>
+          <div class="legenda" id="nastro-legenda"></div>
         </section>
 
         <div id="scheletro">
@@ -281,6 +306,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="piano.js?v=11917834"></script>
+  <script type="module" src="piano.js?v=73246497"></script>
 </body>
 </html>

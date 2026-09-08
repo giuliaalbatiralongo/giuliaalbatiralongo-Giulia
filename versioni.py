@@ -18,9 +18,15 @@ il suo numero; ma quel numero e' scritto DENTRO home.js, quindi cambia
 anche il contenuto di home.js, quindi il suo numero, quindi il
 riferimento dentro index.html. Si ripete il giro finche' non si muove
 piu' niente.
+
+Il conto si fa tutto in memoria e si scrive su disco solo alla fine:
+cosi' `--verifica` puo' dire com'e' la situazione senza cambiarla. Prima
+non era cosi', e la verifica sistemava i numeri e poi si complimentava
+da sola -- oppure, se c'era una qualsiasi modifica non ancora
+depositata, gridava al lupo. Un controllo che grida sempre al lupo non
+lo guarda piu' nessuno.
 """
 import hashlib
-import io
 import re
 import sys
 from pathlib import Path
@@ -40,64 +46,72 @@ def sorgenti():
                   + list(QUI.glob('*.css')))
 
 
-def giro(numeri):
-    """Riscrive i riferimenti secondo `numeri`. Ritorna quanti file ha
-    cambiato."""
-    cambiati = 0
-    for p in list(QUI.glob('*.html')) + sorgenti():
-        testo = p.read_text(encoding='utf-8')
-        nuovo = RIF.sub(
-            lambda m: f"{m.group('file')}?v={numeri.get(m.group('file'), '1')}", testo)
-        if nuovo != testo:
-            p.write_text(nuovo, encoding='utf-8')
-            cambiati += 1
-    return cambiati
+def pagine():
+    return sorted(QUI.glob('*.html'))
+
+
+def assesta(testi):
+    """Rinumera in memoria finche' non si muove piu' niente.
+
+    `testi` e' un dizionario nome -> contenuto, e non viene toccato: si
+    ritorna la versione assestata. Ritorna None se i numeri non si
+    fermano, che vorrebbe dire un giro circolare fra i file.
+    """
+    testi = dict(testi)
+    nomi_sorgenti = [p.name for p in sorgenti()]
+
+    for _ in range(10):
+        numeri = {n: versione(testi[n]) for n in nomi_sorgenti}
+        mosso = False
+        for nome, testo in testi.items():
+            nuovo = RIF.sub(
+                lambda m: f"{m.group('file')}?v={numeri.get(m.group('file'), '1')}", testo)
+            if nuovo != testo:
+                testi[nome] = nuovo
+                mosso = True
+        if not mosso:
+            return testi
+    return None
 
 
 def main(solo_verifica: bool) -> int:
-    prima = {p.name: p.read_text(encoding='utf-8') for p in sorgenti()}
+    tutti = pagine() + sorgenti()
+    prima = {p.name: p.read_text(encoding='utf-8') for p in tutti}
 
-    for _ in range(10):
-        numeri = {p.name: versione(p.read_text(encoding='utf-8')) for p in sorgenti()}
-        if giro(numeri) == 0:
-            break
-    else:
+    dopo = assesta(prima)
+    if dopo is None:
         print('MALE  i numeri non si assestano: c\'e\' un giro circolare fra i file?')
         return 1
 
     # I contenuti possono essere cambiati solo nei `?v=`: se e' cambiato
     # altro, qualcosa non torna.
-    dopo = {p.name: p.read_text(encoding='utf-8') for p in sorgenti()}
-    tocchi = [n for n in prima if RIF.sub('', prima[n]) != RIF.sub('', dopo.get(n, ''))]
+    tocchi = [n for n in prima if RIF.sub('', prima[n]) != RIF.sub('', dopo[n])]
     if tocchi:
         print('MALE  ho toccato piu' + "'" + ' dei numeri in: ' + ', '.join(tocchi))
         return 1
 
-    diversi = [n for n in prima if prima[n] != dopo[n]]
+    diversi = sorted(n for n in prima if prima[n] != dopo[n])
 
     if solo_verifica:
-        import subprocess
-        sporchi = subprocess.run(['git', 'status', '--porcelain'], cwd=QUI,
-                                 capture_output=True, text=True).stdout.strip()
-        if diversi or (sporchi and any(l.split()[-1].endswith(('.html', '.js', '.css'))
-                                       for l in sporchi.splitlines())):
-            print('MALE  i numeri di versione non erano aggiornati. Lancia: python3 versioni.py')
-            print('      file rinumerati: ' + (', '.join(diversi) or '(solo html)'))
+        if diversi:
+            print('MALE  i numeri di versione non sono aggiornati. Lancia: python3 versioni.py')
+            print('      da rinumerare: ' + ', '.join(diversi))
             return 1
         print('Versioni a posto.')
         return 0
 
-    # Anche gli html cambiano, quando cambia il numero di un file che
-    # citano: contarli evita il messaggio bugiardo "niente da fare"
-    # mentre in realta' qualcosa si e' mosso.
-    import subprocess
-    sporchi = [l[3:] for l in subprocess.run(
-        ['git', 'status', '--porcelain'], cwd=QUI, capture_output=True, text=True
-    ).stdout.splitlines() if l[3:].endswith('.html')]
-    print(f'Versioni aggiornate. Rinumerati {len(diversi)} file'
-          + (': ' + ', '.join(diversi) if diversi else '')
-          + (f'; {len(sporchi)} pagine aggiornate' if sporchi else '')
-          + ('' if diversi or sporchi else ' (niente da fare)'))
+    for nome in diversi:
+        (QUI / nome).write_text(dopo[nome], encoding='utf-8')
+
+    if not diversi:
+        print('Versioni aggiornate (niente da fare).')
+        return 0
+
+    fonti = [n for n in diversi if not n.endswith('.html')]
+    html = [n for n in diversi if n.endswith('.html')]
+    print(f'Versioni aggiornate. Rinumerati {len(diversi)} file: '
+          + ', '.join(diversi)
+          + f'  [{len(fonti)} sorgenti, {len(html)} pagine]')
     return 0
 
 

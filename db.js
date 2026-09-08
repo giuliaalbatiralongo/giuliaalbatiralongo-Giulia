@@ -1352,6 +1352,103 @@ export function misureDi(piano) {
   ];
 }
 
+/* ---------- Il calendario dello studio ----------
+
+   Non e' il calendario degli appuntamenti: e' come si distribuisce nel
+   tempo quello che hai deciso di studiare. Ogni materia una riga, ogni
+   passata una fascia colorata sui giorni che occupa davvero.
+
+   Serve a vedere in un colpo se una settimana e' vuota e la successiva
+   impossibile: guardando una materia per volta non si vede.
+
+   Il conto sta qui e non nella pagina perche' e' matematica sui giorni,
+   e la matematica si collauda senza aprire un browser. */
+
+export function calendarioStudio(piani, dal, quantiGiorni, oggiIso) {
+  const oggi = oggiIso || new Date().toISOString().slice(0, 10);
+
+  const giorni = [];
+  const cursore = new Date(dal + 'T00:00:00');
+  for (let i = 0; i < quantiGiorni; i += 1) {
+    const iso = cursore.toISOString().slice(0, 10);
+    giorni.push({
+      iso,
+      settimana: cursore.getDay() === 0 ? 7 : cursore.getDay(),
+      numero: cursore.getDate(),
+      mese: cursore.getMonth(),
+      primoDelMese: cursore.getDate() === 1,
+      oggi: iso === oggi,
+    });
+    cursore.setDate(cursore.getDate() + 1);
+  }
+
+  const indice = new Map(giorni.map((g, i) => [g.iso, i]));
+
+  const righe = piani.map((piano) => {
+    const calcolo = calcolaPiano(piano, oggi);
+
+    /* Dove cade ogni passata dentro la finestra che stiamo guardando.
+       I giorni consecutivi della stessa passata diventano una fascia
+       sola: trenta quadratini attaccati non dicono niente di piu' di
+       una fascia, e si leggono peggio. */
+    const blocchi = [];
+    calcolo.fasi.forEach((fase) => {
+      const suoi = [];
+      let corrente = null;
+      fase.giorniVeri.forEach((iso) => {
+        const i = indice.get(iso);
+        if (i === undefined) {
+          corrente = null;
+          return;
+        }
+        if (corrente && corrente.da + corrente.quanti === i) {
+          corrente.quanti += 1;
+          return;
+        }
+        corrente = {
+          da: i,
+          quanti: 1,
+          nome: fase.nome,
+          famiglia: famigliaDiFase(fase),
+          alGiorno: fase.alGiorno,
+          finita: fase.fatte >= (piano.unita === 'giorni' ? fase.giorni : piano.quantita),
+          etichetta: false,
+        };
+        suoi.push(corrente);
+        blocchi.push(corrente);
+      });
+
+      /* I giorni liberi spezzano una passata in piu' pezzi, ma la
+         passata resta una. Il nome va scritto su un pezzo solo, il piu'
+         largo: scritto su tutti sembrano tre letture diverse. */
+      if (suoi.length > 0) {
+        suoi.reduce((a, b) => (b.quanti > a.quanti ? b : a)).etichetta = true;
+      }
+    });
+
+    const dataEsame = piano.fine;
+    return {
+      piano,
+      materia: piano.materia,
+      blocchi,
+      // Il giorno in cui la finestra si chiude, se cade qui dentro
+      fine: indice.has(dataEsame) ? indice.get(dataEsame) : null,
+      vuota: blocchi.length === 0,
+    };
+  });
+
+  return { giorni, righe, quanti: quantiGiorni };
+}
+
+/* Il lunedi' della settimana di una data: le settimane cominciano di
+   lunedi', e una griglia che parte di mercoledi' non si legge. */
+export function lunediDi(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  const g = d.getDay() === 0 ? 7 : d.getDay();
+  d.setDate(d.getDate() - (g - 1));
+  return d.toISOString().slice(0, 10);
+}
+
 /* ---------- Le tre famiglie di passate ----------
 
    Leggere, ripetere, ripassare sono tre lavori diversi: la prima volta

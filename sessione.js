@@ -7,10 +7,10 @@ import {
   getMateriali,
   linkMateriali,
   registraRisposta,
-} from './db.js?v=21901172';
+} from './db.js?v=14335439';
 import { iconaPerMateria } from './materie.js?v=71987087';
-import { proteggiPagina } from './auth.js?v=14062611';
-import { misuraTempo } from './tempo.js?v=22520732';
+import { proteggiPagina } from './auth.js?v=19355368';
+import { misuraTempo } from './tempo.js?v=11203991';
 
 const parametri = new URLSearchParams(window.location.search);
 const materiaFiltro = parametri.get('materia');

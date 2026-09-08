@@ -874,6 +874,60 @@ Sulla tessera c'e' la **percentuale**, non `fatte/totale`: tre passate su
 450 pagine fanno 1350, ma nessuno ragiona cosi'. I numeri esatti stanno
 nel dettaglio.
 
+### Il nastro: il programma di studio nel tempo (8 settembre)
+
+Giulia: *"vedo che c'e' oggi le due materie, bisogna fare un grafico con
+tipo il tuo programma di studio che sia una sorta di calendario, pero'
+non proprio calendario... come dashboard che io posso vedere come ho
+organizzato il mio studio, come se fosse un secondo calendario nel
+tempo. A primo impatto devo poter vedere almeno una settimana o due
+settimane o tutto il mese e poi i vari mesi"*.
+
+Sta in **Organizzazione studio**, fra "Oggi" e le tessere delle materie.
+Una riga per materia, una colonna per giorno, e le passate come fasce
+colorate: si vede in un colpo che a fine mese ci sono tre materie
+addosso, cosa che guardando una tessera per volta non si vede.
+
+**Quattro ingrandimenti**: Settimana, 2 settimane, Mese (35 giorni), 3
+mesi (91 giorni). All'apertura sono due settimane; quello scelto si
+ricorda (`localStorage`, chiave `akesis-nastro-zoom`), cosi' chi guarda
+sempre il mese non lo riseleziona ogni volta.
+
+Cose imparate mentre lo facevo:
+
+- **La larghezza del giorno deve seguire l'ingrandimento.** Con una
+  larghezza sola, "3 mesi" mostrava un mese e mezzo e poi si scorreva:
+  cioe' esattamente quello che l'ingrandimento doveva evitare. Adesso
+  ogni ingrandimento ha la sua larghezza (40 / 30 / 20 / 8 px) e sia il
+  mese sia i tre mesi ci stanno tutti dentro la pagina.
+- **A otto pixel il numero del giorno non ci sta.** A "3 mesi" in testa
+  ci vanno i nomi dei mesi, larghi quanto i loro giorni, e il lunedi'
+  porta una riga sottile: senza, non si capisce piu' dove finisce una
+  settimana. Spariscono anche i nomi delle passate, che diventerebbero
+  "Pri..." e non direbbero niente: li' parlano i colori, e c'e' la
+  legenda.
+- **Un giorno libero spezza la fascia, ma la passata resta una.** Il
+  nome va scritto una volta sola, sul pezzo piu' largo. Scritto su tutti
+  i pezzi, "Prima lettura" compariva tre volte di fila nella stessa riga
+  e sembravano tre letture diverse. Il pezzo da etichettare lo decide
+  `calendarioStudio` (campo `etichetta`), non la pagina: cosi' si prova
+  senza browser.
+- **La colonna dei nomi sta ferma** (`position: sticky`) mentre il resto
+  scorre: scorrendo di tre mesi, senza, non si sa piu' di che materia e'
+  la riga.
+- **I nomi lunghi si spezzano invece di sparire.** "Gastroenterologia"
+  da sola e' piu' larga della colonna: tagliata dava "Gastroenterolog",
+  che non si capisce.
+
+Il conto sta in `calendarioStudio(piani, dal, quantiGiorni, oggi)` in
+`db.js` e non nella pagina, perche' e' matematica sui giorni e la
+matematica si collauda senza aprire un browser. Ritorna i giorni della
+finestra e, per ogni materia, le fasce con dove cominciano e quanto
+durano. La pagina disegna e basta.
+
+Senza materie il nastro resta nascosto: una griglia vuota non spiega
+niente, occupa solo posto.
+
 ### Organizzazione studio: come ragiona adesso
 
 Non piu' esami e lezioni, ma **una materia per volta**: quanto materiale
@@ -1174,7 +1228,30 @@ mandare online):
 2. **`controlla-nomi.mjs`**: prende il caso gemello, cioe' importare un
    nome che dall'altra parte non c'e'
 
-Tutte e due viste **fallire** rimettendo il guasto, e poi tornare verdi.
+3. **`versioni.py`**: i numeri di versione (`?v=`) non si scrivono piu'
+   a mano. Sono calcolati dal contenuto del file e si propagano da soli
+   -- cambia auth.js, cambia il suo numero, cambia home.js che lo cita,
+   cambia index.html che cita home.js. E' il guasto piu' frequente di
+   questo progetto: cinque volte, e una ha spento il sito
+
+Tutte e due le prime viste **fallire** rimettendo il guasto, e poi
+tornare verdi.
+
+**Poi ha gridato al lupo per un mese (8 settembre).** `versioni.py
+--verifica` guardava `git status` e considerava "numeri non aggiornati"
+qualsiasi file .html/.js/.css non ancora depositato. Con quaranta file
+in lavorazione era rosso sempre, per il motivo sbagliato. E, peggio, la
+verifica **prima sistemava i numeri e poi controllava**: dopo il primo
+lancio era comunque tutto a posto, quindi non poteva accorgersi di
+niente.
+
+Adesso il conto si fa tutto in memoria e si scrive solo alla fine, cosi'
+`--verifica` guarda senza toccare. Rosso solo se un numero e' davvero
+indietro. Visto fallire toccando un file e poi tornare verde
+rimettendolo com'era.
+
+Un controllo che grida sempre al lupo non lo guarda piu' nessuno: e'
+peggio di non averlo.
 
 ---
 
@@ -1207,6 +1284,11 @@ altrimenti si collauda roba vecchia. Le suite:
 - `livello-dati.mjs` - cosa scrive davvero `db.js` nel database
 - `sweep.mjs` - tutte le pagine si aprono senza errori
 - `contrasto.mjs` - leggibilita' del testo, chiaro e scuro
+- `nastro.mjs` - il programma di studio nel tempo: il conto dei giorni
+  senza browser, e poi a schermo gli ingrandimenti, le frecce e le fasce
+- `giorni.mjs` - il modulo e il piano contano i giorni allo stesso modo
+- `media.mjs`, `famiglie.mjs`, `menu.mjs`, `materie-scelta.mjs`,
+  `cestino.mjs`, `inizio.mjs`, `conti.mjs`, `vuota.mjs`
 
 I dati di prova si calcolano da oggi (i giorni liberi compresi):
 scriverli fissi faceva passare o fallire le prove a seconda del giorno
@@ -1301,6 +1383,36 @@ Storage, `dispense`, cartella `38e2a8ed-.../`.
 
 **Lezione per la prossima volta:** un materiale si cancella dall'app,
 non da SQL, altrimenti il file resta indietro.
+
+### I voti veri del libretto (8 settembre)
+
+Giulia ha mandato **due fotografie del suo libretto UniGe**. I nomi
+degli esami dei primi due anni sono stati riportati **come stanno li'**,
+non come stanno nel manifesto: *"hanno cambiato i nomi nella nuova
+coorte, usa pure quelli del libretto"*. Il libretto e' quello che ha
+davvero dato lei; il manifesto e' il corso di chi comincia adesso.
+
+Cambiati: `La cellula` (biologia, 29 - **non** 28, che avevo letto
+male), `Anatomia umana` 30, `I tessuti (istologia ed embriologia)` 28,
+`Fisica medica, biofisica e informatica` 30 e lode, `Anatomia sistema
+nervoso e endocrino` 23.
+
+`Chimica e propedeutica biochimica` **nel libretto non c'e'**: e' andata
+nel cestino, non cancellata. Se salta fuori che c'e' ma con un altro
+nome, si ripesca da li'.
+
+Secondo anno gia' giusto: Biochimica 27, Scienze umane 29, Eziologia 27,
+Fisiologia umana 1 e 2 trenta, Primo soccorso e Laboratorio idoneita'
+senza voto.
+
+Adesso: **15 esami, 153 crediti, media 28,13** (aritmetica) e **28,12**
+(pesata sui crediti).
+
+**Una cosa da chiarire con Giulia:** i crediti dei primi due anni non
+tornano. Akesis, che li ha presi dal manifesto, dice 54 al primo anno e
+51 al secondo; il libretto dice **51** e **57**. Le fotografie non
+riportano i crediti esame per esame, quindi da qui non si puo' capire
+quale riga sia diversa. Serve che li guardi lei.
 
 ## Regole di lavoro concordate
 

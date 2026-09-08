@@ -17,9 +17,9 @@ import {
   statoAnno,
   calcolaMedie,
   ANNI,
-} from './db.js?v=21901172';
-import { proteggiPagina } from './auth.js?v=14062611';
-import { offriAnnulla } from './annulla.js?v=17471225';
+} from './db.js?v=14335439';
+import { proteggiPagina } from './auth.js?v=19355368';
+import { offriAnnulla } from './annulla.js?v=69847830';
 
 const elScheletro = document.getElementById('scheletro');
 const elElenco = document.getElementById('elenco');

@@ -1,4 +1,4 @@
-import { getSessione, getProfilo, reinviaConferma, leggiErroreDaUrl } from './auth.js?v=14062611';
+import { getSessione, getProfilo, reinviaConferma, leggiErroreDaUrl } from './auth.js?v=19355368';
 
 const viste = {
   attesa: document.getElementById('vista-attesa'),

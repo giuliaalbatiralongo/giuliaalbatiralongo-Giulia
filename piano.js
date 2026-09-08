@@ -12,6 +12,8 @@ import {
   getDateEsame,
   getEsami,
   quantiGiorniDiStudio,
+  calendarioStudio,
+  lunediDi,
   gruppiDiMaterie,
   mieImpostazioni,
   annoIndovinato,
@@ -21,9 +23,9 @@ import {
   giorniMancanti,
   FAMIGLIE,
   famigliaDiFase,
-} from './db.js?v=21901172';
-import { proteggiPagina } from './auth.js?v=14062611';
-import { offriAnnulla } from './annulla.js?v=17471225';
+} from './db.js?v=14335439';
+import { proteggiPagina } from './auth.js?v=19355368';
+import { offriAnnulla } from './annulla.js?v=69847830';
 import { preparaSceltaMateria } from './scelta-materia.js?v=16848224';
 
 const elScheletro = document.getElementById('scheletro');
@@ -213,6 +215,222 @@ function creaTessera(piano) {
 
   return card;
 }
+
+/* ---------- Il programma nel tempo ----------
+
+   Ogni materia una riga, ogni passata una fascia sui giorni che occupa.
+   Serve a vedere in un colpo se una settimana e' vuota e la successiva
+   impossibile: guardando una materia per volta non si vede.
+
+   Non e' il calendario degli appuntamenti, e' come si distribuisce
+   quello che hai deciso di studiare. */
+
+/* Piu' tempo si guarda, piu' stretti sono i giorni: novanta colonne
+   larghe come sette non ci starebbero mai, e "3 mesi" che mostra un mese
+   e mezzo e poi si scorre non serve a niente. Sotto una certa larghezza
+   il numero del giorno non ci sta piu': li' in testa si scrivono i mesi
+   invece dei giorni. */
+const ZOOM = [
+  { chiave: 'settimana', nome: 'Settimana', giorni: 7, largo: 40 },
+  { chiave: 'due', nome: '2 settimane', giorni: 14, largo: 30 },
+  { chiave: 'mese', nome: 'Mese', giorni: 35, largo: 20 },
+  { chiave: 'tre', nome: '3 mesi', giorni: 91, largo: 8, fitto: true },
+];
+
+const CHIAVE_ZOOM = 'akesis-nastro-zoom';
+let zoom = ZOOM[1];
+let nastroDal = null;
+
+function ricordaZoom() {
+  try { localStorage.setItem(CHIAVE_ZOOM, zoom.chiave); } catch (e) { /* pazienza */ }
+}
+
+function zoomRicordato() {
+  try {
+    const c = localStorage.getItem(CHIAVE_ZOOM);
+    return ZOOM.find((z) => z.chiave === c) || ZOOM[1];
+  } catch (e) {
+    return ZOOM[1];
+  }
+}
+
+const LETTERE = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
+const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
+              'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+
+function spostaGiorni(iso, n) {
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+function periodoScritto(giorni) {
+  if (giorni.length === 0) return '';
+  const a = giorni[0];
+  const b = giorni[giorni.length - 1];
+  if (a.mese === b.mese) return `${a.numero} - ${b.numero} ${MESI[b.mese]}`;
+  return `${a.numero} ${MESI[a.mese]} - ${b.numero} ${MESI[b.mese]}`;
+}
+
+function disegnaNastro() {
+  const sezione = document.getElementById('nastro');
+  const griglia = document.getElementById('nastro-griglia');
+
+  if (piani.length === 0) {
+    sezione.hidden = true;
+    return;
+  }
+  sezione.hidden = false;
+
+  if (!nastroDal) nastroDal = lunediDi(oggiIso());
+
+  const dati = calendarioStudio(piani, nastroDal, zoom.giorni, oggiIso());
+  document.getElementById('nastro-periodo').textContent = periodoScritto(dati.giorni);
+
+  sezione.style.setProperty('--zoom-giorno', `${zoom.largo}px`);
+  griglia.classList.toggle('fitto', Boolean(zoom.fitto));
+  griglia.innerHTML = '';
+  // Una colonna per i nomi, una per ogni giorno.
+  griglia.style.gridTemplateColumns =
+    `var(--nastro-nomi) repeat(${dati.quanti}, minmax(var(--nastro-giorno), 1fr))`;
+
+  /* Riga 1: le date. Poi una riga per materia. Le righe della griglia si
+     contano da 1, quindi la materia numero `i` sta nella riga `i + 2`. */
+  const angolo = document.createElement('div');
+  angolo.className = 'nastro-angolo';
+  angolo.style.gridArea = '1 / 1';
+  griglia.appendChild(angolo);
+
+  if (zoom.fitto) {
+    /* Colonne da nove pixel: il numero del giorno non ci sta. In testa
+       va il mese, largo quanto i suoi giorni. */
+    let da = 0;
+    dati.giorni.forEach((g, i) => {
+      const ultimo = i === dati.giorni.length - 1;
+      if (!ultimo && dati.giorni[i + 1].mese === g.mese) return;
+      const cella = document.createElement('div');
+      cella.className = 'nastro-mese';
+      cella.style.gridArea = `1 / ${da + 2} / auto / span ${i - da + 1}`;
+      cella.textContent = MESI[g.mese];
+      griglia.appendChild(cella);
+      da = i + 1;
+    });
+  } else {
+    dati.giorni.forEach((g, i) => {
+      const cella = document.createElement('div');
+      cella.className = 'nastro-data'
+        + (g.settimana >= 6 ? ' festivo' : '')
+        + (g.oggi ? ' oggi' : '')
+        + (g.primoDelMese ? ' mese' : '');
+      cella.style.gridArea = `1 / ${i + 2}`;
+      cella.innerHTML =
+        `<span class="nastro-lettera">${LETTERE[g.settimana - 1]}</span>`
+        + `<span class="nastro-numero">${g.numero}</span>`;
+      if (g.primoDelMese) cella.title = MESI[g.mese];
+      griglia.appendChild(cella);
+    });
+  }
+
+  dati.righe.forEach((riga, n) => {
+    const suaRiga = n + 2;
+
+    const nome = document.createElement('button');
+    nome.type = 'button';
+    nome.className = 'nastro-nome';
+    const scritta = document.createElement('span');
+    scritta.textContent = riga.materia;
+    nome.appendChild(scritta);
+    nome.title = `Apri ${riga.materia}`;
+    nome.style.gridArea = `${suaRiga} / 1`;
+    nome.addEventListener('click', () => apriMateria(riga.piano));
+    griglia.appendChild(nome);
+
+    // Il fondo: una cella per giorno, cosi' i giorni liberi e quelli
+    // fuori finestra si vedono come spazio vuoto invece che come niente.
+    dati.giorni.forEach((g, i) => {
+      const cella = document.createElement('div');
+      cella.className = 'nastro-cella'
+        + (g.settimana >= 6 ? ' festivo' : '')
+        + (g.oggi ? ' oggi' : '')
+        + (g.settimana === 1 ? ' lunedi' : '');
+      cella.style.gridArea = `${suaRiga} / ${i + 2}`;
+      griglia.appendChild(cella);
+    });
+
+    // Le fasce, sopra il fondo
+    riga.blocchi.forEach((b) => {
+      const fascia = document.createElement('div');
+      fascia.className = 'nastro-fascia'
+        + (b.famiglia ? ` fam-${b.famiglia}` : '')
+        + (b.finita ? ' finita' : '');
+      fascia.style.gridRow = String(suaRiga);
+      fascia.style.gridColumn = `${b.da + 2} / span ${b.quanti}`;
+
+      const quanto = b.alGiorno === null
+        ? ''
+        : ` · ${arrotonda(b.alGiorno)} ${nomeUnita(riga.piano.unita, arrotonda(b.alGiorno))} al giorno`;
+      fascia.title = `${riga.materia}: ${b.nome}${quanto}`;
+
+      // Il nome ci sta solo se la fascia e' larga abbastanza: scritto
+      // dentro tre quadratini non si legge e basta. E si scrive una
+      // volta sola per passata, sul pezzo piu' largo.
+      if (b.etichetta && b.quanti >= 3) {
+        const testo = document.createElement('span');
+        testo.className = 'nastro-fascia-nome';
+        testo.textContent = b.nome;
+        fascia.appendChild(testo);
+      }
+      griglia.appendChild(fascia);
+    });
+
+    if (riga.vuota) {
+      const nulla = document.createElement('span');
+      nulla.className = 'nastro-niente';
+      nulla.textContent = 'niente in questo periodo';
+      nulla.style.gridRow = String(suaRiga);
+      nulla.style.gridColumn = `2 / span ${dati.quanti}`;
+      griglia.appendChild(nulla);
+    }
+  });
+
+  // Gli stessi colori della finestra di una materia
+  const legenda = document.getElementById('nastro-legenda');
+  legenda.replaceChildren(...legendaFamiglie().childNodes);
+}
+
+function preparaNastro() {
+  const scelte = document.getElementById('nastro-zoom');
+  zoom = zoomRicordato();
+  scelte.innerHTML = '';
+
+  ZOOM.forEach((z) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'nastro-zoom-tasto' + (z.chiave === zoom.chiave ? ' scelto' : '');
+    b.textContent = z.nome;
+    b.setAttribute('aria-pressed', String(z.chiave === zoom.chiave));
+    b.addEventListener('click', () => {
+      zoom = z;
+      ricordaZoom();
+      preparaNastro();
+      disegnaNastro();
+    });
+    scelte.appendChild(b);
+  });
+}
+
+document.getElementById('nastro-indietro').addEventListener('click', () => {
+  nastroDal = spostaGiorni(nastroDal, -zoom.giorni);
+  disegnaNastro();
+});
+document.getElementById('nastro-avanti').addEventListener('click', () => {
+  nastroDal = spostaGiorni(nastroDal, zoom.giorni);
+  disegnaNastro();
+});
+document.getElementById('nastro-oggi').addEventListener('click', () => {
+  nastroDal = lunediDi(oggiIso());
+  disegnaNastro();
+});
 
 /* ---------- Il dettaglio di una materia ----------
    Qui ci si arriva apposta, quindi qui stanno i numeri. Due cose che
@@ -574,6 +792,7 @@ document.getElementById('elimina-materia').addEventListener('click', async () =>
 
 function disegna() {
   elStriscia.innerHTML = '';
+  disegnaNastro();
 
   elConto.textContent =
     piani.length === 0 ? '' : `${piani.length} ${piani.length === 1 ? 'materia' : 'materie'}`;
@@ -1259,6 +1478,7 @@ async function avvia() {
     });
 
     preparaFinestra();
+    preparaNastro();
     disegna();
 
     elScheletro.remove();

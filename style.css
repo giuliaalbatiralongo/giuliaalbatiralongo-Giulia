@@ -4667,6 +4667,215 @@ a.oggi-riga {
   .materia-link-nota { display: none; }
 }
 
+/* ---------- Il programma nel tempo ----------
+
+   Una griglia: una colonna per giorno, una riga per materia. Le passate
+   sono fasce che coprono i giorni che occupano davvero, cosi' si vede
+   in un colpo se una settimana e' vuota e la successiva impossibile. */
+
+.nastro {
+  --nastro-nomi: 132px;
+  /* La larghezza di un giorno la decide l'ingrandimento scelto (--zoom-giorno) */
+  --nastro-giorno: var(--zoom-giorno, 26px);
+  margin-bottom: 26px;
+}
+
+.nastro-testa {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nastro-comandi {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nastro-zoom {
+  display: flex;
+  border: 1px solid var(--linea-forte);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.nastro-zoom-tasto {
+  padding: 5px 10px;
+  border: none;
+  background: var(--superficie);
+  color: var(--testo-2);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 160ms var(--curva), color 160ms var(--curva);
+}
+
+.nastro-zoom-tasto + .nastro-zoom-tasto { border-left: 1px solid var(--linea-forte); }
+.nastro-zoom-tasto.scelto { background: var(--accento); color: #fff; }
+
+.nastro-frecce { display: flex; align-items: center; gap: 4px; }
+
+.nastro-periodo {
+  margin: -4px 0 12px;
+  font-size: 12.5px;
+  color: var(--testo-3);
+}
+
+/* Con tre mesi le colonne non ci stanno: si scorre di lato invece di
+   schiacciarle finche' non si legge piu' niente. */
+.nastro-scorri {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+}
+
+.nastro-griglia {
+  display: grid;
+  gap: 2px;
+  min-width: 100%;
+}
+
+/* La colonna dei nomi resta ferma mentre il resto scorre: scorrendo di
+   tre mesi, senza, non si sa piu' di che materia e' la riga. */
+.nastro-angolo,
+.nastro-nome {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--superficie);
+}
+
+.nastro-angolo { grid-area: 1 / 1; }
+
+.nastro-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 2px 0 5px;
+  border-radius: 4px;
+}
+
+/* In testa, quando i giorni sono troppo stretti per il loro numero */
+.nastro-mese {
+  display: flex;
+  align-items: flex-end;
+  padding: 0 0 4px 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--testo-3);
+  border-left: 2px solid var(--linea-forte);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.nastro-lettera { font-size: 9.5px; font-weight: 700; color: var(--testo-3); }
+.nastro-numero { font-size: 11px; color: var(--testo-2); }
+
+.nastro-data.festivo .nastro-lettera,
+.nastro-data.festivo .nastro-numero { color: var(--testo-3); opacity: 0.6; }
+
+.nastro-data.oggi { background: var(--accento-tenue); }
+.nastro-data.oggi .nastro-lettera,
+.nastro-data.oggi .nastro-numero { color: var(--accento-su-tenue); font-weight: 700; }
+
+/* Il primo del mese porta una riga a sinistra: senza, tre mesi di
+   numeri sono indistinguibili. */
+.nastro-data.mese { border-left: 2px solid var(--linea-forte); }
+
+.nastro-nome {
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: left;
+  line-height: 1.25;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Due righe e poi i puntini: "Gastroenterolog" tagliato a meta' parola
+   non si capisce, "Gastroenterolo..." si'. */
+.nastro-nome > span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* "Gastroenterologia" da sola e' piu' larga della colonna: si spezza
+     invece di sparire tagliata a meta'. */
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.nastro-nome:hover { color: var(--accento); }
+
+.nastro-cella {
+  min-height: 30px;
+  border-radius: 4px;
+  background: var(--superficie-alt);
+}
+
+.nastro-cella.festivo { background: transparent; }
+.nastro-cella.oggi { background: var(--accento-tenue); }
+
+/* A tre mesi i giorni sono nove pixel: senza un segno il lunedi, non si
+   capisce piu' dove finisce una settimana. */
+/* Novanta colonne: lo spazio fra una e l'altra, moltiplicato novanta,
+   e' mezzo mese di larghezza sprecata. Via il vuoto fra i giorni, e la
+   colonna dei nomi un po' piu' stretta. */
+.nastro-griglia.fitto { gap: 1px 0; }
+.nastro.fitto, .nastro-griglia.fitto { --nastro-nomi: 104px; }
+.nastro-griglia.fitto .nastro-cella.lunedi { border-left: 1px solid var(--linea); }
+.nastro-griglia.fitto .nastro-fascia { padding: 0; border-left-width: 2px; }
+/* Otto pixel al giorno: "Prima lettura" diventa "Pri...", che non dice
+   niente. A tre mesi parlano i colori, e c'e' la legenda. */
+.nastro-griglia.fitto .nastro-fascia-nome { display: none; }
+
+.nastro-fascia {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 7px;
+  border-radius: 5px;
+  background: var(--fam-tenue, var(--superficie-alt));
+  border-left: 3px solid var(--fam, var(--linea-forte));
+  overflow: hidden;
+}
+
+/* Una passata finita si smorza: quello che conta e' quello che resta. */
+.nastro-fascia.finita { opacity: 0.55; }
+
+.nastro-fascia-nome {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fam, var(--testo-2));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nastro-niente {
+  display: flex;
+  align-items: center;
+  font-size: 11.5px;
+  color: var(--testo-3);
+  font-style: italic;
+}
+
+@media (max-width: 700px) {
+  .nastro { --nastro-nomi: 92px; --nastro-giorno: calc(var(--zoom-giorno, 26px) * 0.78); }
+  .nastro-fascia-nome { display: none; }
+}
+
 /* ---------- Le tre famiglie di passate ---------- */
 
 .fam-lettura { --fam: var(--fam-lettura); --fam-tenue: var(--fam-lettura-tenue); }

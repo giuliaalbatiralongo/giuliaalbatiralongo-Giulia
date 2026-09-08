@@ -9,8 +9,8 @@ import {
   giorniMancanti,
   nomeTipoData,
   titoloData,
-} from './db.js?v=21901172';
-import { proteggiPagina } from './auth.js?v=14062611';
+} from './db.js?v=14335439';
+import { proteggiPagina } from './auth.js?v=19355368';
 
 const elScheletro = document.getElementById('scheletro');
 const elGriglia = document.getElementById('griglia');

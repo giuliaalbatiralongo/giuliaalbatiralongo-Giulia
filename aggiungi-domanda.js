@@ -1,6 +1,6 @@
-import { inserisciDomandaEsame, getEsami, gruppiDiMaterie } from './db.js?v=21901172';
+import { inserisciDomandaEsame, getEsami, gruppiDiMaterie } from './db.js?v=14335439';
 import { preparaSceltaMateria } from './scelta-materia.js?v=16848224';
-import { proteggiPagina } from './auth.js?v=14062611';
+import { proteggiPagina } from './auth.js?v=19355368';
 
 const form = document.getElementById('form-domanda');
 const elEsito = document.getElementById('esito');

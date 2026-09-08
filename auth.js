@@ -1,4 +1,4 @@
-import { supabase } from './db.js?v=21901172';
+import { supabase } from './db.js?v=14335439';
 import { preparaGruppiDelMenu } from './menu.js?v=16717556';
 
 /* Autenticazione e profilo.
