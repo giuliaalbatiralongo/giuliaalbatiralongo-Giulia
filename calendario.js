@@ -15,10 +15,10 @@ import {
   tipoData,
   TIPI_DATA,
   creaIcs,
-} from './db.js?v=12384483';
-import { proteggiPagina } from './auth.js?v=18118483';
+} from './db.js?v=26954542';
+import { proteggiPagina } from './auth.js?v=51601206';
 import { preparaGiro } from './giro.js';
-import { offriAnnulla } from './annulla.js?v=85184409';
+import { offriAnnulla } from './annulla.js?v=21216437';
 
 const elScheletro = document.getElementById('scheletro');
 const elTutto = document.getElementById('calendario');

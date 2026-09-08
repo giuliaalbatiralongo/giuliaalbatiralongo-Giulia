@@ -1,4 +1,4 @@
-import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './db.js?v=12384483';
+import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './db.js?v=26954542';
 
 /* Misura quanto tempo si passa davvero in una sezione.
 

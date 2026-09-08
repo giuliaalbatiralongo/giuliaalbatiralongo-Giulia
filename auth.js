@@ -1,5 +1,5 @@
-import { supabase } from './db.js?v=12384483';
-import { preparaGruppiDelMenu } from './menu.js?v=16717556';
+import { supabase } from './db.js?v=26954542';
+import { preparaGruppiDelMenu } from './menu.js?v=13154695';
 
 /* Autenticazione e profilo.
    Il profilo esiste solo se l'utente ha riscattato un codice di invito:

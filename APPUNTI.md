@@ -1351,6 +1351,7 @@ altrimenti si collauda roba vecchia. Le suite:
 - `giro.mjs` - il giro guidato della prima volta, tutte e sei le tappe
 - `iscritti.mjs` - chi vede nomi ed email degli iscritti, e chi puo'
   mettere una data sul calendario di tutti
+- `aiuto.mjs` - il pulsante Aiuto su ogni pagina, e i codici di invito
 - `giorni.mjs` - il modulo e il piano contano i giorni allo stesso modo
 - `media.mjs`, `famiglie.mjs`, `menu.mjs`, `materie-scelta.mjs`,
   `cestino.mjs`, `inizio.mjs`, `conti.mjs`, `vuota.mjs`
@@ -1439,6 +1440,49 @@ presi dal suo manifesto ufficiale. Niente a memoria.
 **Da chiarire:** il conto dei crediti fa **363**, e Medicina ne dichiara
 360. Tre di scarto. Non e' un errore di somma, e' quello che c'e' scritto
 nel manifesto riga per riga: da guardare con Giulia.
+
+### Il pulsante Aiuto, e i codici che si fanno da soli (8 settembre)
+
+**Aiuto, in basso a destra.** Giulia: *"non so io cosa devo fare perche'
+non ho mai aperto quest'app, quindi e' la prima, ho bisogno di aiuto...
+senza cose troppo particolari"*.
+
+Tre voci, e basta:
+
+1. *Spiegami di nuovo com'e' fatta Akesis* -- rifa' il giro guidato
+2. *Cosa trovo in ogni sezione* -- apre l'elenco delle cinque sezioni
+3. *Non trovo quello che mi serve* -- porta ai suggerimenti
+
+Le descrizioni delle sezioni **sono gli stessi testi delle tappe del
+giro** (`PASSI` di `giro.js`), non copie: scritti due volte,
+prima o poi uno dei due sarebbe rimasto indietro.
+
+Si attacca da `menu.js`, che gira su ogni pagina dentro
+`proteggiPagina()`. Un posto solo invece di venti file, e le pagine di
+accesso e conferma -- che `proteggiPagina` non la chiamano -- non lo
+prendono, che e' giusto: li' un pulsante di aiuto non aiuta nessuno.
+Durante il giro guidato il tasto sparisce, altrimenti sarebbe l'unica
+cosa illuminata sopra il velo.
+
+**I codici di invito, senza aprire Supabase.** Giulia: *"non devo aprire
+ogni volta Cloud per farlo"*.
+
+Nel Profilo: i codici **liberi** con un tasto Copia (un codice si passa
+a qualcuno, e ricopiarlo a mano da schermo e' il modo migliore per
+sbagliare un carattere), e quelli **gia' usati** sbarrati, con nome ed
+email di chi e' entrato -- che era la richiesta precisa: *"li veda
+associati all'account nuovo"*. Un codice usato non serve piu', ma dice
+chi e' entrato con cosa, e quello serve.
+
+Su `codici_invito` la sicurezza a livello di riga e' accesa e **non c'e'
+nessuna regola**: dal browser quella tabella non si legge e non si
+scrive, punto. Si passa da due funzioni `security definer`,
+`elenco_codici()` e `crea_codice_invito()`, tutte e due con il controllo
+su `e_admin()`. Provato impersonando: un utente normale vede **0**
+codici e sul tentativo di crearne uno prende un errore secco.
+
+Il codice nuovo lo genera il database da `gen_random_uuid()` e non da
+`random()`, sull'alfabeto senza 0/O e 1/I/L.
 
 ### Chi si e' iscritto, e chi decide cosa vedono gli altri (8 settembre)
 

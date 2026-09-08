@@ -4876,6 +4876,205 @@ a.oggi-riga {
   .nastro-fascia-nome { display: none; }
 }
 
+/* ---------- Il pulsante Aiuto, in basso a destra ----------
+   Sempre nello stesso posto: chi e' perso non deve mettersi a cercare
+   anche l'aiuto. */
+
+.aiuto-tasto {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border: 1px solid var(--linea-forte);
+  border-radius: 24px;
+  background: var(--superficie);
+  color: var(--testo-1);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(15, 18, 32, 0.16);
+  transition: transform 160ms var(--curva), box-shadow 160ms var(--curva);
+}
+
+.aiuto-tasto:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(15, 18, 32, 0.22);
+}
+
+.aiuto-tasto .ph { font-size: 17px; color: var(--accento); }
+
+/* Mentre il giro guidato e' in corso il tasto sparisce: sarebbe
+   l'unica cosa illuminata sopra il velo, e distrarrebbe e basta. */
+body.giro-in-corso .aiuto-tasto { display: none; }
+
+.aiuto-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 810;
+  background: rgba(15, 18, 32, 0.35);
+}
+
+.aiuto-pannello {
+  position: fixed;
+  right: 20px;
+  bottom: 74px;
+  z-index: 811;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-card);
+  background: var(--superficie);
+  box-shadow: 0 16px 44px rgba(15, 18, 32, 0.28);
+}
+
+.aiuto-titolo {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--testo-1);
+}
+
+.aiuto-voci { display: flex; flex-direction: column; gap: 4px; }
+
+.aiuto-voce {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 12px;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  color: var(--testo-1);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 140ms var(--curva);
+}
+
+.aiuto-voce:hover { background: var(--superficie-alt); }
+.aiuto-voce .ph { font-size: 18px; color: var(--accento); flex: none; }
+
+.aiuto-sezioni {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--linea);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.aiuto-sezione {
+  display: block;
+  padding: 9px 12px;
+  border-radius: 9px;
+  text-decoration: none;
+  transition: background 140ms var(--curva);
+}
+
+.aiuto-sezione:hover { background: var(--superficie-alt); }
+
+.aiuto-sezione-nome {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accento);
+}
+
+.aiuto-sezione-testo {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--testo-2);
+}
+
+.aiuto-chiudi { margin-top: 12px; width: 100%; justify-content: center; }
+
+@media (max-width: 700px) {
+  /* Sul telefono la barra in basso e' gia' occupata: il tasto si
+     stringe alla sola icona per non coprire niente. */
+  .aiuto-tasto { right: 14px; bottom: 14px; padding: 12px; }
+  .aiuto-tasto { font-size: 0; gap: 0; }
+  .aiuto-tasto .ph { font-size: 20px; }
+  .aiuto-pannello { right: 14px; left: 14px; bottom: 72px; width: auto; }
+}
+
+/* ---------- I codici di invito ---------- */
+
+.codici-gruppo + .codici-gruppo { margin-top: 18px; }
+
+.codici-gruppo-titolo {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--testo-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.codice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  background: var(--superficie);
+}
+
+.codice + .codice { margin-top: 6px; }
+
+/* Un codice gia' usato non serve piu' a niente: si smorza, ma resta,
+   perche' dice chi e' entrato con cosa. */
+.codice.usato { background: var(--superficie-alt); }
+.codice.usato .codice-testo { color: var(--testo-3); text-decoration: line-through; }
+
+.codice-testo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--testo-1);
+  letter-spacing: 0.02em;
+}
+
+.codice-a { flex: 1; min-width: 0; text-align: right; }
+
+.codice-chi {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--testo-1);
+}
+
+.codice-email {
+  margin: 1px 0 0;
+  font-size: 11.5px;
+  color: var(--testo-3);
+  word-break: break-all;
+}
+
+.codice-libero {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ok, #0f7f72);
+}
+
+@media (max-width: 700px) {
+  .codice { flex-wrap: wrap; }
+  .codice-a { text-align: left; flex-basis: 100%; }
+}
+
 /* ---------- Chi si e' iscritto (solo l'amministratrice) ---------- */
 
 .iscritti-conto {

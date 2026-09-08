@@ -15,7 +15,15 @@
    di stile non lo riapre: il browser nasconde il contenuto per conto
    suo, e nessuna regola ci arriva. Tornando largo, ognuno riprende lo
    stato che aveva. */
+import { preparaAiuto } from './aiuto.js';
+
+/* Il pulsante "Aiuto" in basso a destra. Si attacca da qui perche'
+   questo e' l'unico posto che gira su OGNI pagina dopo l'accesso: cosi'
+   non serve toccare venti file, e le pagine di accesso e conferma non
+   lo prendono, che e' giusto. */
 export function preparaGruppiDelMenu() {
+  preparaAiuto();
+
   const stretto = window.matchMedia('(max-width: 820px)');
   const gruppi = [...document.querySelectorAll('.nav-apribile')];
   if (gruppi.length === 0) return;

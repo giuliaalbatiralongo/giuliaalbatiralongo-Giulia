@@ -1932,6 +1932,32 @@ export async function getIscritti() {
   return data || [];
 }
 
+/* ---------- I codici di invito (solo per l'amministratrice) ----------
+
+   Su `codici_invito` la sicurezza a livello di riga e' accesa e non c'e'
+   nessuna regola: dal browser quella tabella non si legge e non si
+   scrive, punto. Si passa da due funzioni `security definer` che
+   controllano `e_admin()` -- una per vedere, una per crearne uno nuovo,
+   cosi' non si deve piu' aprire il pannello di Supabase. */
+
+export async function getCodiciInvito() {
+  const { data, error } = await supabase.rpc('elenco_codici');
+  if (error) {
+    segnaErrore('Errore nella lettura dei codici:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function creaCodiceInvito() {
+  const { data, error } = await supabase.rpc('crea_codice_invito');
+  if (error) {
+    segnaErrore('Errore nella creazione del codice:', error);
+    return null;
+  }
+  return data;
+}
+
 /* ---------- Suggerimenti ----------
    La lista di cosa vorremmo che Akesis facesse e non fa ancora. La
    scrivono tutti, la lettura e' aperta a tutti: un'idea gia' proposta si

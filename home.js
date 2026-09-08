@@ -9,8 +9,8 @@ import {
   giorniMancanti,
   nomeTipoData,
   titoloData,
-} from './db.js?v=12384483';
-import { proteggiPagina } from './auth.js?v=18118483';
+} from './db.js?v=26954542';
+import { proteggiPagina } from './auth.js?v=51601206';
 import { preparaGiro } from './giro.js';
 
 const elScheletro = document.getElementById('scheletro');

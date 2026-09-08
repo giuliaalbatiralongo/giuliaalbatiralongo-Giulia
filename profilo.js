@@ -1,5 +1,5 @@
-import { proteggiPagina, cambiaPassword, esci } from './auth.js?v=18118483';
-import { getIscritti } from './db.js';
+import { proteggiPagina, cambiaPassword, esci } from './auth.js?v=51601206';
+import { getIscritti, getCodiciInvito, creaCodiceInvito } from './db.js';
 
 const elNome = document.getElementById('dato-nome');
 const elEmail = document.getElementById('dato-email');
@@ -50,7 +50,10 @@ async function avvia() {
   elEmail.textContent = profilo.email || '-';
   elRuolo.textContent = profilo.ruolo === 'admin' ? 'Amministratrice' : 'Studente';
 
-  if (profilo.ruolo === 'admin') await mostraIscritti();
+  if (profilo.ruolo === 'admin') {
+    await mostraIscritti();
+    await mostraCodici();
+  }
 }
 
 /* ---------- Chi si e' iscritto ----------
@@ -131,5 +134,122 @@ async function mostraIscritti() {
     dove.appendChild(riga);
   });
 }
+
+/* ---------- I codici di invito ----------
+   Un codice libero e' un accesso ad Akesis che aspetta qualcuno: vanno
+   visti tutti insieme, e quelli gia' usati devono dire A CHI, altrimenti
+   fra un mese non si sa piu' chi e' entrato con cosa. */
+
+async function mostraCodici() {
+  const dove = document.getElementById('codici');
+  const codici = await getCodiciInvito();
+  dove.innerHTML = '';
+
+  const liberi = codici.filter((c) => !c.usato);
+  const usati = codici.filter((c) => c.usato);
+
+  dove.appendChild(gruppoCodici(
+    `Liberi (${liberi.length})`,
+    liberi,
+    'Nessun codice libero. Creane uno per invitare qualcuno.'
+  ));
+
+  if (usati.length > 0) {
+    dove.appendChild(gruppoCodici(`Gi\u00e0 usati (${usati.length})`, usati, ''));
+  }
+}
+
+function gruppoCodici(titolo, elenco, seVuoto) {
+  const box = document.createElement('div');
+  box.className = 'codici-gruppo';
+
+  const t = document.createElement('p');
+  t.className = 'codici-gruppo-titolo';
+  t.textContent = titolo;
+  box.appendChild(t);
+
+  if (elenco.length === 0) {
+    const vuoto = document.createElement('p');
+    vuoto.className = 'blocco-nota';
+    vuoto.textContent = seVuoto;
+    box.appendChild(vuoto);
+    return box;
+  }
+
+  elenco.forEach((c) => box.appendChild(rigaCodice(c)));
+  return box;
+}
+
+function rigaCodice(c) {
+  const riga = document.createElement('div');
+  riga.className = 'codice' + (c.usato ? ' usato' : '');
+
+  const testo = document.createElement('code');
+  testo.className = 'codice-testo';
+  testo.textContent = c.codice;
+  riga.appendChild(testo);
+
+  const a = document.createElement('div');
+  a.className = 'codice-a';
+  if (c.usato) {
+    // Chi l'ha usato, con nome ed email: il codice da solo non dice niente.
+    const chi = document.createElement('p');
+    chi.className = 'codice-chi';
+    chi.textContent = c.nome || 'qualcuno';
+    a.appendChild(chi);
+    const mail = document.createElement('p');
+    mail.className = 'codice-email';
+    mail.textContent = c.email || '';
+    a.appendChild(mail);
+  } else {
+    const libero = document.createElement('p');
+    libero.className = 'codice-libero';
+    libero.textContent = 'libero';
+    a.appendChild(libero);
+  }
+  riga.appendChild(a);
+
+  if (!c.usato) {
+    // Un codice si passa a qualcuno: copiarlo a mano da schermo e'
+    // il modo migliore per sbagliare un carattere.
+    const copia = document.createElement('button');
+    copia.type = 'button';
+    copia.className = 'btn btn-neutro btn-piccolo';
+    copia.textContent = 'Copia';
+    copia.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(c.codice);
+        copia.textContent = 'Copiato';
+        setTimeout(() => { copia.textContent = 'Copia'; }, 1600);
+      } catch (e) {
+        copia.textContent = 'Copialo a mano';
+      }
+    });
+    riga.appendChild(copia);
+  }
+
+  return riga;
+}
+
+document.getElementById('crea-codice').addEventListener('click', async (e) => {
+  const tasto = e.currentTarget;
+  const esito = document.getElementById('codici-esito');
+  tasto.disabled = true;
+  esito.className = 'esito-form attesa';
+  esito.textContent = 'Creo il codice';
+
+  const nuovo = await creaCodiceInvito();
+  tasto.disabled = false;
+
+  if (!nuovo) {
+    esito.className = 'esito-form ko';
+    esito.textContent = 'Non sono riuscita a creare il codice. Riprova.';
+    return;
+  }
+
+  esito.className = 'esito-form ok';
+  esito.textContent = `Codice creato: ${nuovo}`;
+  await mostraCodici();
+});
 
 avvia();

@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=21712572">
+  <link rel="stylesheet" href="style.css?v=18900320">
 </head>
 <body>
   <div class="app">
@@ -148,6 +148,20 @@
             <p class="sezione-sub">Chi ha un accesso ad Akesis, e quand&rsquo;&egrave; entrato l&rsquo;ultima volta. Lo vedi solo tu.</p>
             <div id="iscritti"></div>
           </section>
+
+          <!-- I codici di invito: vederli e crearne di nuovi senza
+               passare dal pannello di Supabase. -->
+          <section class="sezione" id="sezione-codici" data-solo-admin hidden>
+            <div class="sezione-testa">
+              <h2 class="sezione-titolo">Codici di invito</h2>
+              <button type="button" class="btn btn-piccolo" id="crea-codice">
+                <i class="ph ph-plus" aria-hidden="true"></i> Creane uno nuovo
+              </button>
+            </div>
+            <p class="sezione-sub">Chi ha un codice libero pu&ograve; iscriversi ad Akesis. Un codice vale una volta sola.</p>
+            <p class="esito-form" id="codici-esito"></p>
+            <div id="codici"></div>
+          </section>
         </div>
       </div>
     </main>
@@ -159,6 +173,6 @@
       if (el) el.textContent = 'Errore nella pagina: ' + (e.message || 'sconosciuto');
     });
   </script>
-  <script type="module" src="profilo.js?v=16596956"></script>
+  <script type="module" src="profilo.js?v=14457160"></script>
 </body>
 </html>
