@@ -23,10 +23,10 @@ import {
   giorniMancanti,
   FAMIGLIE,
   famigliaDiFase,
-} from './db.js?v=22686977';
-import { proteggiPagina } from './auth.js?v=26833199';
+} from './db.js?v=12384483';
+import { proteggiPagina } from './auth.js?v=18118483';
 import { preparaGiro } from './giro.js';
-import { offriAnnulla } from './annulla.js?v=19400965';
+import { offriAnnulla } from './annulla.js?v=85184409';
 import { preparaSceltaMateria } from './scelta-materia.js?v=16848224';
 
 const elScheletro = document.getElementById('scheletro');

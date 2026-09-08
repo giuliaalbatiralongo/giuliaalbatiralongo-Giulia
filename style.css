@@ -4876,6 +4876,89 @@ a.oggi-riga {
   .nastro-fascia-nome { display: none; }
 }
 
+/* ---------- Chi si e' iscritto (solo l'amministratrice) ---------- */
+
+.iscritti-conto {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--testo-3);
+}
+
+.iscritto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  background: var(--superficie);
+}
+
+.iscritto + .iscritto { margin-top: 8px; }
+
+.iscritto-testi { min-width: 0; }
+
+.iscritto-nome {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--testo-1);
+}
+
+.iscritto-segno {
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: var(--accento-tenue);
+  color: var(--accento-su-tenue);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.iscritto-email {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--testo-2);
+  word-break: break-all;
+}
+
+.iscritto-quando { text-align: right; }
+
+.iscritto-ultimo {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--testo-1);
+}
+
+.iscritto-dal {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: var(--testo-3);
+}
+
+/* Un'email non confermata e' la spiegazione piu' probabile di
+   "non riesco a entrare": va vista. */
+.iscritto-avviso {
+  margin: 4px 0 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--attenzione, #b5730d);
+}
+
+@media (max-width: 700px) {
+  .iscritto { align-items: flex-start; }
+  .iscritto-quando { text-align: left; }
+}
+
 /* ---------- Il giro guidato della prima volta ----------
 
    Il velo scurisce tutto tranne il pezzo di cui si parla. Il buco non

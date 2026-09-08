@@ -1,6 +1,6 @@
-import { inserisciCaso, getEsami, gruppiDiMaterie } from './db.js?v=22686977';
+import { inserisciCaso, getEsami, gruppiDiMaterie } from './db.js?v=12384483';
 import { preparaSceltaMateria } from './scelta-materia.js?v=16848224';
-import { proteggiPagina } from './auth.js?v=26833199';
+import { proteggiPagina } from './auth.js?v=18118483';
 
 let profiloCorrente = null;
 

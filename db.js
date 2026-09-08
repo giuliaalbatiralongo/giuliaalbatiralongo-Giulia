@@ -1915,6 +1915,23 @@ export function studioDiOggi(piani, oggiIso) {
 
 /* ---------- Interesse per i servizi non ancora attivi ---------- */
 
+/* ---------- Chi si e' iscritto (solo per l'amministratrice) ----------
+
+   Le email stanno in `auth.users`, che dal browser non si legge e non
+   si deve leggere. Ci pensa la funzione `chi_si_e_iscritto()`, che e'
+   `security definer` e porta dentro un `where e_admin()`: a chiunque
+   altro non ritorna niente. Il filtro sta li' e non qui, perche' una
+   riga tolta dalla pagina resta comunque arrivata al browser. */
+
+export async function getIscritti() {
+  const { data, error } = await supabase.rpc('chi_si_e_iscritto');
+  if (error) {
+    segnaErrore('Errore nella lettura degli iscritti:', error);
+    return [];
+  }
+  return data || [];
+}
+
 /* ---------- Suggerimenti ----------
    La lista di cosa vorremmo che Akesis facesse e non fa ancora. La
    scrivono tutti, la lettura e' aperta a tutti: un'idea gia' proposta si

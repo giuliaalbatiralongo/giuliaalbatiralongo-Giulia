@@ -1349,6 +1349,8 @@ altrimenti si collauda roba vecchia. Le suite:
   un piano di studi
 - `suggerimenti.mjs` - chi vede le proposte e chi puo' solo mandarne una
 - `giro.mjs` - il giro guidato della prima volta, tutte e sei le tappe
+- `iscritti.mjs` - chi vede nomi ed email degli iscritti, e chi puo'
+  mettere una data sul calendario di tutti
 - `giorni.mjs` - il modulo e il piano contano i giorni allo stesso modo
 - `media.mjs`, `famiglie.mjs`, `menu.mjs`, `materie-scelta.mjs`,
   `cestino.mjs`, `inizio.mjs`, `conti.mjs`, `vuota.mjs`
@@ -1437,6 +1439,54 @@ presi dal suo manifesto ufficiale. Niente a memoria.
 **Da chiarire:** il conto dei crediti fa **363**, e Medicina ne dichiara
 360. Tre di scarto. Non e' un errore di somma, e' quello che c'e' scritto
 nel manifesto riga per riga: da guardare con Giulia.
+
+### Chi si e' iscritto, e chi decide cosa vedono gli altri (8 settembre)
+
+Tre cose che vengono dalla stessa domanda: **con Akesis aperta ad altri,
+chi puo' mettere roba davanti agli occhi di chi?**
+
+**1. Le date condivise.** Giulia: *"nel calendario vedo che e' inserito
+inizio lezioni di medicina come se fosse per tutto. No, non e' per
+tutti"*. C'era una casella *"Visibile agli altri studenti"* che
+**chiunque** poteva spuntare, e quella data finiva sul calendario di
+tutti. L'inizio delle lezioni di medicina non vale per chi fa un altro
+anno, e chi la scrive non puo' saperlo per gli altri.
+
+- la data esistente e' tornata privata
+- la casella adesso e' `data-solo-admin`
+- e **il database la nega**: `with_check (visibilita = 'privato' or
+  e_admin())` su INSERT e UPDATE. Provato impersonando: un utente
+  normale che tenta una data condivisa prende
+  `new row violates row-level security policy`, ma una data sua se la
+  crea senza problemi
+
+Il valore giusto e' `privato`, non `personale`: me l'ha detto il vincolo
+`data_visibilita_valida` rifiutando la scrittura. Un vincolo che serve.
+
+**2. Chi si e' iscritto.** Giulia: *"la possibilita' di vedere chi si e'
+loggato con l'e-mail e il nome utente, ma lo devo poter vedere soltanto
+io"*.
+
+Le email stanno in `auth.users`, che dal browser non si legge e non si
+deve leggere. Ci pensa `chi_si_e_iscritto()`, `security definer`, con un
+`where e_admin()` dentro: per chiunque altro **non ritorna niente**, e
+nemmeno un errore che lasci capire quanti sono. Il filtro sta li' e non
+nella pagina, perche' una riga tolta a schermo e' comunque arrivata al
+browser.
+
+La sezione sta nel **Profilo**, che e' il suo account, e mostra per ogni
+persona: nome, email, quando si e' iscritta, quando e' entrata l'ultima
+volta, e se **l'email non e' confermata** -- che e' la spiegazione piu'
+probabile di un "non riesco a entrare".
+
+**3. CORSIE nel cestino** e non cancellata a mano: come farebbe il tasto
+Elimina dell'app. Resta recuperabile trenta giorni.
+
+**Quello che da qui non si puo' fare, di nuovo.** I file veri nello
+Storage (il PDF di CORSIE e il vecchio da 22 MB) non si cancellano ne'
+da SQL ne' con gli strumenti che ho: Supabase lo proibisce apposta.
+Restano occupati ~22 MB su 1 GB. Vanno tolti a mano dal pannello,
+Storage, secchio `dispense`.
 
 ### Il giro guidato della prima volta (8 settembre)
 
