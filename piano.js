@@ -11,6 +11,7 @@ import {
   proponiPassate,
   getDateEsame,
   getEsami,
+  quantiGiorniDiStudio,
   gruppiDiMaterie,
   mieImpostazioni,
   annoIndovinato,
@@ -20,9 +21,9 @@ import {
   giorniMancanti,
   FAMIGLIE,
   famigliaDiFase,
-} from './db.js?v=60572282';
-import { proteggiPagina } from './auth.js?v=16234204';
-import { offriAnnulla } from './annulla.js?v=23580464';
+} from './db.js?v=21901172';
+import { proteggiPagina } from './auth.js?v=14062611';
+import { offriAnnulla } from './annulla.js?v=17471225';
 import { preparaSceltaMateria } from './scelta-materia.js?v=16848224';
 
 const elScheletro = document.getElementById('scheletro');
@@ -717,29 +718,30 @@ function inizioNelModulo() {
   return document.getElementById('piano-inizio').value || oggiIso();
 }
 
-function giorniDisponibiliNelModulo() {
-  const liberi = [...document.querySelectorAll('#giorni-liberi input:checked')].length;
+/* Il giorno in cui la finestra si chiude, secondo quello che c'e'
+   scritto adesso nel modulo. */
+function fineNelModulo() {
   const modo = form.querySelector('input[name="modo"]:checked')?.value;
-
-  let giorni = null;
   if (modo === 'durata') {
-    giorni = Number(document.getElementById('piano-durata').value) || 0;
-  } else {
-    const data = document.getElementById('piano-data').value;
-    if (data) {
-      // Si contano dal giorno in cui cominci, non da oggi: se parti fra
-      // due settimane, quelle due settimane non sono giorni di studio.
-      giorni = Math.max(
-        Math.round(
-          (new Date(data + 'T00:00:00') - new Date(inizioNelModulo() + 'T00:00:00')) / 86400000
-        ),
-        0
-      );
-    }
+    const durata = Number(document.getElementById('piano-durata').value) || 0;
+    if (durata < 1) return null;
+    const d = new Date(inizioNelModulo() + 'T00:00:00');
+    d.setDate(d.getDate() + durata);
+    return d.toISOString().slice(0, 10);
   }
+  return document.getElementById('piano-data').value || null;
+}
 
-  if (giorni === null) return null;
-  return Math.round(giorni * ((7 - liberi) / 7));
+/* I giorni di studio disponibili. Li conta uno per uno, con la stessa
+   funzione che usa il piano vero: prima li stimava, e la stima poteva
+   sbagliare di un giorno. Cosi' la divisione proposta ci sta sempre. */
+function giorniDisponibiliNelModulo() {
+  const liberi = [...document.querySelectorAll('#giorni-liberi input:checked')].map((c) =>
+    Number(c.value)
+  );
+  const fine = fineNelModulo();
+  if (!fine) return null;
+  return quantiGiorniDiStudio(inizioNelModulo(), fine, liberi);
 }
 
 function passateNelModulo() {
@@ -941,13 +943,33 @@ function apriFinestra(piano) {
 
     document.getElementById('piano-inizio').value = piano.inizio;
 
-    // Di una materia gia' avviata si mostra la data vera di fine: e' il
-    // dato che lei riconosce.
-    scegliModo('data');
-    // Il campo si chiama "Giorno dell'esame": se il calendario ne ha
-    // uno per questa materia, e' quello che va mostrato, non la fine
-    // della finestra che potrebbe essere rimasta indietro.
-    document.getElementById('piano-data').value = dataEsameDi(piano) || piano.fine;
+    /* Il campo si chiama "Giorno dell'esame" e deve contenere SOLO una
+       data d'esame vera, quella che sta nel calendario.
+
+       Prima, se non ce n'era una, ci finiva dentro la fine della
+       finestra di studio: cioe' un giorno calcolato da "fra tot giorni".
+       Sembrava che Akesis si inventasse la data dell'esame -- e
+       salvando la scriveva davvero nel calendario. Nessuno gliel'aveva
+       chiesto.
+
+       Adesso: se una data d'esame c'e', si mostra quella; se non c'e',
+       il campo resta vuoto e la finestra si descrive con i giorni che
+       mancano, che e' l'informazione vera. */
+    const giornoEsame = dataEsameDi(piano);
+    if (giornoEsame) {
+      scegliModo('data');
+      document.getElementById('piano-data').value = giornoEsame;
+    } else {
+      scegliModo('durata');
+      document.getElementById('piano-data').value = '';
+      const giorni = Math.max(
+        Math.round(
+          (new Date(piano.fine + 'T00:00:00') - new Date(piano.inizio + 'T00:00:00')) / 86400000
+        ),
+        2
+      );
+      document.getElementById('piano-durata').value = giorni;
+    }
 
     const liberi = piano.giorni_liberi || [];
     document.querySelectorAll('#giorni-liberi input').forEach((c) => {

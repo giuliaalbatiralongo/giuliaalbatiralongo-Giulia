@@ -158,9 +158,8 @@
 
       <div class="finestra-corpo">
         <p class="blocco-nota" id="nota-modifica" hidden>
-          Stai correggendo una materia gia' avviata. Quello che hai gia' segnato
-          come fatto resta dov'e'. Se scegli "fra tot giorni" la finestra
-          riparte da oggi.
+          Stai correggendo una materia gia&rsquo; avviata. Quello che hai gi&agrave;
+          segnato come fatto resta dov&rsquo;&egrave;.
         </p>
 
         <div class="campo">
@@ -229,7 +228,10 @@
         <div class="campo" id="campo-data" hidden>
           <label for="piano-data">Giorno dell'esame</label>
           <input type="date" id="piano-data" name="data">
-          <p class="campo-aiuto" id="aiuto-data">Questa data finisce anche nel calendario: se scrivi una materia che hai gia&rsquo; li&rsquo;, si compila da sola.</p>
+          <p class="campo-aiuto" id="aiuto-data">
+            Solo se la data la sai davvero: finisce nel calendario come esame.
+            Se non la sai ancora, usa &ldquo;fra tot giorni&rdquo;.
+          </p>
         </div>
 
         <div class="campo">
@@ -279,6 +281,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="piano.js?v=42486229"></script>
+  <script type="module" src="piano.js?v=11917834"></script>
 </body>
 </html>

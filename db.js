@@ -1658,6 +1658,20 @@ export async function eliminaPiano(id) {
   return nelCestino([{ tabella: 'piani', ids: [id] }]);
 }
 
+/* Quanti giorni di studio ci sono davvero fra due date.
+
+   Esiste perche' il modulo li STIMAVA -- giorni per (7 meno i liberi)
+   diviso 7 -- mentre il piano vero li CONTAVA uno per uno. Due conti
+   diversi per la stessa cosa: la divisione proposta poteva chiedere un
+   giorno in piu' di quelli esistenti, e al salvataggio compariva "c'e'
+   un giorno di troppo" su una divisione appena suggerita.
+
+   Adesso il conto e' uno solo, e sta qui. */
+export function quantiGiorniDiStudio(dal, al, giorniLiberi) {
+  if (!dal || !al || al <= dal) return 0;
+  return giorniDiStudio(dal, al, giorniLiberi).length;
+}
+
 function giorniDiStudio(dal, al, giorniLiberi) {
   const liberi = new Set((giorniLiberi || []).map(Number));
   const giorni = [];

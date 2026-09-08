@@ -179,6 +179,45 @@ elenco scritto a mano, e controlla anche la versione stretta.
 nome per esteso l'aveva pero' lasciato scegliere a me, e la voce e'
 rimasta **Libretto**. Se lo rivuole lungo e' una parola.
 
+### Due bug che facevano arrabbiare (8 settembre)
+
+Giulia, e aveva ragione su tutti e due.
+
+**1. "Mi mette la data dell'esame da solo in base al numero di giorni
+che gli dico. Ma chi gliel'ha detto di fare cosi'? Non io."**
+
+Riaprendo una materia, il campo "Giorno dell'esame" veniva riempito con
+`piano.fine`, cioe' la **fine della finestra di studio** -- un giorno
+calcolato da "fra tot giorni". La finestra si apriva in modo "data", e
+salvando quella data finiva nel calendario **come esame vero**.
+
+Nessuno gliel'aveva chiesto, e il campo si chiama "Giorno dell'esame":
+o contiene una data d'esame vera o resta vuoto. Adesso: se una data
+d'esame c'e' si mostra quella, altrimenti il campo resta **vuoto** e la
+finestra si descrive con i giorni, che e' l'informazione vera.
+
+**2. "Mi da' un suggerimento di divisione dello studio e quando salvo mi
+dice che c'e' un giorno di troppo."**
+
+Il modulo **stimava** i giorni di studio -- `giorni * (7 - liberi) / 7`
+arrotondato -- mentre il piano vero li **contava** uno per uno saltando
+i giorni liberi. Due conti diversi per la stessa cosa. La divisione
+proposta nasceva sulla stima e poteva chiedere un giorno piu' di quelli
+esistenti: Akesis suggeriva una divisione e poi si lamentava della
+propria divisione.
+
+Adesso il conto e' **uno solo** (`quantiGiorniDiStudio` in db.js), usato
+sia dal modulo sia dal piano.
+
+Quanto sbagliava la stima: su 280 combinazioni di partenza, durata e
+giorni liberi, **ne sbagliava 60**. Il collaudo (`giorni.mjs`) le prova
+tutte e rifa' il confronto, cosi' si vede che il vecchio modo era
+davvero rotto e non e' stato un caso.
+
+**La lezione, che vale oltre questi due:** due funzioni che calcolano la
+stessa cosa in due modi diversi finiscono per non essere d'accordo. Non
+e' "se" ma "quando".
+
 ### Decidere quando cominciare (8 settembre)
 
 Giulia: *"devo poter decidere di iniziare a studiare, quindi che il

@@ -6,10 +6,10 @@ import {
   eliminaNota,
   aggiungiProfessore,
   togliProfessore,
-} from './db.js?v=60572282';
+} from './db.js?v=21901172';
 import { iconaPerMateria } from './materie.js?v=71987087';
-import { proteggiPagina } from './auth.js?v=16234204';
-import { misuraTempo } from './tempo.js?v=55458626';
+import { proteggiPagina } from './auth.js?v=14062611';
+import { misuraTempo } from './tempo.js?v=22520732';
 
 const parametri = new URLSearchParams(window.location.search);
 const materiaScelta = parametri.get('materia');
