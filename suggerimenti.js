@@ -5,9 +5,9 @@ import {
   cambiaStatoSuggerimento,
   eliminaSuggerimento,
   STATI_SUGGERIMENTO,
-} from './db.js?v=19138326';
-import { proteggiPagina } from './auth.js?v=88595912';
-import { offriAnnulla } from './annulla.js?v=18911880';
+} from './db.js?v=17747242';
+import { proteggiPagina } from './auth.js?v=10812191';
+import { offriAnnulla } from './annulla.js?v=23985364';
 
 const elScheletro = document.getElementById('scheletro');
 const elElenco = document.getElementById('suggerimenti');
@@ -147,13 +147,15 @@ function disegna() {
 
 /* ---------- Finestra ---------- */
 
-document.getElementById('apri-nuovo').addEventListener('click', () => {
+function apriFinestra() {
   form.reset();
   esito.textContent = '';
   esito.className = 'esito-form';
   finestra.showModal();
   document.getElementById('sugg-titolo').focus();
-});
+}
+
+document.getElementById('apri-nuovo').addEventListener('click', apriFinestra);
 
 document.getElementById('chiudi-finestra').addEventListener('click', () => finestra.close());
 finestra.addEventListener('click', (e) => {
@@ -184,10 +186,84 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  suggerimenti.unshift(salvato);
   finestra.close();
-  disegna();
+
+  if (admin) {
+    // L'amministratrice la lista ce l'ha: la si rilegge dal database,
+    // che e' l'unico posto che sa com'e' venuta fuori la riga.
+    suggerimenti = await getSuggerimenti();
+    disegna();
+    return;
+  }
+
+  ringrazia();
 });
+
+/* ---------- Quello che vede chi non e' l'amministratrice ----------
+   Solo l'invito a proporre. Le proposte degli altri non si vedono, e
+   non e' una scortesia: sono appunti di lavoro fra Giulia e chi tiene
+   Akesis, non una bacheca pubblica. */
+
+function pannelloProposta() {
+  const scatola = document.createElement('div');
+  scatola.className = 'sugg-invito';
+
+  const icona = document.createElement('i');
+  icona.className = 'ph ph-lightbulb';
+  icona.setAttribute('aria-hidden', 'true');
+  scatola.appendChild(icona);
+
+  const titolo = document.createElement('p');
+  titolo.className = 'sugg-invito-titolo';
+  titolo.textContent = 'Ti manca qualcosa in Akesis?';
+  scatola.appendChild(titolo);
+
+  const testo = document.createElement('p');
+  testo.className = 'sugg-invito-testo';
+  testo.textContent =
+    'Scrivilo qui. Le proposte le legge chi tiene Akesis, una per una. '
+    + 'Non serve che sia un\'idea finita: basta dire cosa ti serviva e non hai trovato.';
+  scatola.appendChild(testo);
+
+  const tasto = document.createElement('button');
+  tasto.type = 'button';
+  tasto.className = 'btn btn-primario';
+  tasto.textContent = 'Proponi qualcosa';
+  tasto.addEventListener('click', () => apriFinestra());
+  scatola.appendChild(tasto);
+
+  return scatola;
+}
+
+function ringrazia() {
+  elElenco.innerHTML = '';
+  const scatola = document.createElement('div');
+  scatola.className = 'sugg-invito';
+
+  const icona = document.createElement('i');
+  icona.className = 'ph ph-check-circle';
+  icona.setAttribute('aria-hidden', 'true');
+  scatola.appendChild(icona);
+
+  const titolo = document.createElement('p');
+  titolo.className = 'sugg-invito-titolo';
+  titolo.textContent = 'Arrivata, grazie';
+  scatola.appendChild(titolo);
+
+  const testo = document.createElement('p');
+  testo.className = 'sugg-invito-testo';
+  testo.textContent = 'La tua proposta e stata registrata. Se te ne viene un altra, scrivi pure.';
+  scatola.appendChild(testo);
+
+  const tasto = document.createElement('button');
+  tasto.type = 'button';
+  tasto.className = 'btn btn-neutro';
+  tasto.textContent = 'Proponine un altra';
+  tasto.addEventListener('click', () => apriFinestra());
+  scatola.appendChild(tasto);
+
+  elElenco.appendChild(scatola);
+}
 
 /* ---------- Avvio ---------- */
 
@@ -196,6 +272,24 @@ async function avvia(profilo) {
   admin = profilo.ruolo === 'admin';
 
   try {
+    /* Chi non e' amministratrice non vede le proposte degli altri: la
+       pagina serve solo a mandarne una. La lista non si chiede nemmeno
+       -- il database la rifiuterebbe comunque, ma chiedere una cosa
+       che si sa gia' negata e' un errore in attesa di succedere. */
+    if (!admin) {
+      /* Il tasto in alto e quello nella scatola sono lo stesso tasto:
+         due primari identici sullo stesso schermo non aiutano nessuno.
+         Resta quello dentro, che ha accanto la spiegazione. */
+      document.getElementById('apri-nuovo').hidden = true;
+      document.querySelector('.page-sub').textContent =
+        'Ti serviva qualcosa e non l\'hai trovato? Scrivilo qui: le proposte '
+        + 'le legge chi tiene Akesis.';
+      elElenco.appendChild(pannelloProposta());
+      elScheletro.remove();
+      elElenco.hidden = false;
+      return;
+    }
+
     suggerimenti = await getSuggerimenti();
     disegna();
     elScheletro.remove();

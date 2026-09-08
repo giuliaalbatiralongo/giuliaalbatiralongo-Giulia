@@ -15,9 +15,9 @@ import {
   tipoData,
   TIPI_DATA,
   creaIcs,
-} from './db.js?v=19138326';
-import { proteggiPagina } from './auth.js?v=88595912';
-import { offriAnnulla } from './annulla.js?v=18911880';
+} from './db.js?v=17747242';
+import { proteggiPagina } from './auth.js?v=10812191';
+import { offriAnnulla } from './annulla.js?v=23985364';
 
 const elScheletro = document.getElementById('scheletro');
 const elTutto = document.getElementById('calendario');

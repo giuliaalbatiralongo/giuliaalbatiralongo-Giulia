@@ -7,7 +7,7 @@
    Sparisce da sola dopo qualche secondo. Non e' un avviso da leggere:
    se non ti serve, deve andarsene. */
 
-import { annullaEliminazione } from './db.js?v=19138326';
+import { annullaEliminazione } from './db.js?v=17747242';
 
 const DURATA = 8000;
 let striscia = null;

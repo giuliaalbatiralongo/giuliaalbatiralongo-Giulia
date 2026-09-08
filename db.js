@@ -1938,19 +1938,23 @@ export async function getSuggerimenti() {
   return data || [];
 }
 
+/* Chi propone non rilegge quello che ha scritto: i suggerimenti li
+   legge solo l'amministratrice, e la regola sta nel database (la
+   politica SELECT su `suggerimenti` chiede `e_admin()`), non nella
+   pagina. Quindi niente `.select()` dopo l'inserimento: chiederebbe di
+   rileggere una riga che l'utente non ha il permesso di vedere, e
+   l'inserimento fallirebbe pur essendo andato a buon fine. */
 export async function inserisciSuggerimento(titolo, dettaglio) {
   // L'autore non si manda: lo scrive il database da solo.
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('suggerimenti')
-    .insert([{ titolo, dettaglio: dettaglio || null }])
-    .select('*')
-    .single();
+    .insert([{ titolo, dettaglio: dettaglio || null }]);
 
   if (error) {
     segnaErrore('Errore nel salvataggio del suggerimento:', error);
-    return null;
+    return false;
   }
-  return data;
+  return true;
 }
 
 export async function cambiaStatoSuggerimento(id, stato) {

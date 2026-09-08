@@ -1347,6 +1347,7 @@ altrimenti si collauda roba vecchia. Le suite:
   la pagina dove atterra il link della mail
 - `primo.mjs` - il libretto vuoto della prima volta e il caricamento di
   un piano di studi
+- `suggerimenti.mjs` - chi vede le proposte e chi puo' solo mandarne una
 - `giorni.mjs` - il modulo e il piano contano i giorni allo stesso modo
 - `media.mjs`, `famiglie.mjs`, `menu.mjs`, `materie-scelta.mjs`,
   `cestino.mjs`, `inizio.mjs`, `conti.mjs`, `vuota.mjs`
@@ -1435,6 +1436,44 @@ presi dal suo manifesto ufficiale. Niente a memoria.
 **Da chiarire:** il conto dei crediti fa **363**, e Medicina ne dichiara
 360. Tre di scarto. Non e' un errore di somma, e' quello che c'e' scritto
 nel manifesto riga per riga: da guardare con Giulia.
+
+### I suggerimenti non sono una bacheca (8 settembre)
+
+Giulia: *"togliere i suggerimenti, devono essere visibili solo per
+inserire una nuova proposta, quelli esistenti sono solo per
+amministratori"*.
+
+Erano leggibili da chiunque. Con Akesis aperta a cinque amici questo
+voleva dire che ognuno leggeva le idee, le lamentele e i lavori in corso
+di tutti gli altri. Non sono una bacheca pubblica: sono appunti di
+lavoro fra Giulia e chi tiene Akesis.
+
+**La regola sta nel database, non nella pagina.** La politica SELECT su
+`suggerimenti` era `true` -- cioe' tutti leggono tutto -- ed e' diventata
+`e_admin()`. Nascondere la lista solo a schermo non sarebbe servito a
+niente: i dati restavano leggibili a chiunque sapesse dove guardare.
+Verificato impersonando i due ruoli: **Giulia ne vede 16, un utente
+normale 0**, e un utente puo' ancora proporre.
+
+Due conseguenze da cui non si scappa:
+
+- **`inserisciSuggerimento` non rilegge piu' la riga.** Faceva
+  `.insert(...).select().single()`, ma il `RETURNING` ha bisogno del
+  permesso di lettura: da utente normale l'inserimento sarebbe fallito
+  *pur essendo andato a buon fine*. Adesso ritorna solo si' o no
+- **La pagina non chiede nemmeno la lista** quando chi guarda non e'
+  amministratrice. Il database la rifiuterebbe comunque, ma chiedere una
+  cosa che si sa gia' negata e' un errore in attesa di succedere
+
+Chi non e' amministratrice vede una scatola sola: *"Ti manca qualcosa in
+Akesis?"* e un tasto. Mandata la proposta, un grazie e la possibilita' di
+mandarne un'altra. Il tasto in alto sparisce, perche' due primari
+identici sullo stesso schermo non aiutano nessuno.
+
+**Il finto e' stato reso severo uguale**: `getSuggerimenti()` nella copia
+di prova ritorna `[]` se il ruolo non e' admin. Senza, una pagina che li
+chiede da utente normale passerebbe la prova e in produzione troverebbe
+il vuoto.
 
 ### Codici di invito
 

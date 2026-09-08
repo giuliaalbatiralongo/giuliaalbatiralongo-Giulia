@@ -20,9 +20,9 @@ import {
   MANIFESTI,
   contiManifesto,
   caricaManifesto,
-} from './db.js?v=19138326';
-import { proteggiPagina } from './auth.js?v=88595912';
-import { offriAnnulla } from './annulla.js?v=18911880';
+} from './db.js?v=17747242';
+import { proteggiPagina } from './auth.js?v=10812191';
+import { offriAnnulla } from './annulla.js?v=23985364';
 
 const elScheletro = document.getElementById('scheletro');
 const elElenco = document.getElementById('elenco');
@@ -385,13 +385,6 @@ function creaRiga(esame) {
   return riga;
 }
 
-/* ---------- L'elenco, per anno e semestre ---------- */
-
-function disegna() {
-  elElenco.innerHTML = '';
-  mostraRiepilogo();
-  mostraSceltaAnno();
-  // Senza esami non c'e' niente di cui fare la media.
 /* Il libretto vuoto e' il muro di chi apre Akesis la prima volta: sei
    anni "da riempire" e 46 esami da digitare uno per uno. Qui invece si
    offre di caricarli tutti.
@@ -484,7 +477,13 @@ async function caricaPiano(manifesto, tasto, dove) {
   await ricarica();
 }
 
+/* ---------- L'elenco, per anno e semestre ---------- */
 
+function disegna() {
+  elElenco.innerHTML = '';
+  mostraRiepilogo();
+  mostraSceltaAnno();
+  // Senza esami non c'e' niente di cui fare la media.
   document.getElementById('fondo-libretto').hidden = esami.length === 0;
 
   if (esami.length === 0) {

@@ -11,8 +11,8 @@ import {
   svuotaCestino,
   giorniNelCestino,
   GIORNI_NEL_CESTINO,
-} from './db.js?v=19138326';
-import { proteggiPagina } from './auth.js?v=88595912';
+} from './db.js?v=17747242';
+import { proteggiPagina } from './auth.js?v=10812191';
 
 const elScheletro = document.getElementById('scheletro');
 const elElenco = document.getElementById('elenco');

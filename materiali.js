@@ -1,7 +1,7 @@
-import { getMateriali, linkMateriali, linkMateriale, sbloccaMateriale } from './db.js?v=19138326';
+import { getMateriali, linkMateriali, linkMateriale, sbloccaMateriale } from './db.js?v=17747242';
 import { iconaPerMateria } from './materie.js?v=71987087';
 import { TIPI_MATERIALE, tipoPerChiave } from './tipi.js?v=16008283';
-import { proteggiPagina } from './auth.js?v=88595912';
+import { proteggiPagina } from './auth.js?v=10812191';
 
 const parametri = new URLSearchParams(window.location.search);
 const tipoScelto = parametri.get('tipo');
