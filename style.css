@@ -4876,6 +4876,108 @@ a.oggi-riga {
   .nastro-fascia-nome { display: none; }
 }
 
+/* ---------- Il giro guidato della prima volta ----------
+
+   Il velo scurisce tutto tranne il pezzo di cui si parla. Il buco non
+   e' ritagliato davvero: e' un'ombra enorme attorno a un rettangolo
+   trasparente, che e' l'unico modo di farlo senza toccare il resto
+   della pagina. */
+
+body.giro-in-corso { overflow: hidden; }
+
+.giro-velo {
+  position: fixed;
+  z-index: 900;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(15, 18, 32, 0.6);
+  pointer-events: none;
+  transition: all 220ms var(--curva);
+}
+
+/* Quando il pezzo da illuminare non c'e' piu': si scurisce tutto. */
+.giro-velo.pieno {
+  inset: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: rgba(15, 18, 32, 0.6);
+}
+
+.giro-fumetto {
+  position: fixed;
+  z-index: 901;
+  width: min(340px, calc(100vw - 24px));
+  padding: 16px 18px 14px;
+  border-radius: var(--r-card);
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  box-shadow: 0 12px 40px rgba(15, 18, 32, 0.28);
+}
+
+.giro-pallini { display: flex; gap: 5px; margin-bottom: 10px; }
+
+.giro-pallino {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--linea-forte);
+}
+
+.giro-pallino.fatto { background: var(--accento); opacity: 0.45; }
+.giro-pallino.adesso { background: var(--accento); width: 16px; border-radius: 3px; }
+
+.giro-titolo {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--testo-1);
+}
+
+.giro-testo {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--testo-2);
+}
+
+.giro-tasti { display: flex; justify-content: space-between; gap: 10px; }
+
+/* L'offerta in cima alla Home, prima che il giro cominci */
+.giro-offerta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  padding: 26px 24px;
+  border: 1px solid var(--accento-tenue-linea, var(--linea));
+  border-radius: var(--r-card);
+  background: var(--accento-tenue);
+}
+
+.giro-offerta > .ph { font-size: 26px; color: var(--accento-su-tenue); }
+
+.giro-offerta-titolo {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--testo-1);
+}
+
+.giro-offerta-testo {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--testo-2);
+  max-width: 48ch;
+}
+
+.giro-offerta-tasti { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+@media (max-width: 700px) {
+  .giro-fumetto { width: calc(100vw - 24px); }
+}
+
 /* ---------- Suggerimenti: quello che vede chi non e' l'amministratrice ----------
    Solo l'invito a proporre. Le proposte degli altri non sono una
    bacheca pubblica: sono appunti di lavoro. */
@@ -4938,6 +5040,44 @@ a.oggi-riga {
   color: var(--testo-2);
   max-width: 62ch;
 }
+
+/* Le due domande della prima volta: a che anno sei, e che corso fai. */
+.primo-libretto-campo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.primo-libretto-etichetta {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--testo-1);
+  min-width: 120px;
+}
+
+.primo-libretto-menu {
+  flex: 1 1 260px;
+  max-width: 420px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--testo-1);
+  background: var(--superficie);
+  border: 1px solid var(--linea-forte);
+  border-radius: 8px;
+}
+
+.primo-libretto-dettaglio {
+  margin: 2px 0 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--testo-3);
+  max-width: 62ch;
+}
+
+.primo-libretto-tasto[hidden] { display: none; }
 
 .primo-libretto-corso {
   display: flex;

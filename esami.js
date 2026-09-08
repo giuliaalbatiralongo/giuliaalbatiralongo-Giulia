@@ -18,11 +18,13 @@ import {
   calcolaMedie,
   ANNI,
   MANIFESTI,
+  manifestoDi,
   contiManifesto,
   caricaManifesto,
-} from './db.js?v=17747242';
-import { proteggiPagina } from './auth.js?v=10812191';
-import { offriAnnulla } from './annulla.js?v=23985364';
+} from './db.js?v=22686977';
+import { proteggiPagina } from './auth.js?v=26833199';
+import { preparaGiro } from './giro.js';
+import { offriAnnulla } from './annulla.js?v=19400965';
 
 const elScheletro = document.getElementById('scheletro');
 const elElenco = document.getElementById('elenco');
@@ -406,48 +408,105 @@ function propostaManifesto() {
   spiega.className = 'primo-libretto-testo';
   spiega.textContent =
     'Gli esami si scrivono una volta sola: poi li ritrovi nel calendario, '
-    + 'nell\'organizzazione studio e nella media. Se fai uno di questi corsi '
-    + 'te li carico io, e poi li aggiusti come vuoi.';
+    + 'nell\'organizzazione studio e nella media. Rispondi a due domande e '
+    + 'te li carico io.';
   scatola.appendChild(spiega);
 
-  MANIFESTI.forEach((manifesto) => {
-    const conti = contiManifesto(manifesto);
+  /* Prima domanda: a che anno sei. Serve al libretto per sapere quale
+     anno mettere in evidenza, e prima non si poteva nemmeno dire: il
+     menu dell'anno compare solo quando gli esami ci sono gia'. */
+  const rigaAnno = document.createElement('div');
+  rigaAnno.className = 'primo-libretto-campo';
 
-    const riga = document.createElement('div');
-    riga.className = 'primo-libretto-corso';
+  const etAnno = document.createElement('label');
+  etAnno.className = 'primo-libretto-etichetta';
+  etAnno.setAttribute('for', 'primo-anno');
+  etAnno.textContent = 'A che anno sei?';
+  rigaAnno.appendChild(etAnno);
 
-    const testi = document.createElement('div');
-    const nome = document.createElement('p');
-    nome.className = 'primo-libretto-corso-nome';
-    nome.textContent = manifesto.nome;
-    const sotto = document.createElement('p');
-    sotto.className = 'primo-libretto-corso-sotto';
-    sotto.textContent =
-      `${conti.esami} esami, ${conti.cfu} crediti, ${manifesto.anni} anni \u00b7 ${manifesto.fonte}`;
-    testi.appendChild(nome);
-    testi.appendChild(sotto);
-    riga.appendChild(testi);
-
-    const tasto = document.createElement('button');
-    tasto.type = 'button';
-    tasto.className = 'btn btn-primario';
-    tasto.textContent = 'Carica questi esami';
-    riga.appendChild(tasto);
-
-    scatola.appendChild(riga);
-
-    const suoEsito = document.createElement('p');
-    suoEsito.className = 'esito-form';
-    scatola.appendChild(suoEsito);
-    tasto.addEventListener('click', () => caricaPiano(manifesto, tasto, suoEsito));
+  const menuAnno = document.createElement('select');
+  menuAnno.id = 'primo-anno';
+  menuAnno.className = 'primo-libretto-menu';
+  ANNI.forEach((a) => {
+    const o = document.createElement('option');
+    o.value = String(a);
+    o.textContent = nomeAnno(a);
+    o.selected = a === annoCorso;
+    menuAnno.appendChild(o);
   });
+  menuAnno.addEventListener('change', async () => {
+    annoCorso = Number(menuAnno.value);
+    indovinato = false;
+    await salvaImpostazioni({ anno_corso: annoCorso });
+  });
+  rigaAnno.appendChild(menuAnno);
+  scatola.appendChild(rigaAnno);
 
-  const altrove = document.createElement('p');
-  altrove.className = 'primo-libretto-altrove';
-  altrove.textContent =
-    'Fai un altro corso o un\'altra università? Usa "Nuovo esame" qui sopra '
-    + 'e scrivili tu: è più lungo, ma sono i tuoi.';
-  scatola.appendChild(altrove);
+  /* Seconda domanda: che corso. L'elenco per adesso ha un ateneo solo,
+     ma e' un elenco e non un tasto: aggiungerne un altro vuol dire una
+     voce in piu' in MANIFESTI, non rifare questa schermata. */
+  const rigaCorso = document.createElement('div');
+  rigaCorso.className = 'primo-libretto-campo';
+
+  const etCorso = document.createElement('label');
+  etCorso.className = 'primo-libretto-etichetta';
+  etCorso.setAttribute('for', 'primo-corso');
+  etCorso.textContent = 'Che corso fai?';
+  rigaCorso.appendChild(etCorso);
+
+  const menuCorso = document.createElement('select');
+  menuCorso.id = 'primo-corso';
+  menuCorso.className = 'primo-libretto-menu';
+  MANIFESTI.forEach((m) => {
+    const o = document.createElement('option');
+    o.value = m.chiave;
+    o.textContent = m.nome;
+    menuCorso.appendChild(o);
+  });
+  const altro = document.createElement('option');
+  altro.value = '__altro__';
+  altro.textContent = 'La mia università non è in elenco';
+  menuCorso.appendChild(altro);
+  rigaCorso.appendChild(menuCorso);
+  scatola.appendChild(rigaCorso);
+
+  const dettaglio = document.createElement('p');
+  dettaglio.className = 'primo-libretto-dettaglio';
+  scatola.appendChild(dettaglio);
+
+  const suoEsito = document.createElement('p');
+  suoEsito.className = 'esito-form';
+  scatola.appendChild(suoEsito);
+
+  const tasto = document.createElement('button');
+  tasto.type = 'button';
+  tasto.className = 'btn btn-primario primo-libretto-tasto';
+  scatola.appendChild(tasto);
+
+  function aggiorna() {
+    const scelto = menuCorso.value;
+    if (scelto === '__altro__') {
+      dettaglio.textContent =
+        'Degli altri atenei non ho il piano di studi, e inventarmelo sarebbe peggio '
+        + 'che non averlo. Scrivi tu i tuoi esami con "Nuovo esame" qui sopra: '
+        + 'è più lungo, ma sono i tuoi.';
+      tasto.hidden = true;
+      return;
+    }
+    const m = manifestoDi(scelto);
+    const conti = contiManifesto(m);
+    dettaglio.textContent =
+      `${conti.esami} esami, ${conti.cfu} crediti, ${m.anni} anni \u00b7 ${m.fonte}`;
+    tasto.hidden = false;
+    tasto.textContent = 'Carica questi esami';
+  }
+
+  menuCorso.addEventListener('change', aggiorna);
+  tasto.addEventListener('click', () => {
+    const m = manifestoDi(menuCorso.value);
+    if (m) caricaPiano(m, tasto, suoEsito);
+  });
+  aggiorna();
 
   return scatola;
 }
@@ -849,3 +908,6 @@ async function avvia() {
 proteggiPagina().then((profilo) => {
   if (profilo) avvia();
 });
+
+// Il giro guidato della prima volta: decide da se' se c'e' da fare qualcosa.
+preparaGiro();

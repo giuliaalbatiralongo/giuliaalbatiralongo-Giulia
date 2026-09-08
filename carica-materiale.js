@@ -1,5 +1,5 @@
-import { caricaMateriale } from './db.js?v=17747242';
-import { proteggiPagina } from './auth.js?v=10812191';
+import { caricaMateriale } from './db.js?v=22686977';
+import { proteggiPagina } from './auth.js?v=26833199';
 
 const form = document.getElementById('form-materiale');
 const elEsito = document.getElementById('esito');

@@ -1,5 +1,5 @@
-import { getMioInteresse, lasciaInteresse, ritiraInteresse } from './db.js?v=17747242';
-import { proteggiPagina } from './auth.js?v=10812191';
+import { getMioInteresse, lasciaInteresse, ritiraInteresse } from './db.js?v=22686977';
+import { proteggiPagina } from './auth.js?v=26833199';
 
 const elScheletro = document.getElementById('scheletro');
 const elServizi = document.getElementById('servizi');

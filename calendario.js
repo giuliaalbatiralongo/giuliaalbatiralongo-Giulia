@@ -15,9 +15,10 @@ import {
   tipoData,
   TIPI_DATA,
   creaIcs,
-} from './db.js?v=17747242';
-import { proteggiPagina } from './auth.js?v=10812191';
-import { offriAnnulla } from './annulla.js?v=23985364';
+} from './db.js?v=22686977';
+import { proteggiPagina } from './auth.js?v=26833199';
+import { preparaGiro } from './giro.js';
+import { offriAnnulla } from './annulla.js?v=19400965';
 
 const elScheletro = document.getElementById('scheletro');
 const elTutto = document.getElementById('calendario');
@@ -888,3 +889,6 @@ async function avvia() {
 proteggiPagina().then((profilo) => {
   if (profilo) avvia();
 });
+
+// Il giro guidato della prima volta: decide da se' se c'e' da fare qualcosa.
+preparaGiro();

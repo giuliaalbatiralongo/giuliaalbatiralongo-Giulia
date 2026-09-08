@@ -9,8 +9,9 @@ import {
   giorniMancanti,
   nomeTipoData,
   titoloData,
-} from './db.js?v=17747242';
-import { proteggiPagina } from './auth.js?v=10812191';
+} from './db.js?v=22686977';
+import { proteggiPagina } from './auth.js?v=26833199';
+import { preparaGiro } from './giro.js';
 
 const elScheletro = document.getElementById('scheletro');
 const elGriglia = document.getElementById('griglia');
@@ -406,3 +407,6 @@ async function avvia(profilo) {
 proteggiPagina().then((profilo) => {
   if (profilo) avvia(profilo);
 });
+
+// Il giro guidato della prima volta: decide da se' se c'e' da fare qualcosa.
+preparaGiro();

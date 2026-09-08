@@ -1,7 +1,8 @@
-import { getMateriali, linkMateriali, linkMateriale, sbloccaMateriale } from './db.js?v=17747242';
+import { getMateriali, linkMateriali, linkMateriale, sbloccaMateriale } from './db.js?v=22686977';
 import { iconaPerMateria } from './materie.js?v=71987087';
 import { TIPI_MATERIALE, tipoPerChiave } from './tipi.js?v=16008283';
-import { proteggiPagina } from './auth.js?v=10812191';
+import { proteggiPagina } from './auth.js?v=26833199';
+import { preparaGiro } from './giro.js';
 
 const parametri = new URLSearchParams(window.location.search);
 const tipoScelto = parametri.get('tipo');
@@ -349,3 +350,6 @@ async function avvia() {
 proteggiPagina().then((profilo) => {
   if (profilo) avvia();
 });
+
+// Il giro guidato della prima volta: decide da se' se c'e' da fare qualcosa.
+preparaGiro();

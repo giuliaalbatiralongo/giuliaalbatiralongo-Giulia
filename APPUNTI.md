@@ -1348,6 +1348,7 @@ altrimenti si collauda roba vecchia. Le suite:
 - `primo.mjs` - il libretto vuoto della prima volta e il caricamento di
   un piano di studi
 - `suggerimenti.mjs` - chi vede le proposte e chi puo' solo mandarne una
+- `giro.mjs` - il giro guidato della prima volta, tutte e sei le tappe
 - `giorni.mjs` - il modulo e il piano contano i giorni allo stesso modo
 - `media.mjs`, `famiglie.mjs`, `menu.mjs`, `materie-scelta.mjs`,
   `cestino.mjs`, `inizio.mjs`, `conti.mjs`, `vuota.mjs`
@@ -1436,6 +1437,63 @@ presi dal suo manifesto ufficiale. Niente a memoria.
 **Da chiarire:** il conto dei crediti fa **363**, e Medicina ne dichiara
 360. Tre di scarto. Non e' un errore di somma, e' quello che c'e' scritto
 nel manifesto riga per riga: da guardare con Giulia.
+
+### Il giro guidato della prima volta (8 settembre)
+
+Giulia: *"quando lo apro per la prima volta vorrei che la primissima
+cosa che mi spunta nella home sia tipo spiegami come funziona"*, e poi
+Home, Calendario, Libretto, Organizzazione studio, Materiale, *"e
+basta"*. Su Organizzazione studio anche *"clicca nuova materia e compila
+i campi"*; il resto lo capiranno da soli.
+
+Scelto con lei: **Akesis apre da sola la pagina dopo** (non e' la pagina
+che si spiega da se' quando ci arrivi), e la spiegazione e' un **fumetto
+che indica**, con il resto della pagina in ombra.
+
+Sei tappe su cinque pagine (Organizzazione studio ne ha due: cos'e', e
+come si comincia). Sta in `giro.js` perche' lo usano cinque pagine
+diverse e perche' ogni "Avanti" e' una **navigazione vera**, non una
+diapositiva: il passo raggiunto deve sopravvivere al cambio di pagina.
+
+**Due memorie diverse, di proposito:**
+
+- *a che passo siamo*: nel browser (`localStorage`). E' roba di mezzo
+  minuto, non ha senso scriverla nel database a ogni Avanti
+- *se il giro e' gia' stato fatto*: nel profilo (`profili.giro_fatto`).
+  Cambiare telefono non deve rifarlo vedere daccapo
+
+Il buco nel velo non e' ritagliato: e' **un'ombra enorme attorno a un
+rettangolo trasparente** (`box-shadow: 0 0 0 9999px`). E' l'unico modo di
+illuminare un pezzo di pagina senza toccare la pagina, e regge lo
+scorrimento. Se il pezzo da indicare non c'e' piu' (una pagina cambia),
+il velo diventa pieno e il fumetto va al centro: mai puntare il vuoto.
+
+**Il guasto che ci ha messo mezz'ora**, e vale la pena scriverlo:
+
+```js
+const n = Number(localStorage.getItem(CHIAVE));   // SBAGLIATO
+```
+
+`getItem` su una chiave che non c'e' ritorna `null`, e **`Number(null)`
+fa `0`** -- che e' un numero di passo validissimo. Quindi il giro
+credeva *sempre* di essere gia' cominciato al primo passo, e l'offerta
+sulla Home non compariva mai. Nessun errore, nessuna eccezione: solo
+niente. La stringa va guardata prima di convertirla.
+
+### Il libretto della prima volta: due domande
+
+Il menu dell'anno di corso (`#scelta-anno`) compare **solo quando gli
+esami ci sono gia'**. Cioe' al primo accesso, quando servirebbe, non
+c'era. Adesso la scatola del libretto vuoto chiede due cose:
+
+1. **A che anno sei** -- si salva subito nel profilo
+2. **Che corso fai** -- un elenco, non un tasto
+
+L'elenco per adesso ha un ateneo solo, ma e' un elenco: aggiungerne un
+altro vuol dire una voce in piu' in `MANIFESTI`, non rifare la
+schermata. Chi sceglie *"La mia universita non e' in elenco"* non trova
+nessun tasto da premere -- caricargli il piano di Genova sarebbe un
+danno da disfare a mano -- e gli si dice di usare "Nuovo esame".
 
 ### I suggerimenti non sono una bacheca (8 settembre)
 

@@ -790,19 +790,26 @@ export async function aggiornaEsame(id, esame) {
 export async function mieImpostazioni() {
   const { data: sessione } = await supabase.auth.getUser();
   const io = sessione?.user?.id;
-  if (!io) return { anno_corso: null, lode_come: 30 };
+  if (!io) return { anno_corso: null, lode_come: 30, giro_fatto: false };
 
   const { data, error } = await supabase
     .from('profili')
-    .select('anno_corso, lode_come')
+    .select('anno_corso, semestre_corso, lode_come, giro_fatto')
     .eq('id', io)
     .maybeSingle();
 
   if (error) {
     segnaErrore('Errore nella lettura del profilo:', error);
-    return { anno_corso: null, lode_come: 30 };
+    return { anno_corso: null, lode_come: 30, giro_fatto: false };
   }
-  return { anno_corso: data?.anno_corso ?? null, lode_come: data?.lode_come ?? 30 };
+  return {
+    anno_corso: data?.anno_corso ?? null,
+    semestre_corso: data?.semestre_corso ?? null,
+    lode_come: data?.lode_come ?? 30,
+    // Il giro guidato si fa una volta sola, e si ricorda nel profilo e
+    // non nel browser: cambiare telefono non deve rifartelo vedere.
+    giro_fatto: data?.giro_fatto === true,
+  };
 }
 
 export async function salvaImpostazioni(campi) {
