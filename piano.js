@@ -482,6 +482,11 @@ function apriMateria(piano) {
   } else if (calcolo.oggiELibero) {
     oggi.classList.add('spento');
     oggi.textContent = 'Oggi e uno dei giorni che ti sei lasciata libera.';
+  } else if (piano.inizio > oggiIso()) {
+    // Una materia che deve ancora cominciare non e' "fuori dalla
+    // finestra": dire quando parte e' un'informazione, "fuori" no.
+    oggi.classList.add('spento');
+    oggi.textContent = `Comincia il ${dataLunga(piano.inizio)}.`;
   } else {
     oggi.classList.add('spento');
     oggi.textContent = 'Oggi e fuori dalla finestra di questa materia.';
@@ -707,6 +712,11 @@ function aggiungiRigaFase(preimpostata) {
 /* Quanti giorni di studio ci sono davvero nella finestra scelta, letti
    dal modulo mentre lo compili. Serve sia al conto sotto le passate sia
    alla proposta di come dividerle. */
+/* Il giorno da cui parte lo studio. Vuoto vuol dire oggi. */
+function inizioNelModulo() {
+  return document.getElementById('piano-inizio').value || oggiIso();
+}
+
 function giorniDisponibiliNelModulo() {
   const liberi = [...document.querySelectorAll('#giorni-liberi input:checked')].length;
   const modo = form.querySelector('input[name="modo"]:checked')?.value;
@@ -717,9 +727,11 @@ function giorniDisponibiliNelModulo() {
   } else {
     const data = document.getElementById('piano-data').value;
     if (data) {
+      // Si contano dal giorno in cui cominci, non da oggi: se parti fra
+      // due settimane, quelle due settimane non sono giorni di studio.
       giorni = Math.max(
         Math.round(
-          (new Date(data + 'T00:00:00') - new Date(oggiIso() + 'T00:00:00')) / 86400000
+          (new Date(data + 'T00:00:00') - new Date(inizioNelModulo() + 'T00:00:00')) / 86400000
         ),
         0
       );
@@ -876,6 +888,9 @@ function preparaFinestra() {
 
   document.getElementById('piano-durata').addEventListener('input', aggiornaConto);
   document.getElementById('piano-data').addEventListener('input', aggiornaConto);
+  // Spostando la partenza cambiano i giorni disponibili, quindi la
+  // proposta va rifatta: senza, resterebbe divisa sui giorni di prima.
+  document.getElementById('piano-inizio').addEventListener('input', aggiornaConto);
 
   /* Scrivendo una materia che e' gia' in calendario, la data arriva
      sola: prima si guarda fra gli esami della sessione, poi fra le date
@@ -924,9 +939,10 @@ function apriFinestra(piano) {
     document.getElementById('piano-unita').value = piano.unita;
     document.getElementById('aiuto-unita').hidden = piano.unita !== 'giorni';
 
+    document.getElementById('piano-inizio').value = piano.inizio;
+
     // Di una materia gia' avviata si mostra la data vera di fine: e' il
-    // dato che lei riconosce. "Fra tot giorni" resta disponibile, ma li
-    // conta da oggi e quindi fa ripartire la finestra.
+    // dato che lei riconosce.
     scegliModo('data');
     // Il campo si chiama "Giorno dell'esame": se il calendario ne ha
     // uno per questa materia, e' quello che va mostrato, non la fine
@@ -951,6 +967,8 @@ function apriFinestra(piano) {
       c.checked = Number(c.value) === 7;
     });
     aggiornaMenuUnita();
+    // Si comincia oggi finche' non dici altrimenti
+    document.getElementById('piano-inizio').value = oggiIso();
     scegliModo('durata');
 
     // Si parte gia' divisa: e' quasi sempre la divisione giusta, e resta
@@ -1019,6 +1037,7 @@ async function salvaMateria() {
   }
 
   const modo = form.querySelector('input[name="modo"]:checked').value;
+  const inizio = inizioNelModulo();
   let fine;
 
   if (modo === 'durata') {
@@ -1028,14 +1047,22 @@ async function salvaMateria() {
       esito.textContent = 'Dai almeno due giorni.';
       return;
     }
-    const d = new Date(oggiIso() + 'T00:00:00');
+    // I giorni si contano dal giorno in cui cominci, non da oggi
+    const d = new Date(inizio + 'T00:00:00');
     d.setDate(d.getDate() + durata);
     fine = d.toISOString().slice(0, 10);
   } else {
     fine = document.getElementById('piano-data').value;
-    if (!fine || fine <= oggiIso()) {
+    if (!fine) {
       esito.className = 'esito-form ko';
-      esito.textContent = 'La data deve essere nel futuro.';
+      esito.textContent = 'Scrivi il giorno dell esame.';
+      return;
+    }
+    if (fine <= inizio) {
+      esito.className = 'esito-form ko';
+      esito.textContent = inizio === oggiIso()
+        ? 'La data deve essere nel futuro.'
+        : 'L esame deve venire dopo il giorno in cui cominci a studiare.';
       return;
     }
   }
@@ -1100,9 +1127,10 @@ async function salvaMateria() {
     esito.className = 'esito-form attesa';
     esito.textContent = 'Salvataggio';
 
-    // Con "fra tot giorni" la finestra riparte da oggi: i giorni te li
-    // dai adesso, non a partire da quando avevi creato il piano.
-    dati.inizio = modo === 'durata' ? oggiIso() : inModifica.inizio;
+    // L'inizio e' quello che hai scritto tu nel campo, anche
+    // correggendo: se sposti la partenza in avanti, il programma si
+    // ridivide da li'.
+    dati.inizio = inizioNelModulo();
 
     const salvato = await aggiornaPiano(inModifica.id, dati, fasi);
 
@@ -1145,7 +1173,7 @@ async function salvaMateria() {
   esito.className = 'esito-form attesa';
   esito.textContent = 'Creazione';
 
-  dati.inizio = oggiIso();
+  dati.inizio = inizioNelModulo();
   const salvato = await inserisciPiano(dati, fasi);
 
   if (!salvato) {

@@ -179,6 +179,32 @@ elenco scritto a mano, e controlla anche la versione stretta.
 nome per esteso l'aveva pero' lasciato scegliere a me, e la voce e'
 rimasta **Libretto**. Se lo rivuole lungo e' una parola.
 
+### Decidere quando cominciare (8 settembre)
+
+Giulia: *"devo poter decidere di iniziare a studiare, quindi che il
+programma di studio parta da una data diversa rispetto al momento della
+pianificazione"*.
+
+Prima l'inizio era sempre **oggi**, scritto nel codice e non toccabile.
+Se il libro arriva fra due settimane, quelle due settimane finivano
+dentro i giorni di studio e il programma nasceva gia' in ritardo.
+
+Adesso c'e' il campo **"Quando cominci"**, che parte da oggi. Da li'
+dipendono tre cose:
+
+- **i giorni disponibili** si contano dalla partenza, non da oggi: le
+  settimane in cui non studi non sono giorni di studio
+- **"fra tot giorni"** li conta dalla partenza (prima da oggi)
+- **l'esame deve venire dopo la partenza**, e se non e' cosi' lo dice
+  con quelle parole invece del generico "la data deve essere nel futuro"
+
+Una materia che deve ancora cominciare adesso dice **"Comincia il ..."**
+invece di "Oggi e' fuori dalla finestra": e' la stessa situazione, ma la
+prima e' un'informazione e la seconda sembra un errore.
+
+Correggendo una materia, l'inizio resta quello scelto. Prima con "fra
+tot giorni" ripartiva da oggi di nascosto.
+
 ### La materia comparsa due volte (7 settembre)
 
 Giulia: *"creando nell'organizzazione studio il piano di studio di
