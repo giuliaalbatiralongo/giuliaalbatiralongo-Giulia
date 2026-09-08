@@ -1253,6 +1253,45 @@ rimettendolo com'era.
 Un controllo che grida sempre al lupo non lo guarda piu' nessuno: e'
 peggio di non averlo.
 
+### La stessa trappola, terza volta (8 settembre)
+
+Cercando di verificare che il link della mail di conferma atterrasse
+bene, ho aperto `conferma.html` nella copia di prova. Errore:
+
+    The requested module './auth.js' does not provide an export
+    named 'getProfilo'
+
+Nel sito **vero** `getProfilo` c'e' (auth.js riga 14). Il guasto era nel
+collaudo: `stub-auth.js` esportava **solo** `proteggiPagina`, quindi
+qualunque pagina importasse da auth.js un altro nome esplodeva nella
+prova. E' la terza volta che il finto di auth.js nasconde qualcosa.
+
+Ma la cosa seria e' un'altra: `sweep.mjs` -- quello che apre tutte le
+pagine e controlla che non diano errori -- **non aveva in elenco
+`login.html` e `conferma.html`**. Cioe' le uniche due pagine della
+strada per *entrare* in Akesis non erano provate da niente. Non davano
+errore perche' nessuno le apriva.
+
+Sistemato in due modi:
+
+1. `stub-auth.js` adesso fa `export * from './auth-vero.js'` e
+   ridefinisce solo `proteggiPagina`, com'era gia' per il database. La
+   differenza fra vero e finto e' solo quella che serve, e non si puo'
+   piu' rompere per omissione
+2. `sweep.mjs` adesso apre **quindici** pagine invece di undici: ci sono
+   anche login, conferma, cestino e profilo
+
+E c'e' una suite nuova, `conferma.mjs`, sulla cosa che conta davvero: la
+pagina di conferma **non deve mai essere bianca**. Ci arriva chi ha
+appena cliccato il link nella mail, e li' una pagina bianca vuol dire
+account perso. Provata con le tre code che Supabase puo' attaccare
+all'indirizzo (link scaduto, indirizzo nudo, accesso valido): in tutti e
+tre i casi dice cosa e' successo, e da un link scaduto si puo' chiedere
+un link nuovo senza rimanere in un vicolo cieco.
+
+**La regola, adesso scritta:** una pagina che non sta in `sweep.mjs` non
+e' collaudata. Quando se ne aggiunge una, va aggiunta li'.
+
 ---
 
 ## Come si collauda
@@ -1286,6 +1325,8 @@ altrimenti si collauda roba vecchia. Le suite:
 - `contrasto.mjs` - leggibilita' del testo, chiaro e scuro
 - `nastro.mjs` - il programma di studio nel tempo: il conto dei giorni
   senza browser, e poi a schermo gli ingrandimenti, le frecce e le fasce
+- `conferma.mjs` - la strada per **entrare**: la schermata di accesso e
+  la pagina dove atterra il link della mail
 - `giorni.mjs` - il modulo e il piano contano i giorni allo stesso modo
 - `media.mjs`, `famiglie.mjs`, `menu.mjs`, `materie-scelta.mjs`,
   `cestino.mjs`, `inizio.mjs`, `conti.mjs`, `vuota.mjs`
@@ -1301,6 +1342,21 @@ della settimana.
 - **Site URL** ancora impostato su `http://localhost:3000`. Va portato a
   `https://giuliaalbatiralongo.github.io/giuliaalbatiralongo-Giulia/`,
   altrimenti i link di conferma via email puntano nel vuoto.
+  **Giulia dice di averlo fatto l'8 settembre.**
+- **Redirect URLs**: e' un campo **diverso** dal Site URL, nella stessa
+  schermata, e va riempito lo stesso. Akesis chiede a Supabase di
+  riportare l'utente su `conferma.html` (`emailRedirectTo` in auth.js);
+  se quell'indirizzo non e' nella lista dei permessi, Supabase lo
+  **ignora in silenzio** e usa il Site URL. Non e' una pagina bianca, ma
+  non e' nemmeno la pagina giusta. Va messo
+  `https://giuliaalbatiralongo.github.io/giuliaalbatiralongo-Giulia/**`
+- **Leaked password protection: non si puo' avere.** Richiede il piano
+  **Pro** (25 dollari al mese); l'organizzazione di Giulia e' sul piano
+  **free**. Ecco perche' non la trovava: non e' nascosta, e' chiusa a
+  chiave. La voce sta in **Authentication -> Sign In / Providers ->
+  Email**, non in Project Settings e non nelle Policies.
+  Sulla stessa schermata, e **gratis**, ci sono la lunghezza minima
+  della password e i caratteri obbligatori: quelli si possono alzare.
 - **Protezione password compromesse** disattivata. E' una spunta che
   confronta le password scelte con quelle finite in fughe di dati note.
 
