@@ -1,4 +1,4 @@
-import { proteggiPagina, cambiaPassword, esci } from './auth.js?v=51601206';
+import { proteggiPagina, cambiaPassword, esci } from './auth.js?v=16743465';
 import { getIscritti, getCodiciInvito, creaCodiceInvito } from './db.js';
 
 const elNome = document.getElementById('dato-nome');

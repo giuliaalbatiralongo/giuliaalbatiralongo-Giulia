@@ -8,6 +8,7 @@ import {
   calcolaPiano,
   studioDiOggi,
   nomeUnita,
+  UNITA,
   proponiPassate,
   getDateEsame,
   getEsami,
@@ -23,10 +24,10 @@ import {
   giorniMancanti,
   FAMIGLIE,
   famigliaDiFase,
-} from './db.js?v=26954542';
-import { proteggiPagina } from './auth.js?v=51601206';
+} from './db.js?v=47452201';
+import { proteggiPagina } from './auth.js?v=16743465';
 import { preparaGiro } from './giro.js';
-import { offriAnnulla } from './annulla.js?v=21216437';
+import { offriAnnulla } from './annulla.js?v=20216566';
 import { preparaSceltaMateria } from './scelta-materia.js?v=16848224';
 
 const elScheletro = document.getElementById('scheletro');
@@ -353,6 +354,7 @@ function disegnaNastro() {
       cella.className = 'nastro-cella'
         + (g.settimana >= 6 ? ' festivo' : '')
         + (g.oggi ? ' oggi' : '')
+        + (riga.fermi && riga.fermi[i] ? ' fermo' : '')
         + (g.settimana === 1 ? ' lunedi' : '');
       cella.style.gridArea = `${suaRiga} / ${i + 2}`;
       griglia.appendChild(cella);
@@ -961,7 +963,11 @@ function giorniDisponibiliNelModulo() {
   );
   const fine = fineNelModulo();
   if (!fine) return null;
-  return quantiGiorniDiStudio(inizioNelModulo(), fine, liberi);
+  /* Le pause vanno tolte anche QUI. Il modulo e il piano salvato devono
+     contare allo stesso modo: quando il modulo stimava e il piano
+     contava, si finiva col vedere "c'e' un giorno di troppo" su una
+     divisione proposta da Akesis stessa. */
+  return quantiGiorniDiStudio(inizioNelModulo(), fine, liberi, leggiPause());
 }
 
 function passateNelModulo() {
@@ -1030,7 +1036,83 @@ function aggiornaConto() {
   aggiornaProposta();
 }
 
-const NOMI_MISURA = { pagine: 'Pagine', lezioni: 'Lezioni', giorni: 'Giorni' };
+/* I nomi delle misure vengono da UNITA, che e' l'elenco vero in db.js.
+   Prima era una seconda lista scritta a mano qui: ho aggiunto i capitoli
+   di la' e non di qua, e nel menu compariva una riga vuota -- valore
+   giusto, nome niente. Due elenchi della stessa cosa prima o poi
+   divergono, quindi adesso l'elenco e' uno solo. */
+const NOMI_MISURA = Object.fromEntries(UNITA.map((u) => [u.chiave, u.nome]));
+
+/* ---------- I periodi in cui il piano si ferma ----------
+
+   Diversi dai giorni liberi: quelli tornano ogni settimana, questi sono
+   un buco unico nel tempo. Vengono dal piano vero di Giulia, che dal 20
+   al 31 dicembre non prevede studio: senza, quei dodici giorni venivano
+   contati come giorni di studio, gli obiettivi giornalieri uscivano
+   piu' bassi del vero e a gennaio ci si trovava indietro. */
+
+function rigaPausa(pausa) {
+  const riga = document.createElement('div');
+  riga.className = 'pausa';
+
+  const dal = document.createElement('input');
+  dal.type = 'date';
+  dal.className = 'pausa-dal';
+  dal.setAttribute('aria-label', 'Dal giorno');
+  dal.value = pausa?.dal || '';
+  riga.appendChild(dal);
+
+  const a = document.createElement('span');
+  a.className = 'pausa-a';
+  a.textContent = 'al';
+  riga.appendChild(a);
+
+  const al = document.createElement('input');
+  al.type = 'date';
+  al.className = 'pausa-al';
+  al.setAttribute('aria-label', 'Al giorno');
+  al.value = pausa?.al || '';
+  riga.appendChild(al);
+
+  const motivo = document.createElement('input');
+  motivo.type = 'text';
+  motivo.className = 'pausa-motivo';
+  motivo.maxLength = 60;
+  motivo.placeholder = 'perche (facoltativo)';
+  motivo.setAttribute('aria-label', 'Perche ti fermi');
+  motivo.value = pausa?.motivo || '';
+  riga.appendChild(motivo);
+
+  const togli = document.createElement('button');
+  togli.type = 'button';
+  togli.className = 'btn-piu pausa-togli';
+  togli.setAttribute('aria-label', 'Togli questo periodo');
+  togli.innerHTML = '<i class="ph ph-x" aria-hidden="true"></i>';
+  togli.addEventListener('click', () => { riga.remove(); aggiornaConto(); });
+  riga.appendChild(togli);
+
+  [dal, al].forEach((campo) => campo.addEventListener('change', aggiornaConto));
+  return riga;
+}
+
+function mostraPause(pause) {
+  const dove = document.getElementById('pause');
+  dove.innerHTML = '';
+  (pause || []).forEach((p) => dove.appendChild(rigaPausa(p)));
+}
+
+/* Solo i periodi scritti per intero e nel verso giusto: una riga a
+   meta' non e' un errore da segnalare, e' una riga che non conta
+   ancora. Il database rifiuterebbe comunque un "al" prima del "dal". */
+function leggiPause() {
+  return [...document.querySelectorAll('#pause .pausa')]
+    .map((riga) => ({
+      dal: riga.querySelector('.pausa-dal').value,
+      al: riga.querySelector('.pausa-al').value,
+      motivo: riga.querySelector('.pausa-motivo').value.trim() || null,
+    }))
+    .filter((p) => p.dal && p.al && p.al >= p.dal);
+}
 
 /* Il menu offre solo le misure che hai davvero scritto: proporre
    "lezioni" quando le lezioni non ci sono porta solo a un errore dopo. */
@@ -1040,6 +1122,7 @@ function aggiornaMenuUnita() {
 
   const scritte = [
     ['pagine', document.getElementById('piano-pagine').value],
+    ['capitoli', document.getElementById('piano-capitoli').value],
     ['lezioni', document.getElementById('piano-lezioni').value],
     ['giorni', document.getElementById('piano-giorni-materiale').value],
   ].filter(([, v]) => v.trim() !== '');
@@ -1094,8 +1177,12 @@ function preparaFinestra() {
   /* Unita': l'etichetta e l'aiuto cambiano di conseguenza */
   // Si puo' dividere lo studio solo per una misura che hai scritto:
   // il menu si rifa' ogni volta che tocchi uno dei tre numeri.
-  ['piano-pagine', 'piano-lezioni', 'piano-giorni-materiale'].forEach((id) => {
+  ['piano-pagine', 'piano-capitoli', 'piano-lezioni', 'piano-giorni-materiale'].forEach((id) => {
     document.getElementById(id).addEventListener('input', aggiornaMenuUnita);
+  });
+
+  document.getElementById('aggiungi-pausa').addEventListener('click', () => {
+    document.getElementById('pause').appendChild(rigaPausa(null));
   });
 
   /* Durata oppure data */
@@ -1145,6 +1232,8 @@ function apriFinestra(piano) {
   esito.textContent = '';
   esito.className = 'esito-form';
   elRighe.innerHTML = '';
+  // `form.reset()` non tocca le righe delle pause, che sono create a mano.
+  mostraPause([]);
 
   const titolo = document.getElementById('finestra-titolo-piano');
   const bottone = document.getElementById('piano-salva');
@@ -1155,7 +1244,9 @@ function apriFinestra(piano) {
 
     document.getElementById('piano-materia').value = piano.materia;
     document.getElementById('piano-pagine').value = piano.pagine ?? '';
+    document.getElementById('piano-capitoli').value = piano.capitoli ?? '';
     document.getElementById('piano-lezioni').value = piano.lezioni ?? '';
+    mostraPause(piano.pause);
     document.getElementById('piano-giorni-materiale').value = piano.giorni_materiale ?? '';
     aggiornaMenuUnita();
     document.getElementById('piano-unita').value = piano.unita;
@@ -1338,17 +1429,18 @@ async function salvaMateria() {
   }
 
   const pagine = numero(document.getElementById('piano-pagine'));
+  const capitoli = numero(document.getElementById('piano-capitoli'));
   const lezioni = numero(document.getElementById('piano-lezioni'));
   const giorniMateriale = numero(document.getElementById('piano-giorni-materiale'));
 
-  if (pagine === null && lezioni === null && giorniMateriale === null) {
+  if (pagine === null && capitoli === null && lezioni === null && giorniMateriale === null) {
     esito.className = 'esito-form ko';
-    esito.textContent = 'Scrivi almeno una misura: le pagine, le lezioni, o i giorni che ti prende.';
+    esito.textContent = 'Scrivi almeno una misura: le pagine, i capitoli, le lezioni, o i giorni che ti prende.';
     return;
   }
 
   const unita = document.getElementById('piano-unita').value;
-  const scelta = { pagine, lezioni, giorni: giorniMateriale }[unita];
+  const scelta = { pagine, capitoli, lezioni, giorni: giorniMateriale }[unita];
   if (!scelta) {
     esito.className = 'esito-form ko';
     esito.textContent = `Hai scelto di dividere lo studio per ${unita}, ma quel numero non l'hai scritto.`;
@@ -1359,10 +1451,12 @@ async function salvaMateria() {
     materia: document.getElementById('piano-materia').value.trim(),
     unita,
     pagine,
+    capitoli,
     lezioni,
     giorni_materiale: giorniMateriale,
     fine,
     giorni_liberi: liberi,
+    pause: leggiPause(),
   };
 
   if (inModifica) {

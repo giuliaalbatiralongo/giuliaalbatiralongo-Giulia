@@ -4824,6 +4824,16 @@ a.oggi-riga {
   background: var(--superficie-alt);
 }
 
+/* Un giorno in cui il piano e' fermo: righino diagonale, cosi' il buco
+   nelle fasce si legge come una scelta e non come una dimenticanza. */
+.nastro-cella.fermo {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--superficie-alt), var(--superficie-alt) 3px,
+    transparent 3px, transparent 6px
+  );
+}
+
 .nastro-cella.festivo { background: transparent; }
 .nastro-cella.oggi { background: var(--accento-tenue); }
 
@@ -4874,6 +4884,47 @@ a.oggi-riga {
 @media (max-width: 700px) {
   .nastro { --nastro-nomi: 92px; --nastro-giorno: calc(var(--zoom-giorno, 26px) * 0.78); }
   .nastro-fascia-nome { display: none; }
+}
+
+/* ---------- I periodi in cui il piano si ferma ---------- */
+
+.pausa {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.pausa input[type="date"] {
+  flex: 0 1 150px;
+  padding: 7px 9px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--testo-1);
+  background: var(--superficie);
+  border: 1px solid var(--linea-forte);
+  border-radius: 8px;
+}
+
+.pausa-a { font-size: 13px; color: var(--testo-3); }
+
+.pausa-motivo {
+  flex: 1 1 140px;
+  min-width: 0;
+  padding: 7px 9px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--testo-1);
+  background: var(--superficie);
+  border: 1px solid var(--linea-forte);
+  border-radius: 8px;
+}
+
+.pausa-togli { flex: none; }
+
+@media (max-width: 700px) {
+  .pausa input[type="date"] { flex: 1 1 44%; }
 }
 
 /* ---------- Il pulsante Aiuto, in basso a destra ----------

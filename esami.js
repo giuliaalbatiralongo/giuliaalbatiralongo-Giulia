@@ -21,10 +21,10 @@ import {
   manifestoDi,
   contiManifesto,
   caricaManifesto,
-} from './db.js?v=26954542';
-import { proteggiPagina } from './auth.js?v=51601206';
+} from './db.js?v=47452201';
+import { proteggiPagina } from './auth.js?v=16743465';
 import { preparaGiro } from './giro.js';
-import { offriAnnulla } from './annulla.js?v=21216437';
+import { offriAnnulla } from './annulla.js?v=20216566';
 
 const elScheletro = document.getElementById('scheletro');
 const elElenco = document.getElementById('elenco');

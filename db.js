@@ -1388,6 +1388,7 @@ export function creaIcs(date) {
 
 export const UNITA = [
   { chiave: 'pagine', nome: 'Pagine', singolare: 'pagina', plurale: 'pagine' },
+  { chiave: 'capitoli', nome: 'Capitoli', singolare: 'capitolo', plurale: 'capitoli' },
   { chiave: 'lezioni', nome: 'Lezioni', singolare: 'lezione', plurale: 'lezioni' },
   { chiave: 'giorni', nome: 'Giorni', singolare: 'giorno', plurale: 'giorni' },
 ];
@@ -1397,6 +1398,7 @@ export const UNITA = [
 export function misureDi(piano) {
   return [
     { chiave: 'pagine', nome: 'Pagine', quanto: piano.pagine },
+    { chiave: 'capitoli', nome: 'Capitoli', quanto: piano.capitoli },
     { chiave: 'lezioni', nome: 'Lezioni', quanto: piano.lezioni },
     { chiave: 'giorni', nome: 'Giorni di materiale', quanto: piano.giorni_materiale },
   ];
@@ -1436,6 +1438,10 @@ export function calendarioStudio(piani, dal, quantiGiorni, oggiIso) {
 
   const righe = piani.map((piano) => {
     const calcolo = calcolaPiano(piano, oggi);
+    // Quali giorni della finestra cadono in una pausa di QUESTO piano:
+    // il nastro li disegna diversi, altrimenti un buco nelle fasce
+    // sembra una dimenticanza invece di una scelta.
+    const fermi = giorni.map((g) => inPausa(g.iso, piano.pause));
 
     /* Dove cade ogni passata dentro la finestra che stiamo guardando.
        I giorni consecutivi della stessa passata diventano una fascia
@@ -1483,6 +1489,7 @@ export function calendarioStudio(piani, dal, quantiGiorni, oggiIso) {
       blocchi,
       // Il giorno in cui la finestra si chiude, se cade qui dentro
       fine: indice.has(dataEsame) ? indice.get(dataEsame) : null,
+      fermi,
       vuota: blocchi.length === 0,
     };
   });
@@ -1620,7 +1627,7 @@ export function proponiPassate(giorniDisponibili) {
 export async function getPiani() {
   const { data, error } = await supabase
     .from('piani')
-    .select('*, fasi:piano_fasi(*)')
+    .select('*, fasi:piano_fasi(*), pause:piano_pause(*)')
     .is('eliminato_il', null)
     .order('fine', { ascending: true });
 
@@ -1629,7 +1636,11 @@ export async function getPiani() {
     return [];
   }
 
-  return data.map((p) => ({ ...p, fasi: (p.fasi || []).sort((a, b) => a.ordine - b.ordine) }));
+  return data.map((p) => ({
+    ...p,
+    fasi: (p.fasi || []).sort((a, b) => a.ordine - b.ordine),
+    pause: (p.pause || []).sort((a, b) => a.dal.localeCompare(b.dal)),
+  }));
 }
 
 /* I campi di una materia, elencati a mano. `quantita` non si manda:
@@ -1639,6 +1650,7 @@ function campiPiano(piano) {
     materia: piano.materia,
     unita: piano.unita,
     pagine: piano.pagine ?? null,
+    capitoli: piano.capitoli ?? null,
     lezioni: piano.lezioni ?? null,
     giorni_materiale: piano.giorni_materiale ?? null,
     inizio: piano.inizio,
@@ -1706,7 +1718,36 @@ export async function inserisciPiano(piano, fasi) {
     return null;
   }
 
-  return { ...data, fasi: salvate.sort((a, b) => a.ordine - b.ordine) };
+  const pauseSalvate = await scriviPause(data.id, piano.pause);
+
+  return {
+    ...data,
+    fasi: salvate.sort((a, b) => a.ordine - b.ordine),
+    pause: pauseSalvate,
+  };
+}
+
+/* Le pause si riscrivono tutte insieme: sono poche, e tenerle allineate
+   una per una vorrebbe dire distinguere aggiunte, modifiche e
+   cancellazioni per guadagnare niente. */
+async function scriviPause(pianoId, pause) {
+  await supabase.from('piano_pause').delete().eq('piano_id', pianoId);
+
+  const buone = (pause || []).filter((p) => p.dal && p.al && p.al >= p.dal);
+  if (buone.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from('piano_pause')
+    .insert(buone.map((p) => ({
+      piano_id: pianoId, dal: p.dal, al: p.al, motivo: p.motivo || null,
+    })))
+    .select('*');
+
+  if (error) {
+    segnaErrore('Errore nel salvataggio delle pause:', error);
+    return [];
+  }
+  return data.sort((a, b) => a.dal.localeCompare(b.dal));
 }
 
 /* Modifica di un piano gia' esistente.
@@ -1775,9 +1816,11 @@ export async function aggiornaPiano(id, piano, fasi) {
     }
   }
 
+  await scriviPause(id, piano.pause);
+
   const { data: rilette, error: erroreRilettura } = await supabase
     .from('piani')
-    .select('*, fasi:piano_fasi(*)')
+    .select('*, fasi:piano_fasi(*), pause:piano_pause(*)')
     .eq('id', id)
     .single();
 
@@ -1786,7 +1829,11 @@ export async function aggiornaPiano(id, piano, fasi) {
     return null;
   }
 
-  return { ...rilette, fasi: (rilette.fasi || []).sort((a, b) => a.ordine - b.ordine) };
+  return {
+    ...rilette,
+    fasi: (rilette.fasi || []).sort((a, b) => a.ordine - b.ordine),
+    pause: (rilette.pause || []).sort((a, b) => a.dal.localeCompare(b.dal)),
+  };
 }
 
 export async function aggiornaFatteFase(id, fatte) {
@@ -1814,12 +1861,23 @@ export async function eliminaPiano(id) {
    un giorno di troppo" su una divisione appena suggerita.
 
    Adesso il conto e' uno solo, e sta qui. */
-export function quantiGiorniDiStudio(dal, al, giorniLiberi) {
+export function quantiGiorniDiStudio(dal, al, giorniLiberi, pause) {
   if (!dal || !al || al <= dal) return 0;
-  return giorniDiStudio(dal, al, giorniLiberi).length;
+  return giorniDiStudio(dal, al, giorniLiberi, pause).length;
 }
 
-function giorniDiStudio(dal, al, giorniLiberi) {
+/* Un giorno cade in una pausa? Le pause sono estremi COMPRESI: chi
+   scrive "dal 20 al 31 dicembre" intende anche il 31. */
+export function inPausa(iso, pause) {
+  return (pause || []).some((p) => p.dal && p.al && iso >= p.dal && iso <= p.al);
+}
+
+/* I giorni in cui si studia davvero, fra due date.
+   Questa e' la funzione da cui passa OGNI conto: gli obiettivi
+   giornalieri, il nastro, il controllo che le passate ci stiano. Un
+   giorno tolto qui sparisce da tutto insieme, ed e' il motivo per cui
+   le pause si aggiungono qui e non in venti posti diversi. */
+function giorniDiStudio(dal, al, giorniLiberi, pause) {
   const liberi = new Set((giorniLiberi || []).map(Number));
   const giorni = [];
 
@@ -1828,10 +1886,11 @@ function giorniDiStudio(dal, al, giorniLiberi) {
 
   while (cursore < fine) {
     const settimana = cursore.getDay() === 0 ? 7 : cursore.getDay();
-    if (!liberi.has(settimana)) {
-      const m = String(cursore.getMonth() + 1).padStart(2, '0');
-      const g = String(cursore.getDate()).padStart(2, '0');
-      giorni.push(`${cursore.getFullYear()}-${m}-${g}`);
+    const m = String(cursore.getMonth() + 1).padStart(2, '0');
+    const g = String(cursore.getDate()).padStart(2, '0');
+    const iso = `${cursore.getFullYear()}-${m}-${g}`;
+    if (!liberi.has(settimana) && !inPausa(iso, pause)) {
+      giorni.push(iso);
     }
     cursore.setDate(cursore.getDate() + 1);
   }
@@ -1850,7 +1909,7 @@ function giorniDiStudio(dal, al, giorniLiberi) {
    quel modo di contare serve proprio a chi non conta. */
 export function calcolaPiano(piano, oggiIso) {
   const oggi = oggiIso || new Date().toISOString().slice(0, 10);
-  const tutti = giorniDiStudio(piano.inizio, piano.fine, piano.giorni_liberi);
+  const tutti = giorniDiStudio(piano.inizio, piano.fine, piano.giorni_liberi, piano.pause);
   const aQuantita = piano.unita !== 'giorni';
 
   let posizione = 0;

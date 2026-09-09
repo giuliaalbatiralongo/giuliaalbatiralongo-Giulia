@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="style.css?v=18900320">
+  <link rel="stylesheet" href="style.css?v=14718196">
 </head>
 <body>
   <div class="app">
@@ -202,6 +202,10 @@
               <input type="number" id="piano-pagine" name="pagine" min="1" max="20000" placeholder="450">
             </div>
             <div class="campo">
+              <label for="piano-capitoli">Capitoli</label>
+              <input type="number" id="piano-capitoli" name="capitoli" min="1" max="20000" placeholder="32">
+            </div>
+            <div class="campo">
               <label for="piano-lezioni">Lezioni</label>
               <input type="number" id="piano-lezioni" name="lezioni" min="1" max="20000" placeholder="32">
             </div>
@@ -264,6 +268,18 @@
           <div class="giorni-scelta" id="giorni-liberi"></div>
         </div>
 
+        <!-- I periodi in cui il piano si ferma del tutto: vacanze, un
+             intervento, una settimana di tirocinio pieno. Diverso dai
+             giorni liberi, che tornano ogni settimana. -->
+        <div class="campo">
+          <label>Periodi in cui ti fermi</label>
+          <p class="campo-aiuto">Vacanze, un intervento, una settimana di tirocinio pieno. In questi giorni Akesis non ti d&agrave; niente da fare, e distribuisce il materiale sugli altri.</p>
+          <div id="pause"></div>
+          <button type="button" class="btn btn-neutro btn-piccolo" id="aggiungi-pausa">
+            <i class="ph ph-plus" aria-hidden="true"></i> Aggiungi un periodo
+          </button>
+        </div>
+
         <div class="campo">
           <label>Come dividi i giorni</label>
           <p class="campo-aiuto">Ogni riga rifà tutto il materiale nei giorni che le dai. Per questo le ripetizioni sono più fitte della prima lettura.</p>
@@ -306,6 +322,6 @@
       if (el) el.innerHTML = '<p class="messaggio-errore">Errore nella pagina: ' + (e.message || 'sconosciuto') + '</p>';
     });
   </script>
-  <script type="module" src="piano.js?v=14901013"></script>
+  <script type="module" src="piano.js?v=25799338"></script>
 </body>
 </html>

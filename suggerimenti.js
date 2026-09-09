@@ -5,9 +5,9 @@ import {
   cambiaStatoSuggerimento,
   eliminaSuggerimento,
   STATI_SUGGERIMENTO,
-} from './db.js?v=26954542';
-import { proteggiPagina } from './auth.js?v=51601206';
-import { offriAnnulla } from './annulla.js?v=21216437';
+} from './db.js?v=47452201';
+import { proteggiPagina } from './auth.js?v=16743465';
+import { offriAnnulla } from './annulla.js?v=20216566';
 
 const elScheletro = document.getElementById('scheletro');
 const elElenco = document.getElementById('suggerimenti');

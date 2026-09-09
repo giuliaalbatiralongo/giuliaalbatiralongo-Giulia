@@ -1352,6 +1352,7 @@ altrimenti si collauda roba vecchia. Le suite:
 - `iscritti.mjs` - chi vede nomi ed email degli iscritti, e chi puo'
   mettere una data sul calendario di tutti
 - `aiuto.mjs` - il pulsante Aiuto su ogni pagina, e i codici di invito
+- `pause.mjs` - i periodi in cui un piano si ferma, e l'unita' capitoli
 - `giorni.mjs` - il modulo e il piano contano i giorni allo stesso modo
 - `media.mjs`, `famiglie.mjs`, `menu.mjs`, `materie-scelta.mjs`,
   `cestino.mjs`, `inizio.mjs`, `conti.mjs`, `vuota.mjs`
@@ -1440,6 +1441,71 @@ presi dal suo manifesto ufficiale. Niente a memoria.
 **Da chiarire:** il conto dei crediti fa **363**, e Medicina ne dichiara
 360. Tre di scarto. Non e' un errore di somma, e' quello che c'e' scritto
 nel manifesto riga per riga: da guardare con Giulia.
+
+### Le pause, e il piano vero di Giulia (9 settembre)
+
+Giulia ha mandato il suo **piano di studio del IV anno, I semestre**
+(documento Word): 14 settembre - 16 dicembre, quattro materie, cinque
+passate L1 -> L2 -> R1 -> R2 -> RF, con settimane buffer e vincoli veri.
+
+Tre quarti del documento non erano calendario ma **Organizzazione
+studio**. Nel calendario sono andate le otto date (appelli di gennaio e
+febbraio, finestra preappelli, traguardo del 16 dicembre), quattro
+agganciate agli esami veri del libretto.
+
+**Il buco che ha fatto nascere le pause.** Il documento dice "20-31
+dicembre: zero studio programmato". Akesis sapeva solo i *giorni liberi*
+settimanali, non un buco unico nel tempo: quei dodici giorni venivano
+contati come giorni di studio, i numeri giornalieri uscivano piu' bassi
+del vero e a gennaio ci si trovava indietro senza capire perche'. Le
+alternative che avevo proposto erano tutte e due aggiramenti; Giulia ha
+risposto *"metti la possibilita' di saltare un periodo"*, che era la
+risposta giusta.
+
+Adesso un piano ha dei **periodi in cui si ferma** (`piano_pause`):
+vacanze, un intervento, una settimana di tirocinio pieno. Estremi
+compresi: chi scrive "dal 20 al 31" intende anche il 31.
+
+La cosa importante e' **dove** e' finito il filtro: dentro
+`giorniDiStudio()`, la funzione da cui passa **ogni** conto. Un giorno
+tolto li' sparisce insieme dagli obiettivi giornalieri, dal nastro, e
+dal controllo che le passate ci stiano. Aggiunto in venti posti diversi
+sarebbe gia' fuori sincrono.
+
+Nel nastro i giorni fermi hanno un righino diagonale: un buco nelle
+fasce deve leggersi come una scelta, non come una dimenticanza.
+
+### Tre elenchi della stessa cosa (9 settembre)
+
+Aggiungere l'unita' **capitoli** -- che il piano di Giulia usa, e che
+Akesis non aveva -- ha fatto vedere che lo stesso elenco era scritto in
+**tre posti**:
+
+1. `UNITA` in `db.js` (quello vero)
+2. `NOMI_MISURA` in `piano.js`, a mano
+3. il trigger `allinea_quantita()` nel database, a mano
+
+Ne ho aggiornato uno e mezzo, e il menu mostrava una riga **vuota**:
+valore giusto, nome niente. Poi il database ha rifiutato il salvataggio
+con "Manca il numero per l'unita' scelta (capitoli)".
+
+`NOMI_MISURA` adesso e' derivato da `UNITA` e non puo' piu' divergere.
+Il trigger e il vincolo `piano_unita_valida` sono stati allargati a
+mano: quelli stanno nel database e un elenco solo non si puo' fare, ma
+almeno adesso e' scritto qui che sono tre.
+
+**I quattro piani veri**, con i giorni divisi come li propone Akesis e i
+nomi delle passate presi dal documento di Giulia:
+
+| Materia | Capitoli | Finestra | Giorni |
+|---|---|---|---|
+| Gastroenterologia | 32 | 14 set - 16 dic | 80 |
+| Organi di senso | 34 | 14 set - 16 dic | 80 |
+| Farmacologia II | 35 | 14 set - 12 gen | 93 (pausa esclusa) |
+| Infettive/Micro | 48 | 14 set - 11 feb | 119 (pausa esclusa) |
+
+Domenica libera. Verificato con il calcolo vero: tutti e quattro ci
+stanno esatti, e nessun giorno di studio cade nella pausa.
 
 ### Il pulsante Aiuto, e i codici che si fanno da soli (8 settembre)
 
