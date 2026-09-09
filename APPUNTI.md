@@ -1475,6 +1475,37 @@ sarebbe gia' fuori sincrono.
 Nel nastro i giorni fermi hanno un righino diagonale: un buco nelle
 fasce deve leggersi come una scelta, non come una dimenticanza.
 
+### Nove piani per cinque materie (9 settembre)
+
+Giulia: *"vedo un po' di ripetizioni nel programma di studio"*. Colpa
+mia: quattro piani li aveva gia' fatti lei il 7-8 settembre, e io ne ho
+aggiunti altri quattro dal documento senza guardare cosa c'era.
+
+Prima di toccare niente ho controllato l'avanzamento: **zero su tutti e
+nove**, quindi non si perdeva niente da nessuna delle due parti. Ma i
+suoi vecchi piani avevano dei numeri che io non avevo -- 350 pagine di
+Farmaco, 267 di Gastro, 40 lezioni di ODS, 48 di Infettive. Invece di
+buttarli via li ho portati **dentro** i piani nuovi: una materia si puo'
+contare in piu' modi, e `misureDi` lo prevede da sempre.
+
+I quattro doppioni sono andati nel cestino **con lo stesso `eliminato_con`**,
+cosi' si annullano insieme se avessi sbagliato io.
+
+**Anatomia patologica non era un doppione**: l'aveva fatta lei, non sta
+nel documento del semestre, ed era rimasta a meta' (due passate su
+cinque). Chiesto invece di decidere da solo. Giulia: *"tienila e
+sistemala con il calendario che ti ho mandato. Usa sempre quello per
+l'organizzazione. Non so quante pagine siano, non ho il materiale"*.
+
+Quindi: le cinque passate del documento al posto delle due, la domenica
+libera, e la pausa del 20-31 dicembre come le altre. **Le lezioni sono
+rimaste 30 e le pagine sono rimaste vuote**: non le sappiamo, e un
+numero inventato in un piano di studio diventa un obiettivo giornaliero
+sbagliato per quattro mesi.
+
+Tutti e cinque verificati con il calcolo vero: ci stanno esatti (zero
+giorni di avanzo) e nessun giorno di studio cade nella pausa.
+
 ### Tre elenchi della stessa cosa (9 settembre)
 
 Aggiungere l'unita' **capitoli** -- che il piano di Giulia usa, e che
